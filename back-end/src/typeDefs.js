@@ -15,7 +15,9 @@ export const typeDefs = gql`
     }
 
     type Mutation {
-        createUser(firstName: String!, lastName: String!,
+        createUserAdmin(firstName: String!, lastName: String!,
+         personelNumber: Int!, identificationNumber: Int!, isAdmin: Boolean!): UserOutput!
+        createUserApp(firstName: String!, lastName: String!,
          personelNumber: Int!, identificationNumber: Int!): UserOutput!
         login(data: LoginUserInput): AuthPayLoad!
         logout: Boolean!
@@ -45,10 +47,11 @@ export const typeDefs = gql`
         identificationNumber: Int!
         authorized: Boolean!
         changedPassword: Boolean!
+        isAdmin: Boolean!
     }
     
     type AuthPayLoad {
-        user: User!
+        user: UserOutput!
         token: String!
     }
 

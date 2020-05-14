@@ -33,23 +33,17 @@ export const resolvers = {
     Query: {
         users: (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
             return Users.find();
         },
         files: () => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
             return Files.find();
         },
         circularLetters: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             const options = {
                 page: args.page,
@@ -72,13 +66,11 @@ export const resolvers = {
         },
         circularLetterDetails: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             const circularLetter = await CircularLetters.findById(args.id);
             if (!circularLetter) {
-                throw new Error('Letter not found');
+                throw new Error('Letter not found!');
             }
 
             let refrenceId = "";
@@ -100,14 +92,12 @@ export const resolvers = {
         },
         search: async (parent, { information, startDate, endDate, page, limit, sortBy, order }, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             let letters = [];
-            if (context.session.searchResult && context.session.searchParam === information) {
+            if (context.session.searchResult && context.session.searchParam === information
+                && context.session.searchSortBy === sortBy && context.session.searchOrder === order) {
                 letters = context.session.searchResult;
-                console.log("Session")
             }
             else {
                 const regExp = /(\d{2,4})\/(\d{1,2})\/(\d{1,2})/;
@@ -187,14 +177,15 @@ export const resolvers = {
                     letter.files = tempFiles;
                 });
 
-                context.session.searchResult = null;
+                letters.sort(dynamicSort(sortBy, order));
                 context.session.searchResult = letters;
                 context.session.searchParam = information;
+                context.session.searchSortBy = sortBy;
+                context.session.searchOrder = order;
             }
 
             const pages = Math.ceil((letters.length) / limit);
 
-            letters.sort(dynamicSort(sortBy, order));
             letters = paginator(letters, page, limit).data;
 
             return {
@@ -204,9 +195,7 @@ export const resolvers = {
         },
         categoriesQuery: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             const subjectedTo = await SubjectedToType.find();
             const toCategory = await ToCategoryType.find();
@@ -217,21 +206,31 @@ export const resolvers = {
         },
         toCategories: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
             return ToCategoryType.find();
         },
         subjectedTos: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
             return SubjectedToType.find();
         }
     },
     Mutation: {
-        createUser: async (parent, args, context, info) => {
+        createUserAdmin: async (parent, args, context, info) => {
+            isAuthenticated(context.req);
+            const rndPassword = randomstring.generate(8);
+            console.log(rndPassword);
+            const password = await hashPassword(rndPassword);
+            const user = new Users({
+                ...args,
+                password,
+                authorized: true,
+                changedPassword: true
+            });
+            await user.save();
+            return user;
+        },
+        createUserApp: async (parent, args, context, info) => {
             const rndPassword = randomstring.generate(8);
             console.log(rndPassword);
             const password = await hashPassword(rndPassword);
@@ -239,25 +238,22 @@ export const resolvers = {
                 ...args,
                 password,
                 authorized: false,
-                changedPassword: false
+                changedPassword: false,
+                isAdmin: false
             });
             await user.save();
             return user;
         },
         deleteUser: async (parent, args, context, info) => {
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
-            const userId = context.req.userId;
+            isAuthenticated(context.req);
+            const userId = context.req.userId.userId;
             const user = await Users.findById(userId);
             await user.deleteOne();
             return user;
         },
         updateUser: async (parent, args, context, info) => {
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
-            const userId = context.req.userId;
+            isAuthenticated(context.req);
+            const userId = context.req.userId.userId;
             if (typeof args.password === 'string') {
                 args.password = await hashPassword(args.password)
             }
@@ -281,18 +277,19 @@ export const resolvers = {
             });
 
             if (!user) {
-                throw new Error("User not found");
+                throw new Error("User not found!");
             }
 
             const isMatch = await bcrypt.compare(args.data.password, user.password);
 
             if (!isMatch) {
-                throw new Error("Wrong password");
+                throw new Error("Wrong password!");
             }
 
             const refreshToken = generateToken(user.id)
             context.res.cookie("jwt", refreshToken);
-            context.session.searchResult = null;
+            context.session.userID = user.id;
+            console.log(`user ${user.id} logged in!`)
 
             return {
                 user,
@@ -301,21 +298,21 @@ export const resolvers = {
         },
         logout: async (parent, args, context, info) => {
             context.session.destroy();
-            context.res.clearCookie();
-            console.log(`user ${context.req.userId.userId} logged out`);
+            console.log(`user ${context.req.userId.userId} logged out!`);
+            context.res.clearCookie("jwt");
+            context.res.clearCookie("qid");
             return true;
         },
         changePassword: async (parent, args, context, info) => {
             // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
             const userId = context.req.userId;
             const user = await Users.findById(userId);
 
             const isMatch = await bcrypt.compare(args.data.oldPassword, user.password);
 
             if (!isMatch) {
-                throw new Error("Old password is wrong");
+                throw new Error("Wrong password!");
             }
 
             user.password = await hashPassword(args.data.newPassword);
@@ -325,14 +322,12 @@ export const resolvers = {
         },
         uploadFile: async (parent, { file }, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             const { createReadStream, filename, mimetype, encoding } = await file;
 
             if (!validateFile(filename)) {
-                throw new Error('Invalid file type');
+                throw new Error('Invalid file type!');
             }
 
             await new Promise(res =>
@@ -357,9 +352,7 @@ export const resolvers = {
         },
         deleteFile: async (parent, { filename }, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             await Files.deleteOne({ filename });
             fs.unlinkSync(`./images/${filename}`, (err) => {
@@ -367,26 +360,24 @@ export const resolvers = {
                     throw err;
                 }
             });
-            console.log(`File ${filename} has been removed`);
+            console.log(`File ${filename} has been removed!`);
             return true;
         },
         deleteMultiFiles: async (parent, { filenames }, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             filenames.forEach(async (filename) => {
                 await Files.deleteOne({ filename }, (err) => {
                     if (err) {
-                        throw new Error("File not found");
+                        throw new Error("File not found!");
                     }
                 });
                 fs.unlinkSync(`./images/${filename}`, (err) => {
                     if (err) {
-                        throw new Error("File not found")
+                        throw new Error("File not found!")
                     }
-                    console.log(`File ${filename} has been removed`);
+                    console.log(`File ${filename} has been removed!`);
                 });
             });
 
@@ -394,9 +385,26 @@ export const resolvers = {
         },
         circularLetterInit: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
+
+            // var i = 1;
+            // setInterval(async () => {
+            //     const circularLetter = new CircularLetters({
+            //         _id: ObjectId().toString(),
+            //         title: `بخشنامه${i}`,
+            //         number: `۴۲۵/ص/۲۳${i}`,
+            //         importNumber: `۲۱۳۴${i}`,
+            //         date: '1385/05/22',
+            //         dateOfCreation: moment().unix().toString(),
+            //         from: `دانشگاه`,
+            //         subjectedTo: 'همه',
+            //         toCategory: 'همه',
+            //         tags: [`کلاس${i}`, `سال${i}`],
+            //         files: ['8498498421.jpg', 'asfdewrf2566.jpg', 'dwdqa46w48d.jpg']
+            //     });
+            //     await circularLetter.save();
+            //     i++;
+            // }, 1000)
 
             // for (let i = 1; i <= 1000; i++) {
             //     const circularLetter = new CircularLetters({
@@ -422,13 +430,11 @@ export const resolvers = {
         },
         deleteCircularLetter: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             const letter = await CircularLetters.findById(args.id);
             if (!letter) {
-                throw new Error("Letter not found");
+                throw new Error("Letter not found!");
             }
 
             letter.files.forEach(async (file) => {
@@ -443,13 +449,18 @@ export const resolvers = {
         },
         updateCircularLetter: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             const letter = await CircularLetters.findById(args.id);
             if (!letter) {
-                throw new Error("Letter not found");
+                throw new Error("Letter not found!");
+            }
+
+            if (args.data.number) {
+                const letter = await CircularLetters.findOne({ number: args.data.number });
+                if (letter){
+                    throw new Error("Number is taken!")
+                }
             }
 
             const values = {};
@@ -467,54 +478,46 @@ export const resolvers = {
         },
         createToCategoryType: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             const toCategoryType = new ToCategoryType(args);
             const duplicate = await ToCategoryType.findOne({ name: args.name });
             if (duplicate) {
-                throw new Error("Duplicate name found");
+                throw new Error("Duplicate name found!");
             }
             await toCategoryType.save();
             return toCategoryType;
         },
         deleteToCategoryType: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             const toCategoryType = await ToCategoryType.findById(args.id);
             if (!toCategoryType) {
-                throw new Error("Category not found");
+                throw new Error("Category not found!");
             }
             await toCategoryType.deleteOne();
             return toCategoryType;
         },
         createSubjectedToType: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             const subjectedToType = new SubjectedToType(args);
             const duplicate = await SubjectedToType.findOne({ name: args.name });
             if (duplicate) {
-                throw new Error("Duplicate name found");
+                throw new Error("Duplicate name found!");
             }
             await subjectedToType.save();
             return subjectedToType;
         },
         deleteSubjectedToType: async (parent, args, context, info) => {
             // getUserId(context.req);
-            // if (!context.req.userId) {
-            //     throw new Error("JWT EXPIRED")
-            // }
+            isAuthenticated(context.req);
 
             const subjectedToType = await SubjectedToType.findById(args.id);
             if (!subjectedToType) {
-                throw new Error("Category not found");
+                throw new Error("Category not found!");
             }
             await subjectedToType.deleteOne();
             return subjectedToType;
