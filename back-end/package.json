@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "main": "start.js",
   "scripts": {
-    "start": "node ./src/start.js",
-    "start:dev": "nodemon ./src/start.js"
+    "start": "nodemon ./src/start.js"
   },
   "author": "",
   "license": "ISC",
