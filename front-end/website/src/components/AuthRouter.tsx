@@ -48,6 +48,7 @@ const AuthRouter = ({ authenticated, checked, requestedLetter }: any) => {
         }}>
           <Switch>
             <Route path="/login" component={Login} />
+            <PrivateRoute exact path="/" component={UploadCircularLetter} authenticated={authenticated} />
             <PrivateRoute exact path="/uploadNewCircularLetter" component={UploadCircularLetter} authenticated={authenticated} />
             <PrivateRoute path={`/search-letter`} component={SearchLetters} authenticated={authenticated} />
             <PrivateRoute path={`/letter/`} component={Letter} authenticated={authenticated} />
