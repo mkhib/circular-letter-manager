@@ -38,7 +38,7 @@ import { setContext } from 'apollo-link-context';
 // }
 
 const uploadLink = createUploadLink({
-  uri: "https://bdbb8436.ngrok.io/graphql",
+  uri: "https://20e96dd7.ngrok.io/graphql",
   credentials: 'include'
 });
 
