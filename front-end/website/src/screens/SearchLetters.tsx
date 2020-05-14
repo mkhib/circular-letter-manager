@@ -401,7 +401,7 @@ const SearchLetters = (props: any) => {
           color="primary"
           onChange={(_a, b) => {
             if (handlePageNumber() !== b) {
-              props.history.push(`${window.location.pathname}?page=${b}&search=${handleSearch()}`)
+              props.history.push(`${window.location.pathname}?page=${b}&search=${handleSearch()}&sort=${handleSort()}&order=${handleOrder()}`)
             }
           }}
         />}
