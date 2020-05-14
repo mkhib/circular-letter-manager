@@ -37,7 +37,6 @@
     "@babel/register": "^7.9.0",
     "nodemon": "^2.0.3"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "description": ""
 }
