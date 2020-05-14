@@ -184,7 +184,7 @@ const SearchLetters = (props: any) => {
     }
   }
   const { loading, error, data } = useQuery(SEARCH_QUERY, {
-    variables: { information: handleSearch(), startDate: start, endDate: end, page: handlePageNumber(), limit: 15, sortBy: handleSort(), order: handleOrder() },
+    variables: { information: handleSearch(), startDate: start, endDate: end, page: handlePageNumber(), limit: 2, sortBy: handleSort(), order: handleOrder() },
   });
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     props.changeSearchInDate(event.target.checked);
