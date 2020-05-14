@@ -66,13 +66,9 @@ existsSync(path.join(__dirname, "../images")) || mkdirSync(path.join(__dirname, 
 
 app.use("/images", express.static(path.join(__dirname, "../images")));
 
-var allowedOrigins = ['http://localhost:3000',
-                      'https://https://aaa7b99b.ngrok.io'];
-
 app.use(cors({
     credentials: true,
-    origin: true,
-    optionsSuccessStatus: 200
+    origin: true
 }));
 
 // app.use(function (req, res, next) {
