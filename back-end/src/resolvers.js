@@ -18,7 +18,7 @@ import dynamicSort from './util/sorting';
 import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
 
-const imagePath = 'http://localhost:3600/images/';
+const imagePath = 'https://2485f4e1.ngrok.io/images/';
 String.prototype.allTrim = String.prototype.allTrim || function () {
     return this
         .replace(/ +/g, ' ')
