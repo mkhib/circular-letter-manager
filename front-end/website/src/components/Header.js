@@ -5,8 +5,11 @@ import { connect } from 'react-redux';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
+import { useApolloClient } from '@apollo/react-hooks';
 import { handleLogout } from '../redux/slices/user';
 import { withRouter } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
+// import "../assets/animationStyle.scss"
 
 const useStyles = makeStyles(theme => ({
   containerView: {
@@ -37,6 +40,7 @@ mutation Logout{
 `;
 
 const Header = (props) => {
+  const [cookies, setCookie] = useCookies(['jwt']);
   const classes = useStyles();
   const {
     checked,
@@ -70,9 +74,11 @@ const Header = (props) => {
       }
     }
   }
+  const client = useApolloClient();
   return (
     <Mutation mutation={LOGOUT} onCompleted={(data) => {
       if (data.logout) {
+        client.resetStore();
         handleLogout(props.history);
       }
     }}>
@@ -81,7 +87,9 @@ const Header = (props) => {
           <Box className={classes.containerView}>
             {/* {renderLogin()} */}
             <Button className={classes.link} href="/search-letter" color="primary">
-              جست و جو در بخشنامه‌ها
+              <div className="page-example">
+                جست و جو در بخشنامه‌ها
+              </div>
             </Button>
             <Button className={classes.link} href="/uploadNewCircularLetter" color="primary">
               بارگذاری یک بخشنامه جدید

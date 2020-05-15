@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import gql from 'graphql-tag';
+import { compose } from 'redux';
 import { connect } from 'react-redux';
+import {
+  Redirect,
+  useLocation,
+} from 'react-router-dom';
+import moment from 'moment';
 import {
   setAnyThing,
   clearAnyThing,
@@ -18,6 +24,7 @@ import {
   setListOfSubjects,
 } from '../redux/slices/data';
 import * as yup from 'yup';
+import jMoment from 'moment-jalaali';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import TextInput from '../components/TextInput';
@@ -31,13 +38,14 @@ import UploadOneFile from '../components/UploadOneFile';
 import { Colors } from '../assets/base';
 import { MenuItem, InputLabel } from '@material-ui/core';
 import Stepper from '../components/Stepper';
-import DatePickerFarsi from '../components/DatePickerFarsi';
+import DatePicker2 from '../components/DatePicker2';
 import Backdrop from '@material-ui/core/Backdrop';
 import Modal from '@material-ui/core/Modal';
 import Fade from '@material-ui/core/Fade';
 import { GET_ALL } from './EditSubjectsAndCategories';
 import { useQuery } from '@apollo/react-hooks';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { withApollo, graphql } from 'react-apollo';
 
 // const clientWidth = () => {
 //   return Math.max(window.innerWidth, document.documentElement.clientWidth) < RESPONSIVE_WIDTH ? 'column' : 'row';
@@ -200,6 +208,12 @@ interface tagProps {
   onClick: any
 }
 
+const DELETE_CIRCULAR_LETTER = gql`
+mutation DeleteCirculatLetter($id: ID!){
+  deleteCircularLetter(id: $id)
+}
+`;
+
 const Tag = (props: tagProps) => {
   const classes = useStyles();
   return (
@@ -284,7 +298,59 @@ const schema = yup.object().shape({
   refrenceCircularID: yup.string(),
 });
 
-const UploadCircularLetter = (props: any) => {
+const LETTER_QUERY = gql`
+query QueryLetters($id: ID!){
+  circularLetterDetails(id: $id) {
+    circularLetter{
+    _id
+    title
+    number
+    importNumber
+    exportNumber
+    referTo
+    from
+    date
+    subjectedTo
+    toCategory
+    tags
+    files
+    }
+    filesName
+    refrenceId
+  }
+  categoriesQuery{
+    subjectedTos { 
+      id,
+      name 
+    },
+    toCategories{
+      id,
+      name
+    }
+  }
+}
+`;
+
+// export const GET_ALL = gql`
+// query GetBothLists{
+//   categoriesQuery{
+//     subjectedTos { 
+//       id,
+//       name 
+//     },
+//     toCategories{
+//       id,
+//       name
+//     }
+//   }
+// }
+// `;
+
+function useQueryParam() {
+  return new URLSearchParams(useLocation().search);
+}
+var letterId: string = '';
+const EditCircularLetter = (props: any) => {
   const {
     title,
     date,
@@ -315,27 +381,107 @@ const UploadCircularLetter = (props: any) => {
   const [tempTag, setTempTag] = useState('');
   const [open, setOpen] = React.useState(false);
   const [width, setWidth] = useState(window.innerWidth);
+  const [tempDate, setTempDate] = useState(jMoment());
   const [height, setHeight] = useState(window.innerHeight);
   const [disabledButton, setDisabledButton] = useState(true);
-  const { loading, error, data } = useQuery(GET_ALL);
+  let queryParam = useQueryParam();
+  console.log(props.data);
+  if (props.data) {
+    var propsData = props.data;
+    if (props.data.circularLetterDetails) {
+      var filesNameQuery = props.data.circularLetterDetails.filesName;
+      var letterData = props.data.circularLetterDetails.circularLetter;
+    }
+    if (props.data.categoriesQuery) {
+      var lists = props.data.categoriesQuery;
+    }
+  }
   useEffect(() => {
-    if (data) {
-      console.log(data);
-      setListOfCategories(data.categoriesQuery.toCategories);
-      setListOfSubjects(data.categoriesQuery.subjectedTos);
-      setAnyThing({
-        theThing: 'subjectedTo',
-        data: data.categoriesQuery.subjectedTos[0].name,
-      });
-      setAnyThing({
-        theThing: 'toCategory',
-        data: data.categoriesQuery.toCategories[0].name,
-      });
+    if (propsData) {
+      if (lists) {
+        setListOfCategories(lists.toCategories);
+        setListOfSubjects(lists.subjectedTos);
+      }
+      if (letterData) {
+        var momentDate = jMoment(letterData.date, 'jYYYY/jM/jD').format('YYYY/MM/DD');
+        setTempDate(jMoment(momentDate));
+        setAnyThing({
+          theThing: 'date',
+          data: letterData.date,
+        });
+        addFileUpload(filesNameQuery.length);
+        setAnyThing({
+          theThing: 'numberOfFiles',
+          data: filesNameQuery.length,
+        });
+        filesNameQuery.forEach((fileName: string, index: number) => [
+          setFileUpload({
+            index,
+            status: true,
+            link: letterData.files[index],
+            name: fileName,
+          })
+        ]);
+        setAnyThing({
+          theThing: 'filesName',
+          data: filesNameQuery,
+        });
+        setAnyThing({
+          theThing: 'files',
+          data: letterData.files,
+        });
+        setAnyThing({
+          theThing: 'sender',
+          data: letterData.from,
+        });
+        if (letterData.importNumber) {
+          setAnyThing({
+            theThing: 'type',
+            data: 'imported',
+          });
+        } if (letterData.exportNumber) {
+          setAnyThing({
+            theThing: 'type',
+            data: 'exported',
+          });
+        }
+        setAnyThing({
+          theThing: 'exportNumber',
+          data: letterData.exportNumber,
+        });
+        setAnyThing({
+          theThing: 'importNumber',
+          data: letterData.importNumber,
+        });
+        setAnyThing({
+          theThing: 'number',
+          data: letterData.number,
+        });
+        setAnyThing({
+          theThing: 'refrenceCircularID',
+          data: letterData.referTo,
+        });
+        setAnyThing({
+          theThing: 'subjectedTo',
+          data: letterData.subjectedTo,
+        });
+        setAnyThing({
+          theThing: 'tags',
+          data: letterData.tags,
+        });
+        setAnyThing({
+          theThing: 'title',
+          data: letterData.title,
+        });
+        setAnyThing({
+          theThing: 'toCategory',
+          data: letterData.toCategory,
+        });
+      }
     }
     window.addEventListener("resize", updateWidthAndHeight);
     return () => window.removeEventListener("resize", updateWidthAndHeight);
-  }, [data, setListOfCategories, setListOfSubjects, setAnyThing]);
-
+  }, [setListOfCategories, setListOfSubjects, setAnyThing, letterData, lists, propsData, filesNameQuery]);
   const renderTags = (tags: Array<string>) => {
     return tags.map((tag, index) => {
       return (
@@ -425,7 +571,6 @@ const UploadCircularLetter = (props: any) => {
   }
 
   const handleDisabled = () => {
-    console.log('actt', activeStep);
     if (activeStep === 0) {
       if (!(title && date && number && type && sender && toCategory && subjectedTo && tags.length > 0)) {
         return true;
@@ -449,8 +594,7 @@ const UploadCircularLetter = (props: any) => {
     setWidth(window.innerWidth);
     setHeight(window.innerHeight);
   };
-
-  if (loading) {
+  if (props.data.loading) {
     return (<Box style={{
       display: 'flex',
       justifyContent: 'center',
@@ -463,8 +607,8 @@ const UploadCircularLetter = (props: any) => {
     </Box>)
   }
   return (
-    <Mutation mutation={DELETE_MULTI_FILES}>
-      {(deleteMultiFiles: any, { data, loading }: any) => {
+    <Mutation mutation={DELETE_CIRCULAR_LETTER}>
+      {(deleteCircularLetter: any, { data, loading }: any) => {
         let deleteData = data;
         return (
           <Mutation mutation={UPLOAD_CIRCULAR_LETTER}>
@@ -481,6 +625,7 @@ const UploadCircularLetter = (props: any) => {
                 }}>
                   <Stepper
                     disabled={handleDisabled()}
+                    customLabels={['ویرایش مشخصات بخشنامه', 'ویرایش  فایل‌های بخشنامه', 'کنترل اطلاعات ویرایش شده']}
                     onNext={(e: any) => {
                       console.log('eeee', e);
                       // if (e === 0) {
@@ -529,7 +674,6 @@ const UploadCircularLetter = (props: any) => {
                           <Box className={classes.tagsTopBoxField}>
                             <Button
                               variant="contained"
-                              // onClick={handleOpen}
                               href="/editDropDowns"
                               style={{
                                 paddingRight: 50,
@@ -537,15 +681,73 @@ const UploadCircularLetter = (props: any) => {
                                 fontFamily: 'FontNormal',
                                 marginTop: 25,
                                 marginBottom: 20,
-                                // alignSelf: 'center',
+                                alignSelf: width <= RESPONSIVE_WIDTH ? 'center' : '',
                               }}
                             >
                               مدیریت مقاطع و حوزه‌ها
                             </Button>
+                            <Button
+                              variant="contained"
+                              onClick={handleOpen}
+                              // href="/editDropDowns"
+                              style={{
+                                paddingRight: 50,
+                                backgroundColor: '#c62828',
+                                color: 'white',
+                                width: 240,
+                                paddingLeft: 50,
+                                fontFamily: 'FontNormal',
+                                // marginTop: 25,
+                                marginBottom: 20,
+                                alignSelf: width <= RESPONSIVE_WIDTH ? 'center' : '',
+                              }}
+                            >
+                              حذف کامل بخشنامه
+                            </Button>
+                            <Modal
+                              aria-labelledby="modal-title"
+                              aria-describedby="delete-modal-description"
+                              className={classes.modal}
+                              open={open}
+                              onClose={handleClose}
+                              closeAfterTransition
+                              BackdropComponent={Backdrop}
+                              BackdropProps={{
+                                timeout: 500,
+                              }}
+                            >
+                              <Fade in={open}>
+                                <Box className={classes.paper}>
+                                  <Box className={classes.modalTitle}>
+                                    هشدار
+                                  </Box>
+                                  <Box className={classes.modalDescription}>
+                                    آیا از حذف این بخشنامه به طور کامل اطمینان دارید؟
+                                  </Box>
+                                  <Box style={{
+                                    alignSelf: 'center',
+                                    marginTop: 10,
+                                  }}>
+                                    <Button className={classes.modalButtons} onClick={handleClose}>
+                                      بازگشت
+                                    </Button>
+                                    <Button
+                                      onClick={() => {
+                                        deleteCircularLetter();
+                                      }}
+                                      className={classes.modalButtons}
+                                      style={{ backgroundColor: 'red', color: 'white' }}>
+                                      ادامه
+                                    </Button>
+                                  </Box>
+                                </Box>
+                              </Fade>
+                            </Modal>
                             <Box style={{
                               display: 'flex',
                               flexDirection: 'row',
                               alignItems: 'center',
+                              alignSelf: width <= RESPONSIVE_WIDTH ? 'center' : '',
                             }}>
                               <Tooltip
                                 arrow
@@ -564,7 +766,6 @@ const UploadCircularLetter = (props: any) => {
                                 error={errorCheck('number')}
                                 value={number}
                                 label="شماره بخشنامه"
-                                lang={'fa'}
                                 onChange={(event: any) => setAnyThing({
                                   theThing: 'number',
                                   data: event.target.value
@@ -602,6 +803,7 @@ const UploadCircularLetter = (props: any) => {
                               </Button>
                               <TextInput
                                 id="tags"
+                                style={{ width: 213 }}
                                 label="تگ‌ها"
                                 value={tempTag}
                                 onChange={(event: any) => {
@@ -665,7 +867,7 @@ const UploadCircularLetter = (props: any) => {
                             </Box>
                             <Box className={classes.selectBox}>
                               <Select
-                                id="type"
+                                id="subjectedTo"
                                 className={classes.leftSelect}
                                 value={subjectedTo}
                                 variant="outlined"
@@ -692,57 +894,6 @@ const UploadCircularLetter = (props: any) => {
                                 })}
                               </Select>
                             </Box>
-                            <TextInput
-                              id="refer to"
-                              label="ارجاع به شماره"
-                              value={refrenceCircularID}
-                              onChange={(event: any) => setAnyThing({
-                                theThing: 'refrenceCircularID',
-                                data: event.target.value
-                              })}
-                            />
-                            <InputLabel className={classes.selectTopInputLabel} id="numberOfFiles">
-                              :تعداد فایل مورد نیاز برای بارگذاری
-                            </InputLabel>
-                            <TextInput
-                              id="numberOfFiles"
-                              label=""
-                              value={numberOfFiles}
-                              type="number"
-                              InputLabelProps={{
-                                shrink: true,
-                              }}
-                              onChange={(event: { target: HTMLInputElement }) => {
-                                const value = parseInt(event.target.value);
-                                if (files.length > 0) {
-                                  deleteMultiFiles({
-                                    variables: {
-                                      filenames: files
-                                    }
-                                  })
-                                }
-                                if (value < 1) {
-                                  setAnyThing({
-                                    theThing: 'numberOfFiles',
-                                    data: 1,
-                                  });
-                                }
-                                else if (value > 100) {
-                                  setAnyThing({
-                                    theThing: 'numberOfFiles',
-                                    data: 100,
-                                  });
-                                }
-                                else {
-                                  addFileUpload(value);
-                                  clearFiles();
-                                  setAnyThing({
-                                    theThing: 'numberOfFiles',
-                                    data: event.target.value,
-                                  });
-                                }
-                              }}
-                            />
                           </Box>
                           <Box className={classes.rightBoxField} style={{ marginLeft: width >= RESPONSIVE_WIDTH ? 80 : 0 }}>
                             <InputLabel className={classes.selectTopInputLabel} id="title">
@@ -761,8 +912,11 @@ const UploadCircularLetter = (props: any) => {
                             <InputLabel className={classes.selectTopInputLabel} id="to">
                               :تاریخ
                             </InputLabel>
-                            <DatePickerFarsi
+                            <DatePicker2
+                              value={tempDate}
                               getSelectedDate={(date: string) => {
+                                var momentDate = jMoment(date, 'jYYYY/jM/jD').format('YYYY/MM/DD');
+                                setTempDate(jMoment(momentDate));
                                 setAnyThing({
                                   theThing: 'date',
                                   data: date,
@@ -809,6 +963,15 @@ const UploadCircularLetter = (props: any) => {
                                 ))}
                               </Select>
                             </Box>
+                            <TextInput
+                              id="refer to"
+                              label="ارجاع به شماره"
+                              value={refrenceCircularID}
+                              onChange={(event: any) => setAnyThing({
+                                theThing: 'refrenceCircularID',
+                                data: event.target.value
+                              })}
+                            />
                           </Box>
                         </Box>
                       )
@@ -918,19 +1081,30 @@ const mapStateToProps = (state: any) => {
   };
 }
 
-export default connect(mapStateToProps, {
-  setAnyThing,
-  clearAnyThing,
-  addFileUpload,
-  setFileUpload,
-  removeFile,
-  setListOfCategories,
-  setListOfSubjects,
-  clearFiles,
-  setWidth,
-  addFile,
-  addTag,
-  removeTag,
-  clearGraphqlError,
-  setErrors,
-})(UploadCircularLetter);
+export default compose(
+  withApollo,
+  graphql(LETTER_QUERY, {
+    options: () => {
+      return {
+        variables: {
+          id: window.location.search.split('=')[1]
+        }
+      }
+    }
+  }),
+  connect(mapStateToProps, {
+    setAnyThing,
+    clearAnyThing,
+    addFileUpload,
+    setFileUpload,
+    removeFile,
+    setListOfCategories,
+    setListOfSubjects,
+    clearFiles,
+    setWidth,
+    addFile,
+    addTag,
+    removeTag,
+    clearGraphqlError,
+    setErrors,
+  }))(EditCircularLetter);

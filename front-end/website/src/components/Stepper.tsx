@@ -46,7 +46,18 @@ const StepperLabelFD = withStyles((theme: Theme) => ({
 function getSteps() {
   return ['وارد کردن مشخصات بخشنامه', 'بارگذاری فایل‌ها', 'تایید اطلاعات'];
 }
-
+function customStepLabel(step: number, labels: Array<string>) {
+  switch (step) {
+    case 0:
+      return `${labels[0]}`;
+    case 1:
+      return `${labels[1]}`;
+    case 2:
+      return `${labels[2]}`;
+    default:
+      return 'Unknown step';
+  }
+}
 function getStepContent(step: number) {
   switch (step) {
     case 0:
@@ -140,7 +151,7 @@ export default function HorizontalLinearStepper(props: any) {
           </div>
         ) : (
             <div className={classes.stepper}>
-              <Typography className={classes.instructions}>{getStepContent(activeStep)}</Typography>
+              <Typography className={classes.instructions}>{(props.customLabels && customStepLabel(activeStep, props.customLabels)) || getStepContent(activeStep)}</Typography>
               {props.children}
               <div style={{ marginBottom: 30, marginTop: 10 }}>
                 <Button disabled={props.backDisabled || activeStep === 0} onClick={() => {

@@ -14,6 +14,7 @@ import Box from '@material-ui/core/Box'
 import Header from './Header';
 import NotFound from '../screens/NotFound';
 import EditSubjectsAndCategories from '../screens/EditSubjectsAndCategories';
+import EditCircularLetter from '../screens/EditCircularLetter';
 
 const PrivateRoute = ({ component, exact = false, path, authenticated }: any) => (
   <Route
@@ -50,6 +51,7 @@ const AuthRouter = ({ authenticated, checked, requestedLetter }: any) => {
             <Route path="/login" component={Login} />
             <PrivateRoute exact path="/" component={SearchLetters} authenticated={authenticated} />
             <PrivateRoute path="/uploadNewCircularLetter" component={UploadCircularLetter} authenticated={authenticated} />
+            <PrivateRoute path="/edit-circular-letter" component={EditCircularLetter} authenticated={authenticated} />
             <PrivateRoute path={`/search-letter`} component={SearchLetters} authenticated={authenticated} />
             <PrivateRoute path={`/letter/`} component={Letter} authenticated={authenticated} />
             <PrivateRoute path={`/editDropDowns/`} component={EditSubjectsAndCategories} authenticated={authenticated} />
