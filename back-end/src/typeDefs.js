@@ -4,6 +4,7 @@ export const typeDefs = gql`
     
     type Query {
         users: [User!]!
+        unauthenticatedUsers: [User]!
         files: [String]
         circularLetters(page: Int, limit: Int): [CircularLetter!]!
         circularLetterDetails(id: ID!): CircularLetterDetail!
@@ -16,9 +17,10 @@ export const typeDefs = gql`
 
     type Mutation {
         createUserAdmin(firstName: String!, lastName: String!,
-         personelNumber: Int!, identificationNumber: Int!, isAdmin: Boolean!): UserOutput!
+         personelNumber: Int!, identificationNumber: Int!, phoneNumber: String!, isAdmin: Boolean!): UserOutput!
         createUserApp(firstName: String!, lastName: String!,
-         personelNumber: Int!, identificationNumber: Int!): UserOutput!
+         personelNumber: Int!, identificationNumber: Int!, phoneNumber: String!): UserOutput!
+        authenticateUser(id: ID!): Boolean!
         login(data: LoginUserInput): AuthPayLoad!
         logout: Boolean!
         deleteUser: UserOutput!
@@ -26,12 +28,13 @@ export const typeDefs = gql`
         changePassword(data: passwordInput!): Boolean!
         uploadFile(file: Upload!): ReturnFile!
         deleteFile(filename: String!): Boolean!
+        deleteFileWhileUpdate(id: ID! ,filename: String!): Boolean!
         deleteMultiFiles(filenames: [String]!): Boolean!
         circularLetterInit(title: String!, number: String!, importNumber: String,
          exportNumber: String, referTo: String, date: String!, from: String!,
          subjectedTo: String!, toCategory: String!, tags: [String]!, files: [String]! ): Boolean!
         deleteCircularLetter(id: ID!): Boolean!
-        updateCircularLetter(id: ID!, data: updateCircularletter): Boolean!
+        updateCircularLetter(id: ID!, data: updateCircularLetter): Boolean!
         createToCategoryType(name: String!): ToCategoryType!
         deleteToCategoryType(id: ID!): ToCategoryType!
         createSubjectedToType(name: String!): SubjectedToType!
@@ -46,6 +49,7 @@ export const typeDefs = gql`
         password: String!
         personelNumber: Int!
         identificationNumber: Int!
+        phoneNumber: String!
         authorized: Boolean!
         changedPassword: Boolean!
         isAdmin: Boolean!
@@ -98,6 +102,7 @@ export const typeDefs = gql`
         identificationNumber: Int!
         authorized: Boolean!
         changedPassword: Boolean!
+        isAdmin: Boolean!
     }
 
     type SearchOutput {
@@ -136,7 +141,7 @@ export const typeDefs = gql`
         newPassword: String!
     }
 
-    input updateCircularletter {
+    input updateCircularLetter {
         title: String
         number: String
         importNumber: String
@@ -147,5 +152,6 @@ export const typeDefs = gql`
         subjectedTo: String
         toCategory: String
         tags: [String]
+        files: [String]
     }
 `

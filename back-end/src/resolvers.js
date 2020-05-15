@@ -17,8 +17,9 @@ import validateFile from './util/validateFile';
 import dynamicSort from './util/sorting';
 import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
-import { sendRefreshToken } from './util/sendRefreshToken';
-import { createRefreshToken, createAccessToken } from './util/auth';
+import { sendSMS } from './util/sendSMS';
+// import { sendRefreshToken } from './util/sendRefreshToken';
+// import { createRefreshToken, createAccessToken } from './util/auth';
 
 const imagePath = 'https://20301271.ngrok.io/images/';
 String.prototype.allTrim = String.prototype.allTrim || function () {
@@ -37,6 +38,10 @@ export const resolvers = {
             // getUserId(context.req);
             isAuthenticated(context.req);
             return Users.find();
+        },
+        unauthenticatedUsers: (parent, args, context, info) => {
+            isAuthenticated(context.req);
+            return Users.find({ authorized: false });
         },
         files: () => {
             // getUserId(context.req);
@@ -249,6 +254,14 @@ export const resolvers = {
             await user.save();
             return user;
         },
+        authenticateUser: async (parent, args, context, info) => {
+            const user = await Users.findById(args.id);
+            if (!user) {
+                throw new Error("User not found!");
+            }
+            sendSMS(user.id, user.phoneNumber);
+            return true;
+        },
         deleteUser: async (parent, args, context, info) => {
             isAuthenticated(context.req);
             const userId = context.req.userId.userId;
@@ -283,7 +296,7 @@ export const resolvers = {
                 throw new Error("User not found!");
             }
 
-            const isMatch = await bcrypt.compare(args.data.password, user.password);
+            const isMatch = await bcrypt.compare(decrypt(args.data.password), user.password);
 
             if (!isMatch) {
                 throw new Error("Wrong password!");
@@ -316,7 +329,12 @@ export const resolvers = {
             const userId = getUserId(context.req);
             const user = await Users.findById(userId);
 
-            const isMatch = await bcrypt.compare(args.data.oldPassword, user.password);
+            const decrypted = decrypt(args.data.oldPassword);
+            if (decrypted.length < 8) {
+                throw new Error("Password must be more than 8 characters!");
+            }
+
+            const isMatch = await bcrypt.compare(decrypted, user.password);
 
             if (!isMatch) {
                 throw new Error("Wrong password!");
@@ -368,6 +386,25 @@ export const resolvers = {
                 }
             });
             console.log(`File ${filename} has been removed!`);
+            return true;
+        },
+        deleteFileWhileUpdate: async (parent, { id, filename }, context, info) => {
+            const letter = await CircularLetters.findById(id);
+            let oldFiles = letter.files;
+            await Files.deleteOne({ filename });
+            fs.unlinkSync(`./images/${filename}`, (err) => {
+                if (err) {
+                    throw err;
+                }
+            });
+            console.log(`File ${filename} has been removed!`);
+            let newFiles = [];
+            for (let item of oldFiles) {
+                if (item !== filename) {
+                    newFiles.push(item);
+                }
+            }
+            await CircularLetters.findByIdAndUpdate(id, { files: newFiles }, { upsert: true, new: true });
             return true;
         },
         deleteMultiFiles: async (parent, { filenames }, context, info) => {
@@ -463,14 +500,20 @@ export const resolvers = {
                 throw new Error("Letter not found!");
             }
 
-            if (args.data.number) {
-                const letter = await CircularLetters.findOne({ number: args.data.number });
-                if (letter) {
-                    throw new Error("Number is taken!")
+            if (args.data.number !== letter.number) {
+                const newLetter = await CircularLetters.findOne({ number: args.data.number });
+                if (newLetter) {
+                    throw new Error("Number is taken!");
                 }
             }
+            else {
+                delete args.data.number;
+            }
 
-            await findByIdAndUpdate(args.id, args.data, { upsert: true, new: true });
+            context.session.searchResult = null;
+
+
+            await CircularLetters.findByIdAndUpdate(args.id, args.data, { upsert: true, new: true });
 
             // const values = {};
             // Object.entries(args.data).forEach(([key, value]) => {

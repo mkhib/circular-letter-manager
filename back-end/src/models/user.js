@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    phoneNumber: {
+        type: String,
+        required: true
+    },
     authorized: {
         type: Boolean,
         required: true
