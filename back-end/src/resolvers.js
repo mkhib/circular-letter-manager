@@ -17,8 +17,10 @@ import validateFile from './util/validateFile';
 import dynamicSort from './util/sorting';
 import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
+import { sendRefreshToken } from './util/sendRefreshToken';
+import { createRefreshToken, createAccessToken } from './util/auth';
 
-const imagePath = 'https://2485f4e1.ngrok.io/images/';
+const imagePath = 'https://20301271.ngrok.io/images/';
 String.prototype.allTrim = String.prototype.allTrim || function () {
     return this
         .replace(/ +/g, ' ')
@@ -79,6 +81,8 @@ export const resolvers = {
                 refrenceId = referedTo.id;
             }
 
+            const filesName = circularLetter.files;
+
             const tempFiles = [];
             circularLetter.files.forEach((file) => {
                 tempFiles.push(`${imagePath}${file}`);
@@ -87,7 +91,8 @@ export const resolvers = {
 
             return {
                 circularLetter: circularLetter,
-                refrenceId
+                refrenceId,
+                filesName
             };
         },
         search: async (parent, { information, startDate, endDate, page, limit, sortBy, order }, context, info) => {
@@ -254,19 +259,17 @@ export const resolvers = {
         updateUser: async (parent, args, context, info) => {
             isAuthenticated(context.req);
             const userId = context.req.userId.userId;
-            if (typeof args.password === 'string') {
-                args.password = await hashPassword(args.password)
-            }
-            const values = {};
-            Object.entries(args).forEach(([key, value]) => {
-                if (value != null) {
-                    values[key] = value;
-                }
-            });
-            const user = await Users.findByIdAndUpdate(userId, { $set: values }, { new: true }).exec()
-                .catch((err) => {
-                    console.log(err)
-                });
+            const user = await Users.findByIdAndUpdate(userId, args, { upsert: true, new: true });
+            // const values = {};
+            // Object.entries(args).forEach(([key, value]) => {
+            //     if (value != null) {
+            //         values[key] = value;
+            //     }
+            // });
+            // const user = await Users.findByIdAndUpdate(userId, { $set: values }, { new: true }).exec()
+            //     .catch((err) => {
+            //         console.log(err)
+            //     });
             return user;
         },
         login: async (parent, args, context, info) => {
@@ -286,10 +289,13 @@ export const resolvers = {
                 throw new Error("Wrong password!");
             }
 
+            // sendRefreshToken(context.res, user.id);
+
             const refreshToken = generateToken(user.id)
-            context.res.cookie("jwt", refreshToken);
+            context.res.cookie("jwt", refreshToken, { httpOnly: true });
             context.session.userID = user.id;
             console.log(`user ${user.id} logged in!`)
+            // createAccessToken(user.id)
 
             return {
                 user,
@@ -298,15 +304,16 @@ export const resolvers = {
         },
         logout: async (parent, args, context, info) => {
             context.session.destroy();
-            console.log(`user ${context.req.userId.userId} logged out!`);
+            console.log(`user ${context.session.userID} logged out!`);
             context.res.clearCookie("jwt");
             context.res.clearCookie("qid");
             return true;
         },
         changePassword: async (parent, args, context, info) => {
             // if (!context.req.userId) {
-            isAuthenticated(context.req);
-            const userId = context.req.userId;
+            // isAuthenticated(context.req);
+
+            const userId = getUserId(context.req);
             const user = await Users.findById(userId);
 
             const isMatch = await bcrypt.compare(args.data.oldPassword, user.password);
@@ -318,7 +325,7 @@ export const resolvers = {
             user.password = await hashPassword(args.data.newPassword);
             await user.save();
 
-            return user;
+            return true;
         },
         uploadFile: async (parent, { file }, context, info) => {
             // getUserId(context.req);
@@ -458,22 +465,24 @@ export const resolvers = {
 
             if (args.data.number) {
                 const letter = await CircularLetters.findOne({ number: args.data.number });
-                if (letter){
+                if (letter) {
                     throw new Error("Number is taken!")
                 }
             }
 
-            const values = {};
-            Object.entries(args.data).forEach(([key, value]) => {
-                if (value != null) {
-                    values[key] = value;
-                }
-            });
-            const newLetter = await CircularLetters.findByIdAndUpdate(args.id, { $set: values }, { new: true }).exec()
-                .catch((err) => {
-                    console.log(err)
-                });
-            await newLetter.save();
+            await findByIdAndUpdate(args.id, args.data, { upsert: true, new: true });
+
+            // const values = {};
+            // Object.entries(args.data).forEach(([key, value]) => {
+            //     if (value != null) {
+            //         values[key] = value;
+            //     }
+            // });
+            // const newLetter = await CircularLetters.findByIdAndUpdate(args.id, { $set: values }, { new: true }).exec()
+            //     .catch((err) => {
+            //         console.log(err)
+            //     });
+            // await newLetter.save();
             return true;
         },
         createToCategoryType: async (parent, args, context, info) => {
@@ -521,6 +530,13 @@ export const resolvers = {
             }
             await subjectedToType.deleteOne();
             return subjectedToType;
-        }
+        },
+        // revokeRefreshTokenForUser: async (parent, args, context, info) => {
+        //     const user = await Users.findById(args.id);
+        //     let userToken = user.tokenVersion + 1;
+        //     user.tokenVersion = userToken;
+        //     await user.save();
+        //     return true
+        // }
     }
 };

@@ -22,7 +22,7 @@ export const typeDefs = gql`
         login(data: LoginUserInput): AuthPayLoad!
         logout: Boolean!
         deleteUser: UserOutput!
-        updateUser(name: String, email: String, password: String): UserOutput!
+        updateUser(firstName: String, lastName: String): UserOutput!
         changePassword(data: passwordInput!): Boolean!
         uploadFile(file: Upload!): ReturnFile!
         deleteFile(filename: String!): Boolean!
@@ -36,6 +36,7 @@ export const typeDefs = gql`
         deleteToCategoryType(id: ID!): ToCategoryType!
         createSubjectedToType(name: String!): SubjectedToType!
         deleteSubjectedToType(id: ID!): SubjectedToType!
+        # revokeRefreshTokenForUser(id: ID!): Boolean!
     }
 
     type User {
@@ -48,6 +49,7 @@ export const typeDefs = gql`
         authorized: Boolean!
         changedPassword: Boolean!
         isAdmin: Boolean!
+        # tokenVersion: Int
     }
     
     type AuthPayLoad {
@@ -121,6 +123,7 @@ export const typeDefs = gql`
     type CircularLetterDetail {
         circularLetter: CircularLetter!
         refrenceId: String
+        filesName: [String]
     }
 
     input LoginUserInput {
