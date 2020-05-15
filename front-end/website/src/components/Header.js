@@ -43,6 +43,7 @@ const Header = (props) => {
   const [cookies, setCookie] = useCookies(['jwt']);
   const classes = useStyles();
   const {
+    user,
     checked,
     authenticated,
     handleLogout,
@@ -91,9 +92,11 @@ const Header = (props) => {
                 جست و جو در بخشنامه‌ها
               </div>
             </Button>
-            <Button className={classes.link} href="/uploadNewCircularLetter" color="primary">
-              بارگذاری یک بخشنامه جدید
-            </Button>
+            {user.isAdmin && (
+              <Button className={classes.link} href="/uploadNewCircularLetter" color="primary">
+                بارگذاری یک بخشنامه جدید
+              </Button>
+            )}
             {renderLogout(() => logout())}
           </Box>
         );
@@ -104,6 +107,7 @@ const Header = (props) => {
 
 const mapState = ({ session }) => ({
   checked: session.checked,
+  user: session.user,
   authenticated: session.authenticated
 });
 

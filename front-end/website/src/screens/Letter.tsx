@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 import Box from '@material-ui/core/Box';
 import gql from 'graphql-tag';
 import {
@@ -45,13 +46,13 @@ const useStyles = makeStyles(theme => ({
   },
   detailWholeBox: {
     display: 'flex',
-    borderWidth: 1,
-    borderRadius: 7,
-    borderColor: 'black',
     flexDirection: 'column',
     fontFamily: 'FontNormalFD',
     fontSize: 17,
-    // width: '50vmax',
+    paddingLeft: 30,
+    paddingRight: 30,
+    minWidth: 350,
+    paddingTop: 30,
     alignItems: 'flex-end',
   },
   detailBox: {
@@ -145,16 +146,16 @@ const Letter = (props: any) => {
       var refrence = data.circularLetterDetails.refrenceId;
     }
   }
-  React.useEffect(() => {
+  useEffect(() => {
     if (data) {
       setNumberOfFiles(queryData.files.length);
     }
   }, [data, setNumberOfFiles, queryData]);
-  if (error) {
-    return (
-      <Redirect to="/search-letter" />
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <Redirect to="/search-letter" />
+  //   );
+  // }
 
   const handleOpen = () => {
     setOpen(true);
@@ -255,7 +256,15 @@ const Letter = (props: any) => {
         }
         return (
           <Box className={classes.container}>
-            <Box className={classes.detailWholeBox}>
+            <Box
+              border={1}
+              borderColor="#00bcd4"
+              borderRadius={7}
+              className={classes.detailWholeBox}
+              style={{
+                marginTop: props.user.isAdmin ? 50 : 10,
+              }}
+            >
               <Box className={classes.detailBox}>
                 عنوان: {queryData.title}
               </Box>
@@ -334,26 +343,18 @@ const Letter = (props: any) => {
                 flexDirection: 'column',
                 alignItems: 'flex-start'
               }}>
-              <Box style={{
+              {props.user.isAdmin && <Box style={{
                 fontFamily: 'FontNormal',
                 fontSize: 14,
               }}>
                 <Button
-                  onClick={() => {
-                    props.history.push({
-                      pathname: `/edit-circular-letter?id=${queryData._id}`,
-                      state: {
-                        queryData
-                      }
-                    })
-                  }}
                   href={`/edit-circular-letter?id=${queryData._id}`}
                   style={{ marginRight: 10 }}
                 >
                   <EditIcon style={{ height: 30, width: 30 }} />
                 </Button>
                  ویرایش مشخصات بخشنامه
-              </Box>
+              </Box>}
               <Box style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -385,5 +386,7 @@ const Letter = (props: any) => {
     </Mutation>
   );
 }
-
-export default withRouter(Letter as any);
+const mapState = ({ session }: any) => ({
+  user: session.user,
+});
+export default connect(mapState)(withRouter(Letter as any));

@@ -41,7 +41,7 @@ interface InitialStateProps {
     name: string;
     id: string;
   }>;
-  filesName:Array<string>;
+  filesName: Array<string>;
 }
 
 
@@ -80,7 +80,7 @@ let initialState: InitialStateProps = {
   },
   listOfCategories: [],
   listOfSubjects: [],
-  filesName:[],
+  filesName: [],
 }
 
 const dataSlice = createSlice({
@@ -149,6 +149,19 @@ const dataSlice = createSlice({
       state.files = [];
       state.files = tempFiles;
     },
+    addFilesName(state, action) {
+      state.filesName.push(action.payload);
+    },
+    removeFilesName(state, action) {
+      const tempFiles: Array<string> = [];
+      state.filesName.forEach((file) => {
+        if (file !== action.payload) {
+          tempFiles.push(file);
+        }
+      });
+      state.filesName = [];
+      state.filesName = tempFiles;
+    },
     removeTag(state, action) {
       state.tags.forEach((tag, index) => {
         if (tag === action.payload) {
@@ -175,6 +188,16 @@ const dataSlice = createSlice({
           name: '',
         });
       }
+    },
+    increamentFileUpload(state) {
+      state.uploadFilesStatus.push({
+        status: false,
+        link: '',
+        name: '',
+      });
+    },
+    removeFileUploadStatus(state, action) {
+      state.uploadFilesStatus.splice(action.payload, 1);
     },
     clearAnyThing(state: any, action) {
       state[action.payload.theThing] = '';
@@ -210,15 +233,19 @@ export const {
   removeTag,
   changeSearchInDate,
   setGraphqlError,
+  increamentFileUpload,
   clearAnyThing,
   setErrors,
   addFileUpload,
   setFileUpload,
+  removeFilesName,
   setListOfCategories,
   setListOfSubjects,
   clearFiles,
+  removeFileUploadStatus,
   addToListOfCategories,
   addToListOfSubjects,
+  addFilesName,
   removeFromListOfCategories,
   removeFromListOfSubjects,
   changeFromDateFull,

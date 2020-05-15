@@ -140,11 +140,12 @@ export default function HorizontalLinearStepper(props: any) {
         {activeStep === steps.length ? (
           <div>
             <Typography className={classes.instructions}>
-              بخشنامه با موفقیت به ثبت رسید.
+              {props.customLastStep ? props.customLastStep : 'بخشنامه با موفقیت به ثبت رسید.'}
             </Typography>
             <Button
+              disabled={props.returnDisabled ? props.returnDisabled : false}
               //  onClick={handleReset} 
-              href="/"
+              href={props.returnHref ? props.returnHref : '/'}
               className={classes.button}>
               بازگشت
             </Button>

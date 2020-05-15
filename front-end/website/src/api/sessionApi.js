@@ -1,8 +1,8 @@
 export const login = (user) => {
   const response = {
-    token: user.token,
     data: {
       personelNumber: user.personelNumber,
+      isAdmin: user.isAdmin,
       firstName: user.firstName,
       lastName: user.lastName
     }
@@ -11,5 +11,5 @@ export const login = (user) => {
 };
 
 export const logout = () => {
-  return new Promise(resolve => setTimeout(resolve, 100));
+  return new Promise(resolve => setTimeout(resolve, 10));
 };

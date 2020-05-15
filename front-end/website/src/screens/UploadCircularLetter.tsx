@@ -229,7 +229,7 @@ const toolTipText = `
 برای جست و جو در بخشنامه‌ها از این کلمات کلیدی استفاده خواهد شد بعد از وارد کردن هر کلمه بر روی افزودن کلیک کنید
 `;
 const numberToolTip = `
-اگر شماره بخشنامه دارای حروف فارسی همراه با ممیز است، حروف فارسی به آخر می‌روند اما این مسئله خللی در ثبت شماره به صورت صحیح وارد نمی‌کند
+اگر شماره بخشنامه شامل حروف فارسی است، شماره به صورت عکس مشاهده می‌شود، اما در ثبت شماره به صورت صحیح خللی وارد نمی‌کند
 `;
 const RESPONSIVE_WIDTH = 800;
 const UPLOAD_CIRCULAR_LETTER = gql`
@@ -440,7 +440,34 @@ const UploadCircularLetter = (props: any) => {
   const handleOpen = () => {
     setOpen(true);
   };
-
+  const handleNumber = (numberToProcess: string) => {
+    if (numberToProcess) {
+      const numberToShow: Array<any> = [];
+      const numberParts = numberToProcess.split('/');
+      numberParts.forEach((part: string, index: number) => {
+        numberToShow.push(
+          <Box
+            key={index.toString()}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
+            {index !== 0 && <Box>
+              /
+            </Box>}
+            <Box>
+              {part}
+            </Box>
+          </Box>
+        );
+      });
+      return numberToShow.map((number: any) => {
+        return number;
+      });
+    }
+  }
   const handleClose = () => {
     setOpen(false);
   };
@@ -830,35 +857,94 @@ const UploadCircularLetter = (props: any) => {
                     }
                     {
                       activeStep === 2 && (
-                        <React.Fragment>
-                          <Box className={classes.checkInfoBox}>
-                            عنوان: {title}
+                        <Box style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          justifyContent: 'center',
+                        }}>
+                          <Box
+                            border={1}
+                            borderRadius={7}
+                            borderColor="#00bcd4"
+                            style={{
+                              display: 'flex',
+                              minWidth: 500,
+                              flexDirection: 'column',
+                              alignItems: 'flex-end',
+                              justifyContent: 'center',
+                              padding: 30,
+                              marginBottom: 10,
+                            }}>
+                            <Box className={classes.checkInfoBox}>
+                              <Box style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}>
+                                {title}
+                                <Box style={{
+                                  marginLeft: 5
+                                }}>
+                                  :
+                                </Box>
+                                <Box>
+                                  عنوان
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              <Box style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}>
+                                {handleNumber(number)}
+                                <Box style={{ marginLeft: 5, }}>
+                                  :
+                                </Box>
+                                <Box>
+                                  شماره
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              تاریخ: {date}
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              صادر کننده: {sender}
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              مرتبط با مقطع: {toCategory}
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              <Box style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}>
+                                {type === 'imported' ? importNumber : exportNumber}
+                                {(!importNumber && !exportNumber) && 'ندارد'}
+                                <Box style={{
+                                  marginLeft: 5
+                                }}>
+                                  :
+                                </Box>
+                                <Box>
+                                  {type === 'imported' ? "شماره ثبت وارده" : "شماره ثبت صادره"}
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              حوزه مربوطه: {subjectedTo}
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              {!refrenceCircularID ? ".ارجاعی به بخشنامه دیگری ندارد" : `ارجاع به بخشنامه شماره ${refrenceCircularID}`}
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              تگ‌ها: {handleTags(tags)}
+                            </Box>
                           </Box>
-                          <Box className={classes.checkInfoBox}>
-                            شماره: {number}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            تاریخ: {date}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            صادر کننده: {sender}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            مرتبط با مقطع: {toCategory}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            {type === 'imported' ? "شماره ثبت وارده" : "شماره ثبت صادره"}: {type === 'imported' ? importNumber : exportNumber}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            حوزه مربوطه: {subjectedTo}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            {!refrenceCircularID ? ".ارجاعی به بخشنامه دیگری ندارد" : `ارجاع به بخشنامه شماره ${refrenceCircularID}`}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            تگ‌ها: {handleTags(tags)}
-                          </Box>
-                        </React.Fragment>
+                        </Box>
                       )
                     }
                   </Stepper>
