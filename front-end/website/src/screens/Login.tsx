@@ -58,6 +58,7 @@ mutation Login(
   data: $data,
   ){
     user{
+      id
       firstName
       lastName
     }

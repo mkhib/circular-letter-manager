@@ -6,9 +6,9 @@ interface InitialStateProps {
   date: string;
   sender: string;
   innerWidth: number;
-  importNumber?: string;
-  exportNumber?: string;
-  refrenceCircularID?: string;
+  importNumber: string;
+  exportNumber: string;
+  refrenceCircularID: string;
   numberOfFiles: number;
   errors: Array<string>;
   files: Array<string>;
@@ -41,6 +41,7 @@ interface InitialStateProps {
     name: string;
     id: string;
   }>;
+  filesName:Array<string>;
 }
 
 
@@ -79,6 +80,7 @@ let initialState: InitialStateProps = {
   },
   listOfCategories: [],
   listOfSubjects: [],
+  filesName:[],
 }
 
 const dataSlice = createSlice({

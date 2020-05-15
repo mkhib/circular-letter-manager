@@ -12,10 +12,12 @@ import { makeStyles, withStyles, Theme } from '@material-ui/core/styles';
 import { useQuery } from '@apollo/react-hooks';
 import { Mutation } from '@apollo/react-components';
 import Backdrop from '@material-ui/core/Backdrop';
+import EditIcon from '@material-ui/icons/Edit';
 import Typography from '@material-ui/core/Typography';
 import Modal from '@material-ui/core/Modal';
 import Link from '@material-ui/core/Link';
 import Fade from '@material-ui/core/Fade';
+import { withRouter } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -48,7 +50,7 @@ const useStyles = makeStyles(theme => ({
     borderColor: 'black',
     flexDirection: 'column',
     fontFamily: 'FontNormalFD',
-    fontSize: 19,
+    fontSize: 17,
     // width: '50vmax',
     alignItems: 'flex-end',
   },
@@ -148,11 +150,11 @@ const Letter = (props: any) => {
       setNumberOfFiles(queryData.files.length);
     }
   }, [data, setNumberOfFiles, queryData]);
-  // if (error) {
-  //   return (
-  //     <Redirect to="/search-letter" />
-  //   );
-  // }
+  if (error) {
+    return (
+      <Redirect to="/search-letter" />
+    );
+  }
 
   const handleOpen = () => {
     setOpen(true);
@@ -288,12 +290,6 @@ const Letter = (props: any) => {
               <Box className={classes.detailBox}>
                 کلمات کلیدی:{' '}{handleTags(queryData.tags)}
               </Box>
-              <Box>
-                <Button style={{ marginRight: 10 }} onClick={handleOpen}>
-                  <DeleteForeverOutlined style={{ height: 30, width: 30 }} />
-                </Button>
-                  پاک کردن بخشنامه به طور کامل
-              </Box>
               <Modal
                 aria-labelledby="modal-title"
                 aria-describedby="delete-modal-description"
@@ -332,29 +328,56 @@ const Letter = (props: any) => {
                 </Fade>
               </Modal>
             </Box>
-            <Box style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}>
-              <Button
-                target="_blank" rel="noopener noreferrer"
-                href={queryData.files[fileToShow]}
-              >
-                <img
-                  className={classes.letterSize}
-                  src={queryData.files[fileToShow]}
-                  alt='letterImage'
+            <Box
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start'
+              }}>
+              <Box style={{
+                fontFamily: 'FontNormal',
+                fontSize: 14,
+              }}>
+                <Button
+                  onClick={() => {
+                    props.history.push({
+                      pathname: `/edit-circular-letter?id=${queryData._id}`,
+                      state: {
+                        queryData
+                      }
+                    })
+                  }}
+                  href={`/edit-circular-letter?id=${queryData._id}`}
+                  style={{ marginRight: 10 }}
+                >
+                  <EditIcon style={{ height: 30, width: 30 }} />
+                </Button>
+                 ویرایش مشخصات بخشنامه
+              </Box>
+              <Box style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}>
+                <Button
+                  target="_blank" rel="noopener noreferrer"
+                  href={queryData.files[fileToShow]}
+                >
+                  <img
+                    className={classes.letterSize}
+                    src={queryData.files[fileToShow]}
+                    alt='letterImage'
+                  />
+                </Button>
+                <MyPaginator
+                  count={numberOfFiles}
+                  style={{ direction: 'rtl', marginTop: 20 }}
+                  color="primary"
+                  onChange={(_a, b) => {
+                    setFileToShow(b - 1);
+                  }}
                 />
-              </Button>
-              <MyPaginator
-                count={numberOfFiles}
-                style={{ direction: 'rtl', marginTop: 20 }}
-                color="primary"
-                onChange={(_a, b) => {
-                  setFileToShow(b - 1);
-                }}
-              />
+              </Box>
             </Box>
           </Box>
         );
@@ -363,4 +386,4 @@ const Letter = (props: any) => {
   );
 }
 
-export default Letter;
+export default withRouter(Letter as any);

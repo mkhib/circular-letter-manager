@@ -16,6 +16,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
 import { MenuItem, InputLabel } from '@material-ui/core';
 import {
+  Redirect,
+} from 'react-router-dom';
+import {
   setAnyThing,
   changeSearchInDate,
   changeToDateFull,
@@ -208,7 +211,15 @@ const SearchLetters = (props: any) => {
       </Backdrop>
     </Box>
   );
-  if (error) return `Error! ${error}`;
+  if (error) {
+    console.log(error.message);
+    if (error.message === 'GraphQL error: Authentication required') {
+      return (<Redirect to={{
+        pathname: '/login',
+      }} />)
+    }
+    return `Error! ${error}`;
+  }
   console.log('activam', props.searchInDate);
   return (
     <Box>

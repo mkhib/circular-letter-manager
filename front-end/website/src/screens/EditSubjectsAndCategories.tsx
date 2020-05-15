@@ -76,15 +76,6 @@ query GetBothLists{
 }
 `;
 
-const GET_CATEGORIES = gql`
-query GetCategories{
-  toCategories{
-    id
-    name
-  }
-}
-`;
-
 function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
 }

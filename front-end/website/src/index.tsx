@@ -10,6 +10,7 @@ import { ApolloClient, DefaultOptions } from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { createUploadLink } from 'apollo-upload-client';
 import { ApolloProvider } from '@apollo/react-hooks';
+import { CookiesProvider } from 'react-cookie';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import store from './redux/store';
 import App from './App';
@@ -38,7 +39,7 @@ import { setContext } from 'apollo-link-context';
 // }
 
 const uploadLink = createUploadLink({
-  uri: "https://2485f4e1.ngrok.io/graphql",
+  uri: "https://20301271.ngrok.io/graphql",
   credentials: 'include'
 });
 
@@ -60,13 +61,15 @@ const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
 ReactDOM.render(
   <Provider store={store}>
     <ApolloProvider client={client}>
-      <ThemeProvider theme={theme}>
-        <StylesProvider jss={jss}>
-          <div>
-            <App />
-          </div>
-        </StylesProvider>
-      </ThemeProvider>
+      <CookiesProvider>
+        <ThemeProvider theme={theme}>
+          <StylesProvider jss={jss}>
+            <div>
+              <App />
+            </div>
+          </StylesProvider>
+        </ThemeProvider>
+      </CookiesProvider>
     </ApolloProvider>
   </Provider>
   , document.getElementById('root'));
