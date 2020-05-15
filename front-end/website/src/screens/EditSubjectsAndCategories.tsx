@@ -431,6 +431,14 @@ const EditSubjectsAndCategories: React.FunctionComponent<IEditProps> = (props) =
                                       id="newCategory"
                                       label="افزودن مقطع"
                                       value={newCategory}
+                                      onKeyUp={(e: any) => {
+                                        const enterCode = 13;
+                                        if (e.which === enterCode) {
+                                          if (!!newCategory) {
+                                            createToCategoryType({ variables: { name: newCategory } });
+                                          }
+                                        }
+                                      }}
                                       onChange={(event: any) => {
                                         setNewCategory(event.target.value);
                                       }}
@@ -463,6 +471,14 @@ const EditSubjectsAndCategories: React.FunctionComponent<IEditProps> = (props) =
                                       id="newSubject"
                                       label="افزودن حوزه"
                                       value={newSubject}
+                                      onKeyUp={(e: any) => {
+                                        const enterCode = 13;
+                                        if (e.which === enterCode) {
+                                          if (!!newSubject) {
+                                            createSubjectedToType({ variables: { name: newSubject } });
+                                          }
+                                        }
+                                      }}
                                       onChange={(event: any) => {
                                         setNewSubject(event.target.value);
                                       }}

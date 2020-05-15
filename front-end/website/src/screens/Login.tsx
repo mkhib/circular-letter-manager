@@ -17,7 +17,6 @@ import { login, setPersonelNumber, setPassword, setErrors } from '../redux/slice
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import {
-  setAnyThing,
   setGraphqlError,
   clearGraphqlError,
 } from '../redux/slices/data';
@@ -61,6 +60,7 @@ mutation Login(
       id
       firstName
       lastName
+      isAdmin
     }
     token
   }
@@ -82,20 +82,19 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
   } = props;
   const classes = useStyles();
 
-  const saveTokens = (token: any) => {
-    localStorage.setItem('token', token ? token : '');
+  const saveIsAdmin = (isAdmin: boolean) => {
+    localStorage.setItem('isAdmin', isAdmin ? JSON.stringify(isAdmin) : 'false');
   }
 
-  const onSubmit = (history: any, token: string, firstName: string, lastName: string) => {
+  const onSubmit = (history: any, firstName: string, lastName: string, isAdmin: boolean, id: string) => {
     const { login } = props;
     login({
       personelNumber,
-      password,
-      token,
+      id,
+      isAdmin,
       firstName,
       lastName,
     }, history);
-    saveTokens(token);
   }
 
   const errorCheck = (name: string) => {
@@ -142,8 +141,8 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
           variables: {
             data: {
               personelNumber: parseInt(personelNumber, 10),
-              // password: cipher.encrypt(password)
-              password: password
+              password: cipher.encrypt(password)
+              // password: password
             },
           },
         });
@@ -164,7 +163,8 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
       }
       const SubmitButton = withRouter(({ history }) => {
         if (data) {
-          onSubmit(history, data.login.token, data.login.user.firstName, data.login.user.lastName);
+          console.log(data);
+          onSubmit(history, data.login.user.firstName, data.login.user.lastName, data.login.user.isAdmin, data.login.user.id);
         }
         return (
           <Button

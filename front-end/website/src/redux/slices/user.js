@@ -30,9 +30,9 @@ const userSlice = createSlice({
       state[action.payload.theThing] = 0;
     },
     loginAction(_state, action) {
-      const { token } = action.payload.user;
-      sessionService.saveSession({ token }).then(() => {
-        sessionService.saveUser(action.payload.user.data)
+      console.log('sisi', action.payload.user.data);
+      sessionService.saveSession('true').then(() => {
+        sessionService.saveUser(action.payload.user)
           .then(() => {
             action.payload.history.push('/search-letter');
           }).catch(err => console.error(err));
@@ -63,7 +63,7 @@ const userSlice = createSlice({
 });
 
 export const login = (user, history) => async (dispatch) => {
-  if (user.token) {
+  if (user.id) {
     dispatch(loginAction({
       user,
       history,

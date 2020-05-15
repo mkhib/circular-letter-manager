@@ -5,9 +5,20 @@ import Button from '@material-ui/core/Button';
 import { useQuery } from "@apollo/react-hooks";
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Box from '@material-ui/core/Box';
+import { makeStyles } from '@material-ui/core/styles';
 import DoneRounded from '@material-ui/icons/DoneRounded';
 import DeleteForeverRounded from '@material-ui/icons/DeleteForeverRounded';
-
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+const useStyles = makeStyles(theme => ({
+  snackStyle: {
+    fontFamily: 'FontNormal',
+  },
+  snackBox: {
+    marginLeft: 20,
+    marginRight: 20,
+  },
+}));
 export const UPLOAD_FILE = gql`
   mutation UploadFile($file: Upload!) {
     uploadFile(file: $file){
@@ -36,9 +47,24 @@ const UploadOneFile = (props) => {
   // if (loading) {
   //   return <div>loading...</div>;
   // }
+  function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+  }
   const [error, setError] = useState(null);
+  const [openError, setOpenError] = useState(false);
+  const classes = useStyles();
+  const openEditFileFailure = () => {
+    setOpenError(true);
+  };
+  const closeEditFileFailure = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenError(false);
+  };
   return (
     <Mutation mutation={UPLOAD_FILE} onError={(e) => {
+      openEditFileFailure();
       console.log('uploadError', e);
     }} onCompleted={(data) => {
       props.onCompleted(data);
@@ -52,20 +78,29 @@ const UploadOneFile = (props) => {
               console.log('newLoad', loading, data);
               return (
                 <React.Fragment>
+                  <Snackbar open={openError} autoHideDuration={6000} onClose={closeEditFileFailure}>
+                    <Alert className={classes.snackStyle} onClose={closeEditFileFailure} severity="error">
+                      <Box className={classes.snackBox}>
+                        بارگذاری فایل شما با مشکل مواجه شد لطفا دوباره تلاش کنید
+                      </Box>
+                    </Alert>
+                  </Snackbar>
                   {props.file.status && (
                     <Box>
                       <Button onClick={() => {
                         props.onDeleteFile(props.file.name);
-                        deleteFile({
-                          variables: {
-                            filename: props.file.name,
-                          },
-                        })
+                        if (!props.hasRemove) {
+                          deleteFile({
+                            variables: {
+                              filename: props.file.name,
+                            },
+                          })
+                        }
                       }}>
                         <DeleteForeverRounded />
                       </Button>
                       <img src={props.file.link}
-                        style={{
+                        style={props.imageStyle || {
                           height: 128,
                           width: 96,
                         }} alt='uploadedFile' />
@@ -82,28 +117,47 @@ const UploadOneFile = (props) => {
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}>
-                    {(!loading1 && !props.file.status) && <input
-                      style={{
-                        backgroundColor: '#2196f3',
-                        padding: 10,
-                        marginLeft: 10,
-                        marginRight: 10,
-                        color: 'white',
-                      }}
-                      type="file"
-                      accept=".jpg,.jpeg,.png,.bmp,.til,.tiff"
-                      required
-                      onChange={({ target: { validity, files: [file], } }) => {
-                        if (file) {
-                          console.log('inner', file.name);
-                          props.getFileName(file.name);
-                        }
-                        validity.valid && uploadFile({ variables: { file } })
-                      }
-                      }
-                    />}
+                    {(!loading1 && !props.file.status) && (
+                      <Box style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      }}>
+                        {(props.hasRemove && !props.file.status) && (
+                          <Box>
+                            <Button onClick={() => {
+                              const filename = props.file.name;
+                              props.removeFromRedux(filename);
+                            }}>
+                              <DeleteForeverRounded />
+                            </Button>
+                          </Box>
+                        )}
+                        <input
+                          style={{
+                            backgroundColor: '#2196f3',
+                            padding: 10,
+                            marginLeft: 10,
+                            marginRight: 10,
+                            color: 'white',
+                          }}
+                          type="file"
+                          accept=".jpg,.jpeg,.png,.bmp,.til,.tiff"
+                          required
+                          onChange={({ target: { validity, files: [file], } }) => {
+                            if (file) {
+                              console.log('inner', file.name);
+                              props.getFileName(file.name);
+                            }
+                            validity.valid && uploadFile({ variables: { file } })
+                          }
+                          }
+                        />
+                      </Box>
+                    )}
                     {loading1 && (<Box style={{
-                      marginTop: 10
+                      marginTop: 10,
+                      marginLeft: 30,
                     }}>
                       <CircularProgress style={{ width: 20, height: 20 }} />
                     </Box>)}
