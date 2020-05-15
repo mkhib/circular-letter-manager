@@ -29,7 +29,15 @@ const userSchema = new mongoose.Schema({
     changedPassword: {
         type: Boolean,
         required: true
-    }
+    },
+    isAdmin: {
+        type: Boolean,
+        required: true
+    },
+    // tokenVersion: {
+    //     type: Number,
+    //     default: 0
+    // }
 });
 
 userSchema.set('toObjenct', { viruals: true });

@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 
-const getUserId = (token, requireAuth = true) => {
-    // const header = req.headers.authorization || '';
+const getUserId = (req, requireAuth = true) => {
+    const header = req.headers.authorization || '';
 
     if (header) {
-        // const token = header.replace('Bearer ', '');
+        const token = header.replace('Bearer ', '');
         const decoded = jwt.verify(token, "pwtfkipoewofkipejgfpewdjfpdoewfpokwxcvdjvkdsjf");
         return decoded.userId;
     }
