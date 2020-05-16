@@ -10,8 +10,8 @@ import * as sessionApi from '../../api/sessionApi';
 // }
 
 let initialState = {
-  personelNumber: '4444',
-  password: 'Page7515',
+  personelNumber: '',
+  password: '',
   errors: [],
   graphqlError: '',
   oldPassword: '',

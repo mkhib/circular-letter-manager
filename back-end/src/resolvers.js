@@ -21,7 +21,7 @@ import { sendSMS } from './util/sendSMS';
 // import { sendRefreshToken } from './util/sendRefreshToken';
 // import { createRefreshToken, createAccessToken } from './util/auth';
 
-const imagePath = 'https://de66ac5e.ngrok.io/images/';
+const imagePath = 'http://localhost:3600/images/';
 String.prototype.allTrim = String.prototype.allTrim || function () {
     return this
         .replace(/ +/g, ' ')
@@ -340,7 +340,7 @@ export const resolvers = {
         },
         changePassword: async (parent, args, context, info) => {
             isAuthenticated(context.req);
-            
+
             const user = await Users.findById(context.req.userId.userId);
 
             const oldDecrypted = decrypt(args.data.oldPassword);
