@@ -1,5 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+export type userType = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  personelNumber: string;
+  identificationNumber: string;
+  phoneNumber: string;
+}
+
 interface InitialStateProps {
   title: string;
   number: string;
@@ -42,6 +51,7 @@ interface InitialStateProps {
     id: string;
   }>;
   filesName: Array<string>;
+  pendingUsers: Array<userType>;
 }
 
 
@@ -81,6 +91,7 @@ let initialState: InitialStateProps = {
   listOfCategories: [],
   listOfSubjects: [],
   filesName: [],
+  pendingUsers: [],
 }
 
 const dataSlice = createSlice({
@@ -100,6 +111,20 @@ const dataSlice = createSlice({
       state.listOfSubjects = [];
       action.payload.forEach((item: { name: string, id: string }) => {
         state.listOfSubjects.push(item);
+      });
+    },
+    setPendingUsers(state, action) {
+      state.pendingUsers = [];
+      action.payload.forEach((user: userType) => {
+        state.pendingUsers.push(user);
+      });
+    },
+    removeFromPendingUsers(state, action) {
+      state.pendingUsers.forEach((user: userType, index: number) => {
+        if (user.id === action.payload) {
+          state.pendingUsers.splice(index, 1);
+          return true;
+        } return false;
       });
     },
     addToListOfCategories(state, action) {
@@ -240,6 +265,8 @@ export const {
   setFileUpload,
   removeFilesName,
   setListOfCategories,
+  removeFromPendingUsers,
+  setPendingUsers,
   setListOfSubjects,
   clearFiles,
   removeFileUploadStatus,

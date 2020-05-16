@@ -19,6 +19,7 @@ import Modal from '@material-ui/core/Modal';
 import Link from '@material-ui/core/Link';
 import Fade from '@material-ui/core/Fade';
 import { withRouter } from 'react-router-dom';
+import searchBack from '../assets/images/searchBack.jpg';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -27,7 +28,9 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'space-between',
     padding: 40,
     paddingRight: '10vmax',
-    paddingLeft: '10vmax'
+    paddingLeft: '10vmax',
+    backgroundImage: `url(${searchBack})`,
+    backgroundAttachment: 'fixed',
   },
   modal: {
     display: 'flex',

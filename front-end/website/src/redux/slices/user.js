@@ -14,6 +14,9 @@ let initialState = {
   password: 'Page7515',
   errors: [],
   graphqlError: '',
+  oldPassword: '',
+  newPassword: '',
+  againNewPassword: '',
 };
 
 const userSlice = createSlice({
@@ -47,6 +50,14 @@ const userSlice = createSlice({
         throw (err);
       });
     },
+    logoutActionNoRoute(_state, action) {
+      sessionApi.logout().then(() => {
+        sessionService.deleteSession();
+        sessionService.deleteUser();
+      }).catch(err => {
+        throw (err);
+      });
+    },
     setPassword(state, action) {
       state.password = action.payload;
     },
@@ -75,6 +86,10 @@ export const handleLogout = (history) => async (dispatch) => {
   dispatch(logoutAction(history));
 };
 
+export const logoutWithoutChangeRoute = (history) => async (dispatch) => {
+  dispatch(logoutActionNoRoute(history));
+};
+
 const { reducer, actions } = userSlice;
 
 export const {
@@ -85,6 +100,7 @@ export const {
   setPassword,
   clearPersonelNumber,
   loginAction,
+  logoutActionNoRoute,
   clearAnyThing,
 } = actions;
 

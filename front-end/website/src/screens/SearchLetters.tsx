@@ -27,6 +27,7 @@ import {
 import {
   useLocation
 } from "react-router-dom";
+import searchBack from '../assets/images/searchBack.jpg';
 
 const useStyles = makeStyles((theme) => ({
   searchOptions: {
@@ -187,7 +188,7 @@ const SearchLetters = (props: any) => {
     }
   }
   const { loading, error, data } = useQuery(SEARCH_QUERY, {
-    variables: { information: handleSearch(), startDate: start, endDate: end, page: handlePageNumber(), limit: 2, sortBy: handleSort(), order: handleOrder() },
+    variables: { information: handleSearch(), startDate: start, endDate: end, page: handlePageNumber(), limit: 15, sortBy: handleSort(), order: handleOrder() },
   });
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     props.changeSearchInDate(event.target.checked);
@@ -222,7 +223,16 @@ const SearchLetters = (props: any) => {
   }
   console.log('activam', props.searchInDate);
   return (
-    <Box>
+    <Box
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        paddingTop: 30,
+        backgroundImage: `url(${searchBack})`,
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <Box className={classes.searchOptions}>
         <Box className={classes.searchBox} style={{
           flexDirection: width >= RESPONSIVE_WIDTH ? 'row' : 'column-reverse',
