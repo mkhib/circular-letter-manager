@@ -206,6 +206,13 @@ export const resolvers = {
         categoriesQuery: async (parent, args, context, info) => {
             // getUserId(context.req);
             isAuthenticated(context.req);
+            const user = await Users.findById(context.req.userId);
+            if (!user) {
+                throw new Error("Authentication required!");
+            }
+            if (user.isAdmin === false) {
+                throw new Error("Unauthorized action!")
+            }
 
             const subjectedTo = await SubjectedToType.find();
             const toCategory = await ToCategoryType.find();
@@ -260,12 +267,14 @@ export const resolvers = {
                 throw new Error("User not found!");
             }
             sendSMS(user.id, user.phoneNumber);
-            return true;
+            return user;
         },
         deleteUser: async (parent, args, context, info) => {
             isAuthenticated(context.req);
-            const userId = context.req.userId.userId;
-            const user = await Users.findById(userId);
+            const user = await Users.findById(args.id);
+            if (!user) {
+                throw new Error("User not found!")
+            }
             await user.deleteOne();
             return user;
         },
@@ -294,6 +303,9 @@ export const resolvers = {
 
             if (!user) {
                 throw new Error("User not found!");
+            }
+            if (user.authorized === false) {
+                throw new Error("Unauthorized user!")
             }
 
             const isMatch = await bcrypt.compare(decrypt(args.data.password), user.password);
@@ -430,6 +442,13 @@ export const resolvers = {
         circularLetterInit: async (parent, args, context, info) => {
             // getUserId(context.req);
             isAuthenticated(context.req);
+            const user = await Users.findById(context.req.userId);
+            if (!user) {
+                throw new Error("Authentication required!");
+            }
+            if (user.isAdmin === false) {
+                throw new Error("Unauthorized action!")
+            }
 
             // var i = 1;
             // setInterval(async () => {

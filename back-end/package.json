@@ -24,6 +24,7 @@
     "fs": "0.0.1-security",
     "graphql": "^14.6.0",
     "jsonwebtoken": "^8.5.1",
+    "kavenegar": "^1.1.4",
     "mkdirp": "^0.5.5",
     "moesif-express": "^2.9.15",
     "moment": "^2.25.3",
