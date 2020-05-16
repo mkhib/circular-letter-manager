@@ -38,80 +38,42 @@ const useStyles = makeStyles(theme => ({
 }));
 
 interface LoginProps {
-  personelNumber: string;
-  password: string;
+  oldPassword: string;
+  newPassword: string;
+  againNewPassword: string;
   setAnything: any;
   location: any;
   history: any;
   user: string;
-  login: any;
   errors: Array<string>;
   setGraphqlError: any;
   graphqlError: any;
   setErrors: any;
   clearGraphqlError: any;
-  logoutWithoutChangeRoute: any;
 }
 
-const LOGIN = gql`
-mutation Login(
- $data: LoginUserInput!){
-  login(
-  data: $data,
-  ){
-    user{
-      id
-      firstName
-      lastName
-      isAdmin
-      changedPassword
-    }
-  }
-}
-`;
-
-const LOGOUT = gql`
-mutation Logout{
-  logout
+const CHANGE_THAT_PASSWORD = gql`
+mutation ChangePassword($data: PasswordInput!){
+  changePassword(data: $data)
 }
 `;
 
 let schema = yup.object().shape({
-  personelNumber: yup.string().required('شماره پرسنلی وارد نشده است.'),
-  password: yup.string().required('رمزعبور وارد نشده است.'),
+  oldPassword: yup.string().required('رمزعبور قبلی وارد نشده است'),
+  newPassword: yup.string().min(8, 'رمزعبور جدید باید حداقل 8 کاراکتر باشد').required('رمزعبور جدید وارد نشده است'),
+  againNewPassword: yup.string().min(8, 'تکرار رمزعبور باید حداقل 8 کاراکتر باشد').required('تکرار رمزعبور وارد نشده است').oneOf([yup.ref('newPassword')], 'تکرار رمزعبور جدید منطبق نیست')
 });
 
-const Login: React.FunctionComponent<LoginProps> = (props) => {
-  const [
-    logout,
-    { loading: logoutLoading, error: logoutnError },
-  ] = useMutation(LOGOUT);
+const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
   const {
-    personelNumber,
-    password,
     setAnything,
-    logoutWithoutChangeRoute,
+    oldPassword,
+    newPassword,
+    againNewPassword,
     location,
-    user,
   } = props;
   const classes = useStyles();
-
-  React.useEffect(() => {
-    logout();
-    logoutWithoutChangeRoute();
-  }, [logout, logoutWithoutChangeRoute]);
-
-
-  const onSubmit = (history: any, firstName: string, lastName: string, isAdmin: boolean, id: string) => {
-    const { login } = props;
-    login({
-      personelNumber,
-      id,
-      isAdmin,
-      firstName,
-      lastName,
-    }, history);
-  }
+  const [errs, setErrs] = React.useState([]);
 
   const errorCheck = (name: string) => {
     let hasError = false;
@@ -126,8 +88,24 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
   const handleErrorMessage = (message: string) => {
     if (message === 'Network error: Failed to fetch') {
       return '.لطفا اتصال خود به اینترنت را بررسی کنید'
-    } else {
-      return '.نام‌کاربری یا رمز عبور نادرست است'
+    } if (message === 'GraphQL error: Wrong password!') {
+      return '.رمزعبور قبلی نادرست است'
+    }
+    else {
+      return '.مشکلی پیش آمده است'
+    }
+  }
+
+  const findErr = (name: string) => {
+    let errorMessage = '';
+    if (errs.length > 0) {
+      errs.forEach((error: any) => {
+        if (error.params.path === name) {
+          errorMessage = error.message;
+          return true;
+        }
+      });
+      return errorMessage;
     }
   }
 
@@ -146,19 +124,18 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
   const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
   const cipher = aes256.createCipher(key);
   return (<Mutation
-    mutation={LOGIN}
+    mutation={CHANGE_THAT_PASSWORD}
     onError={(err: any) => {
       props.setGraphqlError(err);
     }}
   >
-    {(login: any, { data, error, loading }: any) => {
-      const onRealLogin = () => {
-        login({
+    {(changePassword: any, { data, error, loading }: any) => {
+      const onChangePassword = () => {
+        changePassword({
           variables: {
             data: {
-              personelNumber: parseInt(personelNumber, 10),
-              password: cipher.encrypt(password)
-              // password: password
+              oldPassword: cipher.encrypt(oldPassword),
+              newPassword: cipher.encrypt(newPassword),
             },
           },
         });
@@ -166,22 +143,20 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
       const validateAndLogin = () => {
         props.clearGraphqlError();
         schema.validate({
-          personelNumber,
-          password,
+          oldPassword,
+          newPassword,
+          againNewPassword,
         }, {
           abortEarly: false
         }).then(() => {
           props.setErrors([]);
-          onRealLogin();
+          onChangePassword();
         }).catch((e: any) => {
+          setErrs(e.inner);
           props.setErrors(e.inner);
         });
       }
       const SubmitButton = withRouter(({ history }) => {
-        if (data) {
-          console.log(data);
-          onSubmit(history, data.login.user.firstName, data.login.user.lastName, data.login.user.isAdmin, data.login.user.id);
-        }
         return (
           <Button
             className={classes.button}
@@ -189,7 +164,7 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
             color="primary"
             onClick={validateAndLogin}
           >
-            {loading ? <CircularProgress style={{ height: 24, width: 24 }} /> : 'ورود'}
+            {loading ? <CircularProgress style={{ height: 24, width: 24 }} /> : 'تغییر رمزعبور'}
           </Button>
         );
       });
@@ -212,20 +187,20 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
             flex: 1,
           }}>
             <Box className={classes.titleBox}>
-              به سامانه بارگذاری و جست و جو بخشنامه‌ها خوش‌آمدید
+              تغییر رمز عبور
             </Box>
             {renderError(error)}
             <TextInput
-              id="personelNumber"
-              label="شماره پرسنلی"
-              error={errorCheck('personelNumber')}
-              value={personelNumber}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setAnything({
-                  theThing: 'personelNumber',
-                  data: event.target.value,
-                });
-              }}
+              id="oldPassword"
+              label="رمزعبور قبلی"
+              error={errorCheck('oldPassword')}
+              type="password"
+              helperText={findErr('oldPassword')}
+              value={oldPassword}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAnything({
+                theThing: 'oldPassword',
+                data: event.target.value
+              })}
               onKeyUp={(e: any) => {
                 const enterCode = 13;
                 if (e.which === enterCode) {
@@ -234,13 +209,32 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
               }}
             />
             <TextInput
-              id="password"
-              label="رمزعبور"
-              error={errorCheck('password')}
+              id="newPassword"
+              label="رمزعبور جدید"
+              error={errorCheck('newPassword')}
               type="password"
-              value={password}
+              helperText={findErr('newPassword')}
+              value={newPassword}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAnything({
-                theThing: 'password',
+                theThing: 'newPassword',
+                data: event.target.value
+              })}
+              onKeyUp={(e: any) => {
+                const enterCode = 13;
+                if (e.which === enterCode) {
+                  validateAndLogin();
+                }
+              }}
+            />
+            <TextInput
+              id="againNewPassword"
+              label="تکرار رمزعبور جدید"
+              error={errorCheck('againNewPassword')}
+              helperText={findErr('againNewPassword')}
+              type="password"
+              value={againNewPassword}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAnything({
+                theThing: 'againNewPassword',
                 data: event.target.value
               })}
               onKeyUp={(e: any) => {
@@ -261,8 +255,9 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
 
 const mapStateToProps = (state: any) => {
   const {
-    personelNumber,
-    password,
+    oldPassword,
+    newPassword,
+    againNewPassword,
     errors,
     user,
   } = state.userData;
@@ -276,18 +271,18 @@ const mapStateToProps = (state: any) => {
   return {
     checked,
     authenticated,
-    personelNumber,
     graphqlError,
-    password,
     errors,
     user,
+    oldPassword,
+    newPassword,
+    againNewPassword,
   };
 };
 
 export default connect(mapStateToProps, {
   login,
   setErrors,
-  logoutWithoutChangeRoute,
   clearGraphqlError,
   setPersonelNumber,
   setPassword,
@@ -295,4 +290,4 @@ export default connect(mapStateToProps, {
   setGraphqlError,
   clearAnyThing,
   clearPersonelNumber,
-})(Login);
+})(ChangePassword);

@@ -373,6 +373,10 @@ const UploadCircularLetter = (props: any) => {
           key={i.toString()}>
           <UploadOneFile
             file={uploadFilesStatus[i]}
+            imageStyle={{
+              height: 256,
+              width: 192,
+            }}
             onDeleteFile={(name: string) => {
               removeFile(name);
               setFileUpload({

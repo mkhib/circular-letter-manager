@@ -1,0 +1,12 @@
+@font-face {
+  font-family: 'FontNormalFD';
+  src: local('FontNormalFD'), url(../fonts/Vazir-FD.ttf) format('truetype');
+}
+
+tbody.MuiTableBody-root > tr:hover {
+  background-color: #efefef;
+}
+
+tbody.MuiTableBody-root{
+  font-family: 'FontNormal';
+}

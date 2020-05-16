@@ -15,6 +15,9 @@ const useStyles = makeStyles(theme => ({
     // paddingRight: 90,
     // fontSize: '2.1vmin'
   },
+  helperText: {
+    fontFamily: 'FontNormal',
+  },
 }));
 
 interface ITextInputProps {
@@ -39,6 +42,10 @@ const TextInput = (props: any) => {
         required={props.required}
         id={props.id}
         style={props.style}
+        helperText={props.helperText}
+        FormHelperTextProps={{
+          className: classes.helperText
+        }}
         onKeyUp={props.onKeyUp}
         error={props.error}
         autoComplete='off'
