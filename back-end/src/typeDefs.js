@@ -20,10 +20,10 @@ export const typeDefs = gql`
          personelNumber: String!, identificationNumber: String!, phoneNumber: String!, isAdmin: Boolean!): UserOutput!
         createUserApp(firstName: String!, lastName: String!,
          personelNumber: String!, identificationNumber: String!, phoneNumber: String!): UserOutput!
-        authenticateUser(id: ID!): Boolean!
+        authenticateUser(id: ID!): UserOutput!
         login(data: LoginUserInput): AuthPayLoad!
         logout: Boolean!
-        deleteUser: UserOutput!
+        deleteUser(id: ID!): UserOutput!
         updateUser(firstName: String, lastName: String): UserOutput!
         changePassword(data: passwordInput!): Boolean!
         uploadFile(file: Upload!): ReturnFile!
