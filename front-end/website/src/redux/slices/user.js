@@ -10,8 +10,8 @@ import * as sessionApi from '../../api/sessionApi';
 // }
 
 let initialState = {
-  personelNumber: '4444',
-  password: 'Page7515',
+  personelNumber: '',
+  password: '',
   errors: [],
   graphqlError: '',
   oldPassword: '',
@@ -33,7 +33,6 @@ const userSlice = createSlice({
       state[action.payload.theThing] = 0;
     },
     loginAction(_state, action) {
-      console.log('sisi', action.payload.user.data);
       sessionService.saveSession('true').then(() => {
         sessionService.saveUser(action.payload.user)
           .then(() => {

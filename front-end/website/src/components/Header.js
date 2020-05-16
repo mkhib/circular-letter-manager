@@ -165,6 +165,7 @@ const Header = (props) => {
             {authenticated && <Box>
               <Button
                 ref={anchorRef}
+                disableRipple
                 aria-controls={open ? 'menu-list-grow' : undefined}
                 aria-haspopup="true"
                 onMouseOver={() => {
@@ -197,7 +198,7 @@ const Header = (props) => {
                       style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
                     >
                       <Paper>
-                        <MenuList autoFocusItem={open} id="menu-list-grow" onKeyDown={handleListKeyDown}>
+                        <MenuList id="menu-list-grow" onKeyDown={handleListKeyDown}>
                           <MenuItem className={classes.menuItem} onClick={(event) => {
                             handleClose(event);
                             props.history.push({

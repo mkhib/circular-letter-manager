@@ -242,7 +242,7 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
                       fontFamily: 'FontNormal',
                     }}
                   >
-                    لیست کاربران درحال انتظار برای تایید
+                    لیست کاربران جدید
                   </Box>}
                   {pendingUsers.length === 0 ? <Box style={{ fontFamily: 'FontNormal' }}>در حال حاضر کاربری وجود ندارد</Box> : <TableContainer component={Paper}>
                     <Table className={classes.table} aria-label="simple table">
