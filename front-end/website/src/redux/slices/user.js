@@ -33,7 +33,6 @@ const userSlice = createSlice({
       state[action.payload.theThing] = 0;
     },
     loginAction(_state, action) {
-      console.log('sisi', action.payload.user.data);
       sessionService.saveSession('true').then(() => {
         sessionService.saveUser(action.payload.user)
           .then(() => {
