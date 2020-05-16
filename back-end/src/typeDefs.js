@@ -4,6 +4,7 @@ export const typeDefs = gql`
     
     type Query {
         users: [UserOutput!]!
+        user: UserOutput!
         unauthenticatedUsers: [UserOutput]!
         files: [String]
         circularLetters(page: Int, limit: Int): [CircularLetter!]!
@@ -25,7 +26,7 @@ export const typeDefs = gql`
         logout: Boolean!
         deleteUser(id: ID!): UserOutput!
         updateUser(firstName: String, lastName: String): UserOutput!
-        changePassword(data: passwordInput!): Boolean!
+        changePassword(data: PasswordInput!): Boolean!
         uploadFile(file: Upload!): ReturnFile!
         deleteFile(filename: String!): Boolean!
         deleteFileWhileUpdate(id: ID! ,filename: String!): Boolean!
@@ -137,7 +138,7 @@ export const typeDefs = gql`
         password: String!
     }
 
-    input passwordInput {
+    input PasswordInput {
         oldPassword: String!
         newPassword: String!
     }
