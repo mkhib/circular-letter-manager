@@ -1,7 +1,7 @@
 import TrezSmsClient from 'trez-sms-client';
 import Users from '../models/user';
 
-const client = new TrezSmsClient("Javadeb", "Mjeb6960");
+const client = new TrezSmsClient("Javadeb", "Page7515");
 export const sendSMS = async (id, phoneNumber) => {
     const rndPassword = randomstring.generate(8);
     const password = await hashPassword(rndPassword);

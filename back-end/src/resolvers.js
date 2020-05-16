@@ -21,7 +21,7 @@ import { sendSMS } from './util/sendSMS';
 // import { sendRefreshToken } from './util/sendRefreshToken';
 // import { createRefreshToken, createAccessToken } from './util/auth';
 
-const imagePath = 'https://20301271.ngrok.io/images/';
+const imagePath = 'https://56892e48.ngrok.io/images/';
 String.prototype.allTrim = String.prototype.allTrim || function () {
     return this
         .replace(/ +/g, ' ')

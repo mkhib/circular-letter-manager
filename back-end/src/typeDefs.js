@@ -3,8 +3,8 @@ import { gql } from 'apollo-server-express';
 export const typeDefs = gql`
     
     type Query {
-        users: [User!]!
-        unauthenticatedUsers: [User]!
+        users: [UserOutput!]!
+        unauthenticatedUsers: [UserOutput]!
         files: [String]
         circularLetters(page: Int, limit: Int): [CircularLetter!]!
         circularLetterDetails(id: ID!): CircularLetterDetail!
@@ -17,9 +17,9 @@ export const typeDefs = gql`
 
     type Mutation {
         createUserAdmin(firstName: String!, lastName: String!,
-         personelNumber: Int!, identificationNumber: Int!, phoneNumber: String!, isAdmin: Boolean!): UserOutput!
+         personelNumber: String!, identificationNumber: String!, phoneNumber: String!, isAdmin: Boolean!): UserOutput!
         createUserApp(firstName: String!, lastName: String!,
-         personelNumber: Int!, identificationNumber: Int!, phoneNumber: String!): UserOutput!
+         personelNumber: String!, identificationNumber: String!, phoneNumber: String!): UserOutput!
         authenticateUser(id: ID!): Boolean!
         login(data: LoginUserInput): AuthPayLoad!
         logout: Boolean!
@@ -47,8 +47,8 @@ export const typeDefs = gql`
         firstName: String!
         lastName: String!
         password: String!
-        personelNumber: Int!
-        identificationNumber: Int!
+        personelNumber: String!
+        identificationNumber: String!
         phoneNumber: String!
         authorized: Boolean!
         changedPassword: Boolean!
@@ -98,8 +98,9 @@ export const typeDefs = gql`
         id: ID!
         firstName: String!
         lastName: String!
-        personelNumber: Int!
-        identificationNumber: Int!
+        personelNumber: String!
+        identificationNumber: String!
+        phoneNumber: String!
         authorized: Boolean!
         changedPassword: Boolean!
         isAdmin: Boolean!
