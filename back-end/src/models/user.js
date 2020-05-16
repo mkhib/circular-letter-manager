@@ -14,12 +14,16 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     personelNumber: {
-        type: Number,
+        type: String,
         required: true,
         unique: true
     },
     identificationNumber: {
-        type: Number,
+        type: String,
+        required: true
+    },
+    phoneNumber: {
+        type: String,
         required: true
     },
     authorized: {
