@@ -10,6 +10,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       width: '100%',
+      height: '100%',
       direction: 'ltr',
     },
     label: {
@@ -75,7 +76,18 @@ export default function HorizontalLinearStepper(props: any) {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set<number>());
+  const [width, setWidth] = React.useState(window.innerWidth);
+  const [height, setHeight] = React.useState(window.innerHeight);
   const steps = getSteps();
+  React.useEffect(() => {
+    window.addEventListener("resize", updateWidthAndHeight);
+    return () => window.removeEventListener("resize", updateWidthAndHeight);
+  });
+
+  const updateWidthAndHeight = () => {
+    setWidth(window.innerWidth);
+    setHeight(window.innerHeight);
+  };
 
   const isStepOptional = (step: number) => {
     return step === 10;
@@ -118,7 +130,11 @@ export default function HorizontalLinearStepper(props: any) {
   };
 
   return (
-    <div className={classes.root}>
+    <div className={classes.root}
+      style={{
+        height: height
+      }}
+    >
       <StepperLabelFD activeStep={activeStep} alternativeLabel>
         {steps.map((label, index) => {
           const stepProps: { completed?: boolean } = {};

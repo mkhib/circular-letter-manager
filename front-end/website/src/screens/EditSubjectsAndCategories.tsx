@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import gql from 'graphql-tag';
+import {
+  Redirect,
+} from 'react-router-dom';
 import { connect } from 'react-redux';
 import TextInput from '../components/TextInput';
 import Box from '@material-ui/core/Box';
@@ -266,6 +269,11 @@ const EditSubjectsAndCategories: React.FunctionComponent<IEditProps> = (props) =
   //   );
   // }
   if (error) {
+    if (error.message === 'GraphQL error: Authentication required') {
+      return (<Redirect to={{
+        pathname: '/login',
+      }} />)
+    }
     return (
       <Box>
         .مشکلی پیش آمده است

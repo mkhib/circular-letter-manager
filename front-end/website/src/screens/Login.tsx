@@ -1,6 +1,7 @@
 import React, { forwardRef, useRef, useImperativeHandle } from 'react';
 import gql from 'graphql-tag';
 import * as yup from 'yup';
+import { useMutation } from '@apollo/react-hooks';
 import { connect } from 'react-redux';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -67,12 +68,22 @@ mutation Login(
 }
 `;
 
+const LOGOUT = gql`
+mutation Logout{
+  logout
+}
+`;
+
 let schema = yup.object().shape({
   personelNumber: yup.string().required('شماره پرسنلی وارد نشده است.'),
   password: yup.string().required('رمزعبور وارد نشده است.'),
 });
 
 const Login: React.FunctionComponent<LoginProps> = (props) => {
+  const [
+    logout,
+    { loading: logoutLoading, error: logoutnError },
+  ] = useMutation(LOGOUT);
   const {
     personelNumber,
     password,
@@ -82,9 +93,10 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
   } = props;
   const classes = useStyles();
 
-  const saveIsAdmin = (isAdmin: boolean) => {
-    localStorage.setItem('isAdmin', isAdmin ? JSON.stringify(isAdmin) : 'false');
-  }
+  // React.useEffect(() => {
+  //   logout();
+  // });
+
 
   const onSubmit = (history: any, firstName: string, lastName: string, isAdmin: boolean, id: string) => {
     const { login } = props;
@@ -251,9 +263,15 @@ const mapStateToProps = (state: any) => {
     user,
   } = state.userData;
   const {
+    checked,
+    authenticated
+  } = state.session;
+  const {
     graphqlError,
   } = state.mainData;
   return {
+    checked,
+    authenticated,
     personelNumber,
     graphqlError,
     password,

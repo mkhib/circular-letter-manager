@@ -15,6 +15,7 @@ import Header from './Header';
 import NotFound from '../screens/NotFound';
 import EditSubjectsAndCategories from '../screens/EditSubjectsAndCategories';
 import EditCircularLetter from '../screens/EditCircularLetter';
+import PendingUsers from '../screens/PendingUsers';
 
 const PrivateRoute = ({ component, exact = false, path, authenticated, isAdmin }: any) => {
   console.log('testt', authenticated, isAdmin)
@@ -83,6 +84,7 @@ const AuthRouter = ({ authenticated, checked, user }: any) => {
             {user.isAdmin && <React.Fragment><SuperPrivateRoute path="/uploadNewCircularLetter" component={UploadCircularLetter} isAdmin={user.isAdmin} authenticated={authenticated} />
               <SuperPrivateRoute path={`/editDropDowns/`} component={EditSubjectsAndCategories} isAdmin={user.isAdmin} authenticated={authenticated} />
               <SuperPrivateRoute path="/edit-circular-letter" component={EditCircularLetter} isAdmin={user.isAdmin} authenticated={authenticated} />
+              <SuperPrivateRoute path="/authorise-users" component={PendingUsers} isAdmin={user.isAdmin} authenticated={authenticated} />
               {/* <Route path="*" component={NotFound} /> */}
             </React.Fragment>}
             <Route path="*" component={NotFound} />

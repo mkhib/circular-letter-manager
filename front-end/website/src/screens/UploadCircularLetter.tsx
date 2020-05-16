@@ -38,6 +38,10 @@ import Fade from '@material-ui/core/Fade';
 import { GET_ALL } from './EditSubjectsAndCategories';
 import { useQuery } from '@apollo/react-hooks';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import circularBack from '../assets/images/circularBack.jpg';
+import {
+  Redirect,
+} from 'react-router-dom';
 
 // const clientWidth = () => {
 //   return Math.max(window.innerWidth, document.documentElement.clientWidth) < RESPONSIVE_WIDTH ? 'column' : 'row';
@@ -336,6 +340,15 @@ const UploadCircularLetter = (props: any) => {
     return () => window.removeEventListener("resize", updateWidthAndHeight);
   }, [data, setListOfCategories, setListOfSubjects, setAnyThing]);
 
+  if (error) {
+    console.log(error.message);
+    if (error.message === 'GraphQL error: Authentication required') {
+      return (<Redirect to={{
+        pathname: '/login',
+      }} />)
+    }
+    return `Error! ${error}`;
+  }
   const renderTags = (tags: Array<string>) => {
     return tags.map((tag, index) => {
       return (
@@ -501,10 +514,12 @@ const UploadCircularLetter = (props: any) => {
               return (
                 <Box style={{
                   display: 'flex',
+                  // minHeight: height,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  // backgroundColor:'blue',
-                  // maxWidth:'50vmax',
+                  backgroundImage: `url(${circularBack})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '100vmax',
                 }}>
                   <Stepper
                     disabled={handleDisabled()}
@@ -845,11 +860,10 @@ const UploadCircularLetter = (props: any) => {
                         <Box style={{
                           display: 'flex',
                           flexDirection: 'row',
-                          // width: '100%',
                           flexWrap: 'wrap',
+                          marginBottom: 150,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          // backgroundColor: 'yellow',
                         }}>
                           {handleUploadFiles(numberOfFiles, addFile)}
                         </Box>
@@ -1019,4 +1033,4 @@ export default connect(mapStateToProps, {
   removeTag,
   clearGraphqlError,
   setErrors,
-})(UploadCircularLetter);
+})(UploadCircularLetter as any);

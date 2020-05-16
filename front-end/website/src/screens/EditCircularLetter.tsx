@@ -50,9 +50,6 @@ import DatePicker2 from '../components/DatePicker2';
 import Backdrop from '@material-ui/core/Backdrop';
 import Modal from '@material-ui/core/Modal';
 import Fade from '@material-ui/core/Fade';
-import deepOrange from '@material-ui/core/colors/deepOrange';
-import { GET_ALL } from './EditSubjectsAndCategories';
-import { useQuery } from '@apollo/react-hooks';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
@@ -460,6 +457,10 @@ const EditCircularLetter = (props: any) => {
       var lists = props.data.categoriesQuery;
     }
   }
+  const updateWidthAndHeight = () => {
+    setWidth(window.innerWidth);
+    setHeight(window.innerHeight);
+  };
   useEffect(() => {
     if (propsData) {
       if (lists) {
@@ -546,6 +547,16 @@ const EditCircularLetter = (props: any) => {
     window.addEventListener("resize", updateWidthAndHeight);
     return () => window.removeEventListener("resize", updateWidthAndHeight);
   }, [setListOfCategories, setListOfSubjects, setAnyThing, letterData, lists, propsData, filesNameQuery]);
+
+  if (props.data) {
+    if (props.data.error) {
+      if (props.data.error.message === 'GraphQL error: Authentication required') {
+        return (<Redirect to={{
+          pathname: '/login',
+        }} />)
+      }
+    }
+  }
   const renderTags = (tags: Array<string>) => {
     return tags.map((tag, index) => {
       return (
@@ -710,10 +721,7 @@ const EditCircularLetter = (props: any) => {
     setOpenFileDelete(false);
   };
 
-  const updateWidthAndHeight = () => {
-    setWidth(window.innerWidth);
-    setHeight(window.innerHeight);
-  };
+
   if (props.data.loading) {
     return (<Box style={{
       display: 'flex',
@@ -1275,7 +1283,21 @@ const EditCircularLetter = (props: any) => {
                                         marginBottom: 10,
                                       }}>
                                       <Box className={classes.checkInfoBox}>
-                                        عنوان: {title}
+                                        <Box style={{
+                                          display: 'flex',
+                                          flexDirection: 'row',
+                                          alignItems: 'center',
+                                        }}>
+                                          {title}
+                                          <Box style={{
+                                            marginLeft: 5
+                                          }}>
+                                            :
+                                          </Box>
+                                          <Box>
+                                            عنوان
+                                          </Box>
+                                        </Box>
                                       </Box>
                                       <Box className={classes.checkInfoBox}>
                                         <Box style={{
@@ -1302,7 +1324,22 @@ const EditCircularLetter = (props: any) => {
                                         مرتبط با مقطع: {toCategory}
                                       </Box>
                                       <Box className={classes.checkInfoBox}>
-                                        {type === 'imported' ? "شماره ثبت وارده" : "شماره ثبت صادره"}: {type === 'imported' ? importNumber : exportNumber}
+                                        <Box style={{
+                                          display: 'flex',
+                                          flexDirection: 'row',
+                                          alignItems: 'center',
+                                        }}>
+                                          {type === 'imported' ? importNumber : exportNumber}
+                                          {(!importNumber && !exportNumber) && 'ندارد'}
+                                          <Box style={{
+                                            marginLeft: 5
+                                          }}>
+                                            :
+                                          </Box>
+                                          <Box>
+                                            {type === 'imported' ? "شماره ثبت وارده" : "شماره ثبت صادره"}
+                                          </Box>
+                                        </Box>
                                       </Box>
                                       <Box className={classes.checkInfoBox}>
                                         حوزه مربوطه: {subjectedTo}
