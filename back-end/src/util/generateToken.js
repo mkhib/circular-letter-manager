@@ -4,7 +4,7 @@ const generateToken = (userId) => {
     const token = jwt.sign({
         userId
     }, "pwtfkipoewofkipejgfpewdjfpdoewfpokwxcvdjvkdsjf", {
-        expiresIn: '10h'
+        expiresIn: '2h'
     });
 
     return token;

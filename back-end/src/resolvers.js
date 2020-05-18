@@ -40,8 +40,8 @@ export const resolvers = {
             return Users.find();
         },
         user: async (parent, args, context, info) => {
-            isAuthenticated(context.req);
-            return Users.findById(context.req.userId.userId);
+            const userId = isAuthenticated(context.req);
+            return Users.findById(userId);
         },
         unauthenticatedUsers: (parent, args, context, info) => {
             isAuthenticated(context.req);
@@ -209,8 +209,8 @@ export const resolvers = {
         },
         categoriesQuery: async (parent, args, context, info) => {
             // getUserId(context.req);
-            isAuthenticated(context.req);
-            const user = await Users.findById(context.req.userId.userId);
+            const userId = isAuthenticated(context.req);
+            const user = await Users.findById(userId);
             if (!user) {
                 throw new Error("Authentication required!");
             }
@@ -283,8 +283,7 @@ export const resolvers = {
             return user;
         },
         updateUser: async (parent, args, context, info) => {
-            isAuthenticated(context.req);
-            const userId = context.req.userId.userId;
+            const userId = isAuthenticated(context.req);;
             const user = await Users.findByIdAndUpdate(userId, args, { upsert: true, new: true });
             // const values = {};
             // Object.entries(args).forEach(([key, value]) => {
@@ -339,9 +338,9 @@ export const resolvers = {
             return true;
         },
         changePassword: async (parent, args, context, info) => {
-            isAuthenticated(context.req);
+            const userId = isAuthenticated(context.req);
 
-            const user = await Users.findById(context.req.userId.userId);
+            const user = await Users.findById(userId);
 
             const oldDecrypted = decrypt(args.data.oldPassword);
 
@@ -356,8 +355,24 @@ export const resolvers = {
                 throw new Error("Password must be more than 8 characters!");
             }
             user.password = await hashPassword(newDecrypted);
+            user.changedPassword = true;
             await user.save();
 
+            return true;
+        },
+        changePasswordOnApp: async (parent, args, context, info) => {
+            const userId = isAuthenticated(context.req);
+            const password = decrypt(args.password);
+            if (password.length < 8) {
+                throw new Error("Password must be more than 8 characters!");
+            }
+
+            await Users.findByIdAndUpdate(userId, { password, changedPassword: true }, { upsert: true, new: true });
+            return true;
+        },
+        forgotPassword: async (parent, { personelNumber }, context, info) => {
+            const user = await Users.findOne({ personelNumber });
+            sendSMS(user.id, user.phoneNumber);
             return true;
         },
         uploadFile: async (parent, { file }, context, info) => {
@@ -444,8 +459,8 @@ export const resolvers = {
         },
         circularLetterInit: async (parent, args, context, info) => {
             // getUserId(context.req);
-            isAuthenticated(context.req);
-            const user = await Users.findById(context.req.userId.userId);
+            const userId = isAuthenticated(context.req);
+            const user = await Users.findById(userId.userId);
             if (!user) {
                 throw new Error("Authentication required!");
             }

@@ -3,5 +3,5 @@ export const isAuthenticated = (req) => {
         throw new Error("Authentication required")
     }
 
-    return true;
+    return req.userId.userId;
 }

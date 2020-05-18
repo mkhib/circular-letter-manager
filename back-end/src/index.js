@@ -108,7 +108,7 @@ app.use(
         resave: false,
         saveUninitialized: false,
         cookie: {
-            maxAge: 1000 * 60 * 60 * 7,
+            maxAge: 7200000,
             httpOnly: true,
             secure: process.env.NODE_ENV === "production"
         }

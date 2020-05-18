@@ -27,6 +27,8 @@ export const typeDefs = gql`
         deleteUser(id: ID!): UserOutput!
         updateUser(firstName: String, lastName: String): UserOutput!
         changePassword(data: PasswordInput!): Boolean!
+        changePasswordOnApp(password: String!):Boolean!
+        forgotPassword(personelNumber: String!): Boolean!
         uploadFile(file: Upload!): ReturnFile!
         deleteFile(filename: String!): Boolean!
         deleteFileWhileUpdate(id: ID! ,filename: String!): Boolean!
