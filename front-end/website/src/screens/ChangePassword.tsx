@@ -155,7 +155,7 @@ const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
         data: ''
       });
       setSnackOption({
-        message: 'رمزعبور شما با موفقیت به ثبت رسید',
+        message: 'رمزعبور شما با موفقیت به تغییر کرد',
         severity: 'success',
       });
       openSnackbar();
