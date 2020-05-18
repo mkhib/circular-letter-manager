@@ -54,13 +54,6 @@ const useStyles = makeStyles(theme => ({
     zIndex: theme.zIndex.drawer + 1,
     color: '#fff',
   },
-  snackStyle: {
-    fontFamily: 'FontNormal',
-  },
-  snackBox: {
-    marginLeft: 20,
-    marginRight: 20,
-  },
   table: {
     minWidth: 650,
     fontFamily: 'FontNormalFD',
@@ -169,7 +162,7 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
         setSnackOption({
           message: 'درخواست شما با موفقیت انجام شد',
           severity: 'success',
-        })
+        });
         openSnackbar();
         removeFromPendingUsers(data.deleteUser.id);
       }}
@@ -177,7 +170,7 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
         setSnackOption({
           message: 'مشکلی در ردکردن کابر به وجود آمده است، لطفا دوباره تلاش کنید',
           severity: 'error',
-        })
+        });
         openSnackbar();
       }}
     >
