@@ -22,7 +22,8 @@ import {
   setGraphqlError,
   clearGraphqlError,
 } from '../redux/slices/data';
-import loginBack from '../assets/images/loginBack.jpg'
+import loginBack from '../assets/images/loginBack.jpg';
+import Snack from '../components/Snack';
 var aes256 = require('aes256');
 
 const useStyles = makeStyles(theme => ({
@@ -52,6 +53,11 @@ interface LoginProps {
   clearGraphqlError: any;
 }
 
+interface SnackState {
+  message: string;
+  severity: 'success' | 'error';
+}
+
 const CHANGE_THAT_PASSWORD = gql`
 mutation ChangePassword($data: PasswordInput!){
   changePassword(data: $data)
@@ -74,7 +80,17 @@ const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
   } = props;
   const classes = useStyles();
   const [errs, setErrs] = React.useState([]);
-
+  const [openSnack, setOpenSnack] = React.useState(false);
+  const [snackOption, setSnackOption] = React.useState<SnackState>({ message: '', severity: "success" })
+  const openSnackbar = () => {
+    setOpenSnack(true);
+  };
+  const closeSnackbar = (event?: React.SyntheticEvent, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnack(false);
+  };
   const errorCheck = (name: string) => {
     let hasError = false;
     props.errors.forEach((errorName) => {
@@ -125,7 +141,31 @@ const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
   const cipher = aes256.createCipher(key);
   return (<Mutation
     mutation={CHANGE_THAT_PASSWORD}
+    onCompleted={() => {
+      setAnything({
+        theThing: 'oldPassword',
+        data: ''
+      });
+      setAnything({
+        theThing: 'newPassword',
+        data: ''
+      });
+      setAnything({
+        theThing: 'againNewPassword',
+        data: ''
+      });
+      setSnackOption({
+        message: 'رمزعبور شما با موفقیت به ثبت رسید',
+        severity: 'success',
+      });
+      openSnackbar();
+    }}
     onError={(err: any) => {
+      setSnackOption({
+        message: 'تغییر رمز عبور شما با مشکل مواجه شد',
+        severity: 'error',
+      });
+      openSnackbar();
       props.setGraphqlError(err);
     }}
   >
@@ -186,6 +226,7 @@ const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
             paddingRight: 100,
             flex: 1,
           }}>
+            <Snack open={openSnack} message={snackOption.message} severity={snackOption.severity} onClose={closeSnackbar} />
             <Box className={classes.titleBox}>
               تغییر رمز عبور
             </Box>
