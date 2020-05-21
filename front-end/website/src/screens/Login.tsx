@@ -23,7 +23,7 @@ import {
   clearGraphqlError,
 } from '../redux/slices/data';
 import loginBack from '../assets/images/loginBack.jpg'
-var aes256 = require('aes256');
+var CryptoJS = require('react-native-crypto-js');
 
 const useStyles = makeStyles(theme => ({
   button: {
@@ -144,7 +144,6 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
     }
   }
   const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
-  const cipher = aes256.createCipher(key);
   return (<Mutation
     mutation={LOGIN}
     onError={(err: any) => {
@@ -153,12 +152,12 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
   >
     {(login: any, { data, error, loading }: any) => {
       const onRealLogin = () => {
+        let cipherPass = CryptoJS.AES.encrypt(password, key).toString();
         login({
           variables: {
             data: {
-              personelNumber: parseInt(personelNumber, 10),
-              password: cipher.encrypt(password)
-              // password: password
+              personelNumber: personelNumber,
+              password: cipherPass
             },
           },
         });

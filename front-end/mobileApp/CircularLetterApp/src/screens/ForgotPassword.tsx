@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { gql } from 'apollo-boost';
 import * as yup from 'yup';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -10,8 +10,6 @@ import { FloatingTitleTextInputField } from '../components/floating_title_text_i
 import { colors, gStyles, shape } from '../assets/styles/Styles';
 import TextAlert from '../components/TextAlert';
 import Loading from '../components/Loading';
-var CryptoJS = require('react-native-crypto-js');
-const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
 
 const LOGIN = gql`
 mutation Login(
@@ -49,16 +47,13 @@ var
 
 const schema = yup.object().shape({
   personelNumber: yup.string().required('شماره پرسنلی وارد نشده است.'),
-  password: yup.string().required('رمزعبور وارد نشده است.'),
 });
-const Login = () => {
+
+const ForgotPassword = () => {
   const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
   const [login, { data, loading, error }] = useMutation(LOGIN);
   const [errorState, setErrorState] = useState<AlertProps>({ state: false, message: '' });
   const [errors, setErrors] = useState<yup.ValidationError | null>(null);
-  const passwordRef = useRef<TextInput>(null);
-  // const passwordRef = React.createRef();
   React.useEffect(() => {
     if (error) {
       if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0') {
@@ -68,28 +63,24 @@ const Login = () => {
         });
       } else {
         setErrorState({
-          message: 'نام‌کاربری یا رمز عبور نادرست است.',
+          message: 'اتصال خود را به اینترنت بررسی کنید.',
           state: true,
         });
       }
     }
   }, [error]);
   if (data) {
-    if (data.login.user.changedPassword) {
-      setTimeout(() => Actions.main(), 0);
-    } else {
-      setTimeout(() => Actions.changePasswordLock(), 0);
-    }
+    setTimeout(() => Actions.main(), 0);
   }
   const clearErrors = () => {
     setErrorState({ message: '', state: false });
     setErrors(null);
   };
+
   const validateAndLogin = () => {
     clearErrors();
     schema.validate({
       personelNumber: username,
-      password,
     }, { abortEarly: false }).then(() => {
       onRealLogin();
     }).catch((e: yup.ValidationError) => {
@@ -97,12 +88,10 @@ const Login = () => {
     });
   };
   const onRealLogin = () => {
-    let cipherPass = CryptoJS.AES.encrypt(fixNumbers(password), key).toString();
     login({
       variables: {
         data: {
           personelNumber: fixNumbers(username),
-          password: cipherPass,
         },
       },
     });
@@ -118,7 +107,10 @@ const Login = () => {
   };
 
   return (
-    <LinearGradient colors={['#7986cb', '#5c6bc0', '#3f51b5', '#3949ab', '#303f9f', '#283593']} style={{ flex: 1 }}>
+    <LinearGradient
+      colors={['#7986cb', '#5c6bc0', '#3f51b5', '#3949ab', '#303f9f', '#283593']}
+      style={styles.linearGradientStyle}
+    >
       <KeyboardAwareScrollView
         style={gStyles.container}
         contentContainerStyle={styles.container}
@@ -127,8 +119,8 @@ const Login = () => {
       >
         <View>
           <Text style={styles.titleText}>
-            به سامانه جست و جو در بخشنامه‌ها خوش‌آمدید
-        </Text>
+            برای ادامه شماره پرسنلی خود را وارد نمایید.
+          </Text>
         </View>
         <View>
           <TextAlert text={errorState.message} state={errorState.state} />
@@ -139,79 +131,22 @@ const Login = () => {
               attrName="personelNumber"
               title="شماره پرسنلی"
               helperText={handleHelperText('personelNumber')}
-              // titleActiveColor="white"
-              // titleInactiveColor="white"
               value={username}
-              returnKeyLabel="go"
-              returnKeyType="go"
-              onSubmitEditing={() => {
-                passwordRef.current?.focus();
-              }}
               onChangeText={(text: string) => {
+                console.log(text);
                 setUsername(text);
               }
               }
-            // textInputStyles={{ // here you can add additional TextInput styles
-            //   color: 'white',
-            //   // fontSize: 15,
-            // }}
             />
           </View>
-          <View>
-            <FloatingTitleTextInputField
-              attrName="password"
-              forwardedRef={passwordRef}
-              // titleActiveColor="white"z
-              helperText={handleHelperText('password')}
-              title="رمزعبور"
-              secureTextEntry
-              onSubmitEditing={() => {
-                validateAndLogin();
-              }}
-              value={password}
-              onChangeText={(text: string) => {
-                setPassword(text);
-              }
-              }
-            // textInputStyles={{ // here you can add additional TextInput styles
-            //   color: 'white',
-            //   // fontSize: 15,
-            // }}
-            />
-          </View>
-          {/* <TextInput
-          style={gStyles.textInput}
-          value={username}
-          placeholder="نام‌کاربری"
-          returnKeyType="next"
-          returnKeyLabel="next"
-          onChangeText={setUsername}
-          onSubmitEditing={() => {
-            passwordRef.current?.focus();
-          }}
-        />
-        <TextInput
-          ref={passwordRef}
-          style={gStyles.textInput}
-          value={password}
-          secureTextEntry
-          returnKeyType="go"
-          returnKeyLabel="go"
-          placeholder="رمزعبور"
-          onChangeText={(text) => setPassword(text)}
-          onSubmitEditing={() => {
-            onRealLogin();
-          }}
-        /> */}
         </View>
         <TouchableOpacity
           onPress={() => {
-            clearErrors();
-            Actions.forgotPassword();
+            Actions.pop();
           }}
         >
-          <Text style={styles.forgotPasswordText}>
-            رمزعبور خود را فراموش کرده‌اید؟
+          <Text style={styles.goBackText}>
+            بازگشت
         </Text>
         </TouchableOpacity>
         <View>
@@ -222,8 +157,8 @@ const Login = () => {
             }}
           >
             <Text style={styles.buttonText}>
-              ورود
-          </Text>
+              ادامه
+            </Text>
           </TouchableOpacity>
         </View>
         {loading &&
@@ -234,20 +169,21 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ForgotPassword;
 
 const styles = StyleSheet.create({
   container: {
     ...gStyles.container,
     justifyContent: 'center',
-    // backgroundColor: colors.indigo,
     alignItems: 'center',
     padding: shape.spacing(),
+  },
+  linearGradientStyle: {
+    flex: 1,
   },
   lottieContainer: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(33,33,33,0.6)',
-    // backgroundColor: 'yellow',
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
@@ -257,27 +193,18 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  lottieView: {
-    // flex: 1,
-    position: 'absolute',
-    bottom: 50,
-    height: 200,
-    width: 200,
-    // backgroundColor: colors.indigo,
-  },
   titleText: {
     ...gStyles.boldText,
     color: 'white',
     marginBottom: shape.spacing(2),
   },
-  forgotPasswordText: {
+  goBackText: {
     ...gStyles.normalText,
     marginVertical: shape.spacing(),
     color: 'white',
   },
   inputsView: {
     width: '100%',
-    // height: 50,
   },
   button: {
     marginTop: shape.spacing(),
