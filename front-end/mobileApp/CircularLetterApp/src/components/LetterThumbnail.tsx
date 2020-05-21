@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
-import { View, Text, TouchableWithoutFeedback, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableWithoutFeedback, StyleSheet, Image, ImageBackground } from 'react-native';
 import { colors, gStyles, shape } from '../assets/styles/Styles';
+import backImage from '../assets/images/letterThumbnailBackground.jpg';
 
 interface ThumbnailProps {
   image: string;
@@ -22,8 +23,8 @@ const handleNumber = (numberToProcess: string) => {
     numberParts.forEach((part: string, index: number) => {
       numberToShow.push(
         <View
-          key={index.toString()}
           style={styles.numberContainer}
+          key={index.toString()}
         >
           <View>
             <Text style={gStyles.normalText}>
@@ -62,26 +63,36 @@ const Line: React.FC<LineProps> = (props) => (
 const LetterThumbnail: React.FC<ThumbnailProps> = (props) => {
   return (
     <TouchableWithoutFeedback>
-      <View style={styles.container}>
-        <Image
-          resizeMode="contain"
-          style={styles.imageStyle}
-          source={{ uri: props.image }}
-        />
-        <Line title="عنوان:" value={props.title} />
-        <Line title="تاریخ:" value={props.date} />
-        <View style={styles.lineContainer}>
-          <View>
-            <Text style={styles.lineTitle}>
-              شماره:
+      <ImageBackground
+        source={backImage}
+        resizeMode="contain"
+        style={{
+          flex: 1,
+          // width: 100,
+          // height: 500,
+        }}
+      >
+        <View style={styles.container}>
+          <Image
+            resizeMode="contain"
+            style={styles.imageStyle}
+            source={{ uri: props.image }}
+          />
+          <Line title="عنوان:" value={props.title} />
+          <Line title="تاریخ:" value={props.date} />
+          <View style={styles.lineContainer}>
+            <View>
+              <Text style={styles.lineTitle}>
+                شماره:
           </Text>
+            </View>
+            <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
+              {handleNumber(props.number)}
+            </View>
           </View>
-          <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
-            {handleNumber(props.number)}
-          </View>
+          <Line title="صادر کننده:" value={props.sender} />
         </View>
-        <Line title="صادر کننده:" value={props.sender} />
-      </View>
+      </ImageBackground>
     </TouchableWithoutFeedback>
   );
 };
@@ -91,7 +102,7 @@ export default LetterThumbnail;
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    backgroundColor: 'white',
+    // backgroundColor: 'white',
     padding: shape.spacing(),
     borderBottomWidth: 0.5,
   },

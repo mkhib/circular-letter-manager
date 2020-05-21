@@ -79,7 +79,7 @@ const App = () => {
           <Scene
             key="main"
             type="reset"
-            // initial
+            initial
             hideNavBar
           >
             <Tabs

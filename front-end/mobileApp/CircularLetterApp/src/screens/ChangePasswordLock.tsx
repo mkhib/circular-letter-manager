@@ -141,7 +141,7 @@ const ChangedPasswordLock = () => {
               title="رمزعبور جدید"
               secureTextEntry
               onSubmitEditing={() => {
-                validateAndLogin();
+                passwordRef.current?.focus();
               }}
               value={newPassword}
               onChangeText={(text: string) => {

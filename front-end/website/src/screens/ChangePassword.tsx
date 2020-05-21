@@ -24,7 +24,7 @@ import {
 } from '../redux/slices/data';
 import loginBack from '../assets/images/loginBack.jpg';
 import Snack from '../components/Snack';
-var aes256 = require('aes256');
+var CryptoJS = require('react-native-crypto-js');
 
 const useStyles = makeStyles(theme => ({
   button: {
@@ -138,7 +138,7 @@ const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
     }
   }
   const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
-  const cipher = aes256.createCipher(key);
+
   return (<Mutation
     mutation={CHANGE_THAT_PASSWORD}
     onCompleted={() => {
@@ -171,11 +171,13 @@ const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
   >
     {(changePassword: any, { data, error, loading }: any) => {
       const onChangePassword = () => {
+        let cipherOldPass = CryptoJS.AES.encrypt(oldPassword, key).toString();
+        let cipherNewPass = CryptoJS.AES.encrypt(newPassword, key).toString();
         changePassword({
           variables: {
             data: {
-              oldPassword: cipher.encrypt(oldPassword),
-              newPassword: cipher.encrypt(newPassword),
+              oldPassword: cipherOldPass,
+              newPassword: cipherNewPass,
             },
           },
         });
