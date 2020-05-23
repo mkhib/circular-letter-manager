@@ -12,6 +12,9 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { verify } from 'jsonwebtoken';
 import uuid from 'uuid';
+import helmet from 'helmet';
+import RateLimit from 'express-rate-limit';
+import MongoDBStore from 'rate-limit-mongo';
 import { typeDefs } from './typeDefs';
 import { resolvers } from './resolvers';
 
@@ -64,38 +67,38 @@ let moesifMiddleware = moesif({
 
 existsSync(path.join(__dirname, "../images")) || mkdirSync(path.join(__dirname, "../images"));
 
+const limiter = new RateLimit({
+    store: new MongoDBStore({
+        uri: dbUrl
+    }),
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    max: 1000, // limit each IP to 1000 requests per windowMs
+    message: "Too many requests"
+});
+
+app.use(limiter);
+
 app.use("/images", express.static(path.join(__dirname, "../images")));
 
 app.use(cors({
     credentials: true,
-    origin: true
+    origin: 'http://localhost:3000'
 }));
 
-// app.use(function (req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     next();
-// });
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 app.use(cookieParser());
+app.use(helmet());
+app.use(helmet.frameguard({ action: 'SAMEORIGIN' }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// app.use(
-//     session({
-//         name: "ssid",
-//         secret: 'SESSION_SECRET',
-//         resave: false,
-//         saveUninitialized: false,
-//         cookie: {
-//             httpOnly: false,
-//             secure: process.env.NODE_ENV === "production",
-//             maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
-//         }
-//     })
-// );
-
+app.set('trust proxy', 1);
 
 app.use(
     session({
@@ -103,13 +106,14 @@ app.use(
             mongooseConnection: mongoose.connection
         }),
         genid: uuid,
-        secret: "mysecret-ssss",
+        secret: "dwpoqreKPO@KWEPD24ePOWRFKI0i90w*W^$%xklczm",
         name: 'qid',
         resave: false,
         saveUninitialized: false,
         cookie: {
             maxAge: 7200000,
             httpOnly: true,
+            // sameSite: true,
             secure: process.env.NODE_ENV === "production"
         }
     })
