@@ -13,23 +13,6 @@ import Loading from '../components/Loading';
 var CryptoJS = require('react-native-crypto-js');
 const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
 
-const LOGIN = gql`
-mutation Login(
- $data: LoginUserInput!){
-  login(
-  data: $data,
-  ){
-    user{
-      id
-      firstName
-      lastName
-      isAdmin
-      changedPassword
-    }
-  }
-}
-`;
-
 const CHANGE_PASSWORD_LOCK = gql`
 mutation ChangePasswordLock($password: String!){
   changePasswordOnApp(password: $password)
@@ -44,7 +27,7 @@ interface AlertProps {
 var
   persianNumbers = [/۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g],
   arabicNumbers = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g],
-  fixNumbers = function (str: string) {
+  fixNumbers = function (str: any) {
     if (typeof str === 'string') {
       for (var i = 0; i < 10; i++) {
         str = str.replace(persianNumbers[i], i).replace(arabicNumbers[i], i);

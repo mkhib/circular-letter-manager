@@ -58,7 +58,7 @@ function DatePicker2({ getSelectedDate, getFullDate, value }: any) {
           value={value || selectedDate}
           onChange={(date) => {
             (date && handleDateChange(date));
-            getSelectedDate && getSelectedDate(`${jMoment(date as any).jYear()}/${jMoment(date as any).jMonth() + 1}/${jMoment(date as any).jDate()}`);
+            getSelectedDate && getSelectedDate(`${jMoment(date as any).jYear()}/${handleUnderTen(jMoment(date as any).jMonth() + 1)}/${handleUnderTen(jMoment(date as any).jDate())}`);
             getFullDate && getFullDate(date);
           }}
         />

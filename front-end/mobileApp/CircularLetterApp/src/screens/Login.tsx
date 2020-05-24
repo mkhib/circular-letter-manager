@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, TouchableWithoutFeedback } from 'react-native';
 import { gql } from 'apollo-boost';
 import * as yup from 'yup';
+import AsyncStorage from '@react-native-community/async-storage';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Actions } from 'react-native-router-flux';
 import { useMutation } from '@apollo/react-hooks';
@@ -26,6 +27,7 @@ mutation Login(
       isAdmin
       changedPassword
     }
+    token
   }
 }
 `;
@@ -51,6 +53,15 @@ const schema = yup.object().shape({
   personelNumber: yup.string().required('شماره پرسنلی وارد نشده است.'),
   password: yup.string().required('رمزعبور وارد نشده است.'),
 });
+
+const storeData = async (value: string) => {
+  try {
+    await AsyncStorage.setItem('tok', value);
+  } catch (e) {
+    // saving error
+  }
+};
+
 const Login = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -58,8 +69,20 @@ const Login = () => {
   const [errorState, setErrorState] = useState<AlertProps>({ state: false, message: '' });
   const [errors, setErrors] = useState<yup.ValidationError | null>(null);
   const passwordRef = useRef<TextInput>(null);
-  // const passwordRef = React.createRef();
   React.useEffect(() => {
+    const storeTok = async () => {
+      if (data) {
+        await storeData(data.login.token);
+        if (data.login.user.changedPassword) {
+          setTimeout(() => Actions.main(), 0);
+        } else {
+          setTimeout(() => Actions.changePasswordLock(), 0);
+        }
+      }
+    }
+    if (data) {
+      storeTok();
+    }
     if (error) {
       if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0') {
         setErrorState({
@@ -73,14 +96,8 @@ const Login = () => {
         });
       }
     }
-  }, [error]);
-  if (data) {
-    if (data.login.user.changedPassword) {
-      setTimeout(() => Actions.main(), 0);
-    } else {
-      setTimeout(() => Actions.changePasswordLock(), 0);
-    }
-  }
+  }, [error, data]);
+
   const clearErrors = () => {
     setErrorState({ message: '', state: false });
     setErrors(null);

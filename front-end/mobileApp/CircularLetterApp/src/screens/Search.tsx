@@ -3,8 +3,12 @@ import { View, Text, TouchableOpacity, TextInput, StyleSheet, FlatList } from 'r
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { CheckBox } from 'react-native-elements';
+import { Actions } from 'react-native-router-flux';
 import LottieView from 'lottie-react-native';
+import gql from 'graphql-tag';
 import { colors, gStyles, shape } from '../assets/styles/Styles';
+import { useQuery } from '@apollo/react-hooks';
+import TextAlert from '../components/TextAlert';
 import moment from 'jalali-moment';
 import DatePicker from '../components/DatePicker';
 import GPicker from '../components/GPicker';
@@ -36,58 +40,36 @@ const ORDERS = [
   },
 ];
 
-const MOCK_DATA = [
-  {
-    image: 'https://cdn.yjc.ir/files/fa/news/1398/12/10/11463965_147.jpg',
-    title: 'عنوان 2',
-    date: '1399/3/2',
-    sender: 'اصغر',
-    number: '65/ص/45/23',
-  },
-  {
-    image: 'https://cdn.yjc.ir/files/fa/news/1398/12/10/11463965_147.jpg',
-    title: 'عنوان 2',
-    date: '1399/3/2',
-    sender: 'اصغر',
-    number: '23/ص/43/56',
-  },
-  {
-    image: 'https://cdn.yjc.ir/files/fa/news/1398/12/10/11463965_147.jpg',
-    title: 'عنوان 2',
-    date: '1399/3/2',
-    sender: 'اصغر',
-    number: '23/ص/43/56',
-  },
-  {
-    image: 'https://cdn.yjc.ir/files/fa/news/1398/12/10/11463965_147.jpg',
-    title: 'عنوان 2',
-    date: '1399/3/2',
-    sender: 'اصغر',
-    number: '23/ص/43/56',
-  },
-  {
-    image: 'https://cdn.yjc.ir/files/fa/news/1398/12/10/11463965_147.jpg',
-    title: 'عنوان 2',
-    date: '1399/3/2',
-    sender: 'اصغر',
-    number: '23/ص/43/56',
-  }, {
-    image: 'https://cdn.yjc.ir/files/fa/news/1398/12/10/11463965_147.jpg',
-    title: 'عنوان 2',
-    date: '1399/3/2',
-    sender: 'اصغر',
-    number: '23/ص/43/56',
-  }, {
-    image: 'https://cdn.yjc.ir/files/fa/news/1398/12/10/11463965_147.jpg',
-    title: 'عنوان 2',
-    date: '1399/3/2',
-    sender: 'اصغر',
-    number: '23/ص/43/56',
-  },
-];
+const EmptySearch = () => (
+  <View style={styles.emptyView}>
+    <Text style={styles.emptyText}>
+      بخشنامه‌ای یافت نشد.
+    </Text>
+  </View>
+);
 
+const SEARCH_QUERY = gql`
+query SearchQuery($information: String,$sortBy: String,$order: String, $startDate: String,$endDate: String, $page: Int, $limit: Int){
+  appSearch(information: $information,startDate: $startDate,endDate: $endDate, page: $page, limit: $limit, sortBy: $sortBy, order: $order){
+    _id
+    title
+    files
+    number
+    from
+    date
+  }
+}
+`;
+interface SearchObj {
+  sort: string;
+  order: string;
+  startDate: string;
+  endDate: string;
+}
+const LIMIT = 3;
 const Search = () => {
   const [searchValue, setSearchValue] = useState<string>('');
+  const [search, setSearch] = useState<string>('');
   const [fromDateToShow, setFromDateToShow] = useState<string>('');
   const [fromDateToSend, setFromDateToSend] = useState<string>('');
   const [toDateToShow, setToDateToShow] = useState<string>('');
@@ -95,21 +77,98 @@ const Search = () => {
   const [dateCheck, setDateCheck] = useState<boolean>(false);
   const [sort, setSort] = useState<string>('');
   const [order, setOrder] = useState<string>('');
+  const [page, setPage] = useState<number>(1);
   const [err, setErr] = useState(new Set());
+  const [searchObject, setSearchObject] = useState<SearchObj>({
+    startDate: '',
+    endDate: '',
+    order: 'asc',
+    sort: 'dateOfCreation',
+  });
+  const [hasMore, setHasMore] = useState(true);
+  const { loading, error, data, fetchMore } = useQuery(SEARCH_QUERY, {
+    variables: {
+      information: searchValue,
+      page: 1,
+      startDate: searchObject.startDate,
+      endDate: searchObject.endDate,
+      limit: LIMIT,
+      sortBy: searchObject.sort,
+      order: searchObject.order,
+    },
+  });
+  React.useEffect(() => {
+    if (error) {
+      console.log(error.message);
+      if (error.message === 'GraphQL error: Authentication required') {
+        Actions.auth();
+      }
+    }
+  }, [error]);
+  if (error) {
+    if (error.message === 'Network error: Unexpected token T in JSON at position 0' || error.message === 'Network error: Network request failed' || error.message === 'Network error: Timeout exceeded') {
+      return (<View
+        style={styles.alertView}
+      >
+        <TextAlert text="اتصال خود را به اینترنت بررسی کنید." state={true} />
+      </View>);
+    }
+  }
+  const handleData = () => {
+    if (loading) {
+      return [];
+    }
+    if (data) {
+      return data.appSearch;
+    } return [];
+  };
+  const handleResetPage = () => {
+    setPage(1);
+    setHasMore(true);
+  };
   return (
     <>
       <FlatList
         style={styles.flatListStyle}
         contentContainerStyle={styles.container}
-        data={MOCK_DATA}
+        data={handleData()}
+        onEndReachedThreshold={2}
+        ListEmptyComponent={!loading ? <EmptySearch /> : null}
+        onEndReached={() => {
+          if (hasMore) {
+            fetchMore({
+              variables: {
+                information: searchValue,
+                page: page + 1,
+                startDate: searchObject.startDate,
+                endDate: searchObject.endDate,
+                limit: LIMIT,
+                sortBy: searchObject.sort,
+                order: searchObject.order,
+              },
+              updateQuery: (prev, { fetchMoreResult }) => {
+                if (fetchMoreResult.appSearch.length === 0) {
+                  setHasMore(false);
+                }
+                if (!fetchMoreResult) {
+                  return prev;
+                }
+                return Object.assign({}, prev, {
+                  appSearch: [...prev.appSearch, ...fetchMoreResult.appSearch],
+                });
+              },
+            });
+            setPage(page + 1);
+          }
+        }}
         keyExtractor={(_item, index) => index.toString()}
         renderItem={({ item }) => {
           return (
             <LetterThumbnail
               date={item.date}
-              image={item.image}
+              image={item.files[0]}
               number={item.number}
-              sender={item.sender}
+              sender={item.from}
               title={item.title}
             />
           );
@@ -121,12 +180,34 @@ const Search = () => {
                 <TextInput
                   value={searchValue}
                   placeholder="جست و جو در بخشنامه‌ها"
-                  onChangeText={setSearchValue}
+                  onChangeText={(text) => {
+                    handleResetPage();
+                    setSearchValue(text);
+                  }}
                   returnKeyType="go"
                   returnKeyLabel="go"
+                  onSubmitEditing={() => {
+                    handleResetPage();
+                    setSearchObject({
+                      endDate: toDateToSend,
+                      startDate: fromDateToSend,
+                      order: order,
+                      sort: sort,
+                    });
+                  }}
                   style={styles.searchInput}
                 />
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    handleResetPage();
+                    setSearchObject({
+                      endDate: toDateToSend,
+                      startDate: fromDateToSend,
+                      order: order,
+                      sort: sort,
+                    });
+                  }}
+                >
                   <MaterialIcons
                     name="search"
                     size={shape.iconSize}
@@ -140,7 +221,10 @@ const Search = () => {
                     items={SORTS}
                     withoutHelp
                     selectedValue={sort}
-                    func={(label: string, value: string) => setSort(value)}
+                    func={(label: string, value: string) => {
+                      setHasMore(true);
+                      setSort(value);
+                    }}
                     placeholder="مرتب سازی بر اساس"
                     errors={err}
                   />
@@ -150,7 +234,10 @@ const Search = () => {
                     items={ORDERS}
                     withoutHelp
                     selectedValue={order}
-                    func={(label: string, value: string) => setSort(value)}
+                    func={(label: string, value: string) => {
+                      setHasMore(true);
+                      setOrder(value);
+                    }}
                     placeholder="نوع مرتب سازی"
                     errors={err}
                   />
@@ -211,15 +298,15 @@ const Search = () => {
           </View>
         }
       />
-      {/* <View
-      style={styles.lottieView}
-    >
-      <LottieView
-        source={require('../assets/animations/paperLoading.json')}
-        autoPlay
-        loop
-      />
-    </View> */}
+      {loading && <View
+        style={styles.lottieView}
+      >
+        <LottieView
+          source={require('../assets/animations/paperLoading.json')}
+          autoPlay
+          loop
+        />
+      </View>}
     </>
   );
 };
@@ -229,6 +316,7 @@ export default Search;
 const styles = StyleSheet.create({
   lottieView: {
     flex: 1,
+    paddingBottom: shape.spacing(),
     backgroundColor: colors.indigo,
   },
   flatListStyle: {
@@ -242,7 +330,6 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   cardStyle: {
-    // backgroundColor: colors.indigo,
     padding: shape.spacing(),
     paddingTop: shape.spacing(1.5),
   },
@@ -259,10 +346,17 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: shape.spacing(),
   },
+  alertView: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.indigo,
+  },
   container: {
     // ...gStyles.container,
     // paddingTop: shape.spacing(),
-    backgroundColor: colors.indigo,
+    // backgroundColor: colors.indigo,
+    // backgroundColor: 'red',
   },
   searchIcon: {
     color: 'white',
@@ -295,5 +389,14 @@ const styles = StyleSheet.create({
   },
   dateView: {
     width: '49%',
+  },
+  emptyView: {
+    flex: 1,
+    alignSelf: 'center',
+  },
+  emptyText: {
+    ...gStyles.normalText,
+    color: 'white',
+    fontSize: 20,
   },
 });
