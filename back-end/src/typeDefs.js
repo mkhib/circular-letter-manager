@@ -11,16 +11,18 @@ export const typeDefs = gql`
         circularLetterDetails(id: ID!): CircularLetterDetail!
         search(information: String, startDate: String,
          endDate: String, page: Int, limit: Int, sortBy: String, order: String): SearchOutput!
+        appSearch(information: String, startDate: String,
+         endDate: String, page: Int, limit: Int, sortBy: String, order: String): [CircularLetter!]!
         categoriesQuery: CategoriesResult!
         toCategories: [ToCategoryType!]!
         subjectedTos: [SubjectedToType!]!
     }
 
     type Mutation {
-        createUserAdmin(firstName: String!, lastName: String!,
+        adminSignUp(firstName: String!, lastName: String!,
          personelNumber: String!, identificationNumber: String!, phoneNumber: String!, isAdmin: Boolean!): UserOutput!
-        createUserApp(firstName: String!, lastName: String!,
-         personelNumber: String!, identificationNumber: String!, phoneNumber: String!): UserOutput!
+        userSignUp(firstName: String!, lastName: String!,
+         personelNumber: String!, identificationNumber: String!, phoneNumber: String!): Boolean!
         authenticateUser(id: ID!): UserOutput!
         login(data: LoginUserInput): AuthPayLoad!
         logout: Boolean!
@@ -136,7 +138,7 @@ export const typeDefs = gql`
     }
 
     input LoginUserInput {
-        personelNumber: Int!
+        personelNumber: String!
         password: String!
     }
 

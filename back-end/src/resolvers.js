@@ -4,6 +4,7 @@ import path from 'path';
 import randomstring from 'randomstring';
 import { ObjectId } from 'mongodb';
 import moment from 'moment';
+import jMoment from 'moment-jalaali';
 import { encrypt, decrypt } from './util/securePassword';
 import Users from './models/user';
 import { hashPassword } from './util/hashPassword';
@@ -18,6 +19,7 @@ import dynamicSort from './util/sorting';
 import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
 import { sendSMS } from './util/sendSMS';
+import { handleUnderTen } from './util/handleUnderTen';
 // import { sendRefreshToken } from './util/sendRefreshToken';
 // import { createRefreshToken, createAccessToken } from './util/auth';
 
@@ -110,15 +112,17 @@ export const resolvers = {
 
             let letters = [];
             if (context.session.searchResult && context.session.searchParam === information
-                && context.session.searchSortBy === sortBy && context.session.searchOrder === order) {
+                && context.session.searchSortBy === sortBy && context.session.searchOrder === order
+                && context.session.startDate === startDate && context.session.endDate === endDate) {
                 letters = context.session.searchResult;
             }
             else {
                 const regExp = /(\d{2,4})\/(\d{1,2})\/(\d{1,2})/;
                 const trimmed = information.allTrim();
                 const paste = trimmed.split(" ");
+                const nowDate = jMoment();
 
-                if (paste.length === 1) {
+                if (paste.length <= 1) {
                     const newLetter = await CircularLetters.find({
                         $or: [
                             { number: { $regex: `${information}` } },
@@ -196,6 +200,8 @@ export const resolvers = {
                 context.session.searchParam = information;
                 context.session.searchSortBy = sortBy;
                 context.session.searchOrder = order;
+                context.session.startDate = startDate;
+                context.session.endDate = endDate;
             }
 
             const pages = Math.ceil((letters.length) / limit);
@@ -206,6 +212,168 @@ export const resolvers = {
                 circularLetters: letters,
                 quantity: pages
             }
+        },
+        appSearch: async (parent, { information, startDate, endDate, page, limit, sortBy, order }, context, info) => {
+            // getUserId(context.req);
+            isAuthenticated(context.req);
+
+            let letters = [];
+            if (context.session.searchResult && context.session.searchParam === information
+                && context.session.searchSortBy === sortBy && context.session.searchOrder === order
+                && context.session.startDate === startDate && context.session.endDate === endDate) {
+                letters = context.session.searchResult;
+            }
+            else {
+                const regExp = /(\d{2,4})\/(\d{1,2})\/(\d{1,2})/;
+                const trimmed = information.allTrim();
+                const paste = trimmed.split(" ");
+                const nowDate = jMoment();
+
+                if (paste.length === 1) {
+                    const newLetter = await CircularLetters.find({
+                        $or: [
+                            { number: { $regex: `${information}` } },
+                            { title: { $regex: `${information}` } },
+                            { tags: { $regex: `${information}` } },
+                            { from: { $regex: `${information}` } },
+                            { referTo: { $regex: `${information}` } },
+                            { importNumber: { $regex: `${information}` } },
+                            { exportNumber: { $regex: `${information}` } },
+                            { subjectedTo: { $regex: `${information}` } },
+                            { toCategory: { $regex: `${information}` } },
+                            { date: { $regex: `${information}` } }
+                        ]
+                    });
+
+                    if (startDate && endDate) {
+                        newLetter.forEach((letter) => {
+                            if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))
+                                && parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
+                                letters.push(letter);
+                            }
+                        });
+                    }
+                    else if (startDate && !endDate) {
+                        newLetter.forEach((letter) => {
+                            if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))) {
+                                letters.push(letter);
+                            }
+                        });
+                    }
+                    else if (!startDate && endDate) {
+                        newLetter.forEach((letter) => {
+                            if (parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
+                                letters.push(letter);
+                            }
+                        });
+                    }
+                    else {
+                        letters = newLetter;
+                    }
+
+                    // if (!endDate) {
+                    //     endDate = `${jMoment(nowDate).jYear()}/${handleUnderTen(jMoment(nowDate).jMonth() + 1)}/${handleUnderTen(jMoment(nowDate).jDate())}`;
+                    // }
+
+                    // if (startDate) {
+                    //     newLetter.forEach((letter) => {
+                    //         if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))
+                    //             && parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
+                    //             letters.push(letter);
+                    //         }
+                    //     });
+                    // }
+                    // else {
+                    //     letters = newLetter;
+                    // }
+                }
+                else {
+                    let lettersId = [];
+                    for (let item of paste) {
+                        const letter = await CircularLetters.find({
+                            $or: [
+                                { number: { $regex: `${item}` } },
+                                { title: { $regex: `${item}` } },
+                                { tags: { $regex: `${item}` } },
+                                { from: { $regex: `${item}` } },
+                                { referTo: { $regex: `${item}` } },
+                                { importNumber: { $regex: `${item}` } },
+                                { exportNumber: { $regex: `${item}` } },
+                                { subjectedTo: { $regex: `${item}` } },
+                                { toCategory: { $regex: `${item}` } },
+                                { date: { $regex: `${item}` } }
+                            ]
+                        });
+                        lettersId = [...lettersId, ...letter];
+                    }
+
+                    let lettersByWord = [...new Map(lettersId.map(obj => [`${obj._id}`, obj]))
+                        .values()
+                    ];
+
+                    if (startDate && endDate) {
+                        newLetter.forEach((letter) => {
+                            if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))
+                                && parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
+                                letters.push(letter);
+                            }
+                        });
+                    }
+                    else if (startDate && !endDate) {
+                        newLetter.forEach((letter) => {
+                            if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))) {
+                                letters.push(letter);
+                            }
+                        });
+                    }
+                    else if (!startDate && endDate) {
+                        newLetter.forEach((letter) => {
+                            if (parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
+                                letters.push(letter);
+                            }
+                        });
+                    }
+                    else {
+                        letters = newLetter;
+                    }
+
+                    // if (!endDate) {
+                    //     endDate = `${jMoment(nowDate).jYear()}/${handleUnderTen(jMoment(nowDate).jMonth() + 1)}/${handleUnderTen(jMoment(nowDate).jDate())}`;
+                    // }
+
+                    // if (startDate) {
+                    //     lettersByWord.forEach((letter) => {
+                    //         if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))
+                    //             && parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
+                    //             letters.push(letter);
+                    //         }
+                    //     });
+                    // }
+                    // else {
+                    //     letters = lettersByWord;
+                    // }
+                }
+
+                letters.forEach((letter) => {
+                    const tempFiles = [];
+                    letter.files.forEach((file) => {
+                        tempFiles.push(`${imagePath}${file}`);
+                    });
+                    letter.files = tempFiles;
+                });
+
+                letters.sort(dynamicSort(sortBy, order));
+                context.session.searchResult = letters;
+                context.session.searchParam = information;
+                context.session.searchSortBy = sortBy;
+                context.session.searchOrder = order;
+                context.session.startDate = startDate;
+                context.session.endDate = endDate;
+            }
+
+            letters = paginator(letters, page, limit).data;
+
+            return letters;
         },
         categoriesQuery: async (parent, args, context, info) => {
             // getUserId(context.req);
@@ -237,21 +405,21 @@ export const resolvers = {
         }
     },
     Mutation: {
-        createUserAdmin: async (parent, args, context, info) => {
+        adminSignUp: async (parent, args, context, info) => {
             isAuthenticated(context.req);
             const rndPassword = randomstring.generate(8);
-            console.log(rndPassword);
             const password = await hashPassword(rndPassword);
             const user = new Users({
                 ...args,
                 password,
                 authorized: true,
-                changedPassword: true
+                changedPassword: false
             });
             await user.save();
+            sendSMS(user.id, user.phoneNumber);
             return user;
         },
-        createUserApp: async (parent, args, context, info) => {
+        userSignUp: async (parent, args, context, info) => {
             const rndPassword = randomstring.generate(8);
             console.log(rndPassword);
             const password = await hashPassword(rndPassword);
@@ -263,7 +431,7 @@ export const resolvers = {
                 isAdmin: false
             });
             await user.save();
-            return user;
+            return true;
         },
         authenticateUser: async (parent, args, context, info) => {
             const user = await Users.findById(args.id);
@@ -350,7 +518,7 @@ export const resolvers = {
                 throw new Error("Wrong password!");
             }
 
-            const newDecrypted = decrypt(args.data.newPassword)
+            const newDecrypted = decrypt(args.data.newPassword);
             if (newDecrypted.length < 8) {
                 throw new Error("Password must be more than 8 characters!");
             }
@@ -362,11 +530,12 @@ export const resolvers = {
         },
         changePasswordOnApp: async (parent, args, context, info) => {
             const userId = isAuthenticated(context.req);
-            const password = decrypt(args.password);
-            if (password.length < 8) {
+            const decrypted = decrypt(args.password);
+            if (decrypted.length < 8) {
                 throw new Error("Password must be more than 8 characters!");
             }
 
+            const password = await hashPassword(decrypted);
             await Users.findByIdAndUpdate(userId, { password, changedPassword: true }, { upsert: true, new: true });
             return true;
         },
@@ -460,7 +629,7 @@ export const resolvers = {
         circularLetterInit: async (parent, args, context, info) => {
             // getUserId(context.req);
             const userId = isAuthenticated(context.req);
-            const user = await Users.findById(userId.userId);
+            const user = await Users.findById(userId);
             if (!user) {
                 throw new Error("Authentication required!");
             }
