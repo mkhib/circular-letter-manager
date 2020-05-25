@@ -312,7 +312,7 @@ export const resolvers = {
                     ];
 
                     if (startDate && endDate) {
-                        newLetter.forEach((letter) => {
+                        lettersByWord.forEach((letter) => {
                             if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))
                                 && parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
                                 letters.push(letter);
@@ -320,21 +320,21 @@ export const resolvers = {
                         });
                     }
                     else if (startDate && !endDate) {
-                        newLetter.forEach((letter) => {
+                        lettersByWord.forEach((letter) => {
                             if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))) {
                                 letters.push(letter);
                             }
                         });
                     }
                     else if (!startDate && endDate) {
-                        newLetter.forEach((letter) => {
+                        lettersByWord.forEach((letter) => {
                             if (parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
                                 letters.push(letter);
                             }
                         });
                     }
                     else {
-                        letters = newLetter;
+                        letters = lettersByWord;
                     }
 
                     // if (!endDate) {
