@@ -233,7 +233,7 @@ const toolTipText = `
 برای جست و جو در بخشنامه‌ها از این کلمات کلیدی استفاده خواهد شد بعد از وارد کردن هر کلمه بر روی افزودن کلیک کنید
 `;
 const numberToolTip = `
-اگر شماره بخشنامه شامل حروف فارسی است، شماره به صورت عکس مشاهده می‌شود، اما در ثبت شماره به صورت صحیح خللی وارد نمی‌کند
+اگر شماره بخشنامه شامل حروف فارسی همراه با ممیز است، شماره به صورت عکس مشاهده می‌شود، اما در ثبت شماره به صورت صحیح خللی وارد نمی‌کند
 `;
 const RESPONSIVE_WIDTH = 800;
 const UPLOAD_CIRCULAR_LETTER = gql`
@@ -327,14 +327,20 @@ const UploadCircularLetter = (props: any) => {
       console.log(data);
       setListOfCategories(data.categoriesQuery.toCategories);
       setListOfSubjects(data.categoriesQuery.subjectedTos);
-      setAnyThing({
-        theThing: 'subjectedTo',
-        data: data.categoriesQuery.subjectedTos[0].name,
-      });
-      setAnyThing({
-        theThing: 'toCategory',
-        data: data.categoriesQuery.toCategories[0].name,
-      });
+      console.log('tedad', data.categoriesQuery.subjectedTos.length)
+      if (data.categoriesQuery.subjectedTos.length > 0) {
+        console.log('farteeee');
+        setAnyThing({
+          theThing: 'subjectedTo',
+          data: data.categoriesQuery.subjectedTos[0].name,
+        });
+      }
+      if (data.categoriesQuery.toCategories.length > 0) {
+        setAnyThing({
+          theThing: 'toCategory',
+          data: data.categoriesQuery.toCategories[0].name,
+        });
+      }
     }
     window.addEventListener("resize", updateWidthAndHeight);
     return () => window.removeEventListener("resize", updateWidthAndHeight);

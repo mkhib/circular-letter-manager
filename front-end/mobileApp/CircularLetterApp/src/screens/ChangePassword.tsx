@@ -1,30 +1,21 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, TouchableWithoutFeedback } from 'react-native';
 import { gql } from 'apollo-boost';
 import * as yup from 'yup';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Actions } from 'react-native-router-flux';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useMutation } from '@apollo/react-hooks';
 import LinearGradient from 'react-native-linear-gradient';
 import { FloatingTitleTextInputField } from '../components/floating_title_text_input_field';
 import { colors, gStyles, shape } from '../assets/styles/Styles';
 import TextAlert from '../components/TextAlert';
 import Loading from '../components/Loading';
+var CryptoJS = require('react-native-crypto-js');
+const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
 
-const LOGIN = gql`
-mutation Login(
- $data: LoginUserInput!){
-  login(
-  data: $data,
-  ){
-    user{
-      id
-      firstName
-      lastName
-      isAdmin
-      changedPassword
-    }
-  }
+const CHANGE_THAT_PASSWORD = gql`
+mutation ChangePassword($data: PasswordInput!){
+  changePassword(data: $data)
 }
 `;
 
@@ -46,14 +37,19 @@ var
   };
 
 const schema = yup.object().shape({
-  personelNumber: yup.string().required('شماره پرسنلی وارد نشده است.'),
+  oldPassword: yup.string().required('رمزعبور قبلی وارد نشده است.'),
+  newPassword: yup.string().min(8, 'رمز عبور جدید باید حداقل 8 کاراکتر باشد.').required('رمزعبور جدید وارد نشده است.'),
+  againNewPassword: yup.string().required('تکرار رمزعبور جدید وارد نشده است.').oneOf([yup.ref('newPassword')], 'تکرار رمزعبور جدید منطبق نیست.'),
 });
-
-const ForgotPassword = () => {
-  const [username, setUsername] = useState<string>('');
-  const [login, { data, loading, error }] = useMutation(LOGIN);
+const ChangedPassword = () => {
+  const [oldPassword, setOldPassword] = useState<string>('');
+  const [newPassword, setNewPassword] = useState<string>('');
+  const [againNewPassword, setAgainNewPassword] = useState<string>('');
+  const [changePassword, { data, loading, error }] = useMutation(CHANGE_THAT_PASSWORD);
   const [errorState, setErrorState] = useState<AlertProps>({ state: false, message: '' });
   const [errors, setErrors] = useState<yup.ValidationError | null>(null);
+  const newPasswordRef = useRef<TextInput>(null);
+  const againNewPasswordRef = useRef<TextInput>(null);
   React.useEffect(() => {
     if (error) {
       if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0') {
@@ -76,23 +72,25 @@ const ForgotPassword = () => {
     setErrorState({ message: '', state: false });
     setErrors(null);
   };
-
   const validateAndLogin = () => {
     clearErrors();
     schema.validate({
-      personelNumber: username,
+      oldPassword,
+      newPassword,
+      againNewPassword,
     }, { abortEarly: false }).then(() => {
-      onRealLogin();
+      onRealChangePassword();
     }).catch((e: yup.ValidationError) => {
       setErrors(e);
     });
   };
-  const onRealLogin = () => {
-    login({
+  const onRealChangePassword = () => {
+    let cipherOldPass = CryptoJS.AES.encrypt(fixNumbers(oldPassword), key).toString();
+    let cipherNewPass = CryptoJS.AES.encrypt(fixNumbers(newPassword), key).toString();
+    changePassword({
       variables: {
-        data: {
-          personelNumber: fixNumbers(username),
-        },
+        oldPassword: cipherOldPass,
+        newPassword: cipherNewPass,
       },
     });
   };
@@ -108,8 +106,8 @@ const ForgotPassword = () => {
 
   return (
     <LinearGradient
-      colors={['#7986cb', '#5c6bc0', '#3f51b5', '#3949ab', '#303f9f', '#283593']}
-      style={styles.linearGradientStyle}
+      colors={['#42a5f5', '#2196f3', '#1976d2', '#1565c0', '#0d47a1']}
+      style={styles.linearStyle}
     >
       <KeyboardAwareScrollView
         style={gStyles.container}
@@ -119,7 +117,7 @@ const ForgotPassword = () => {
       >
         <View>
           <Text style={styles.titleText}>
-            برای ادامه شماره پرسنلی خود را وارد نمایید.
+            تغییر رمزعبور
           </Text>
         </View>
         <View>
@@ -128,27 +126,44 @@ const ForgotPassword = () => {
         <View style={styles.inputsView}>
           <View>
             <FloatingTitleTextInputField
-              attrName="personelNumber"
-              title="شماره پرسنلی"
-              helperText={handleHelperText('personelNumber')}
-              value={username}
-              onChangeText={(text: string) => {
-                console.log(text);
-                setUsername(text);
-              }
-              }
+              attrName="oldPassword"
+              helperText={handleHelperText('oldPassword')}
+              title="رمزعبور قبلی"
+              secureTextEntry
+              onSubmitEditing={() => {
+                newPasswordRef.current?.focus();
+              }}
+              value={oldPassword}
+              onChangeText={setOldPassword}
+            />
+          </View>
+          <View>
+            <FloatingTitleTextInputField
+              attrName="newPassword"
+              forwardedRef={newPasswordRef}
+              helperText={handleHelperText('newPassword')}
+              title="رمزعبور جدید"
+              secureTextEntry
+              onSubmitEditing={() => {
+                againNewPasswordRef.current?.focus();
+              }}
+              value={newPassword}
+              onChangeText={setNewPassword}
+            />
+          </View>
+          <View>
+            <FloatingTitleTextInputField
+              attrName="againNewPassword"
+              forwardedRef={againNewPasswordRef}
+              helperText={handleHelperText('againNewPassword')}
+              title="تکرار رمزعبور جدید"
+              secureTextEntry
+              onSubmitEditing={validateAndLogin}
+              value={againNewPassword}
+              onChangeText={setAgainNewPassword}
             />
           </View>
         </View>
-        <TouchableOpacity
-          onPress={() => {
-            Actions.pop();
-          }}
-        >
-          <Text style={styles.goBackText}>
-            بازگشت
-        </Text>
-        </TouchableOpacity>
         <View>
           <TouchableOpacity
             style={[StyleSheet.flatten([gStyles.button, styles.button])]}
@@ -158,7 +173,17 @@ const ForgotPassword = () => {
           >
             <Text style={styles.buttonText}>
               ادامه
-            </Text>
+          </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[StyleSheet.flatten([styles.backButton])]}
+            onPress={() => {
+              Actions.pop();
+            }}
+          >
+            <Text style={styles.backText}>
+              بازگشت
+          </Text>
           </TouchableOpacity>
         </View>
         {loading &&
@@ -169,21 +194,23 @@ const ForgotPassword = () => {
   );
 };
 
-export default ForgotPassword;
+export default ChangedPassword;
 
 const styles = StyleSheet.create({
+  linearStyle: {
+    flex: 1,
+  },
   container: {
     ...gStyles.container,
     justifyContent: 'center',
+    // backgroundColor: colors.indigo,
     alignItems: 'center',
     padding: shape.spacing(),
-  },
-  linearGradientStyle: {
-    flex: 1,
   },
   lottieContainer: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(33,33,33,0.6)',
+    // backgroundColor: 'yellow',
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
@@ -193,23 +220,40 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+  lottieView: {
+    // flex: 1,
+    position: 'absolute',
+    bottom: 50,
+    height: 200,
+    width: 200,
+    // backgroundColor: colors.indigo,
+  },
   titleText: {
     ...gStyles.boldText,
     color: 'white',
     marginBottom: shape.spacing(2),
   },
-  goBackText: {
+  forgotPasswordText: {
     ...gStyles.normalText,
     marginVertical: shape.spacing(),
     color: 'white',
   },
   inputsView: {
     width: '100%',
+    // height: 50,
   },
   button: {
     marginTop: shape.spacing(),
   },
+  backButton: {
+    marginTop: shape.spacing(),
+    alignItems: 'center',
+  },
   buttonText: {
+    ...gStyles.normalText,
+    color: 'white',
+  },
+  backText: {
     ...gStyles.normalText,
     color: 'white',
   },

@@ -7,7 +7,9 @@ import {
   View,
   StyleSheet,
 } from 'react-native';
-import ApolloClient from 'apollo-boost';
+import AsyncStorage from '@react-native-community/async-storage';
+import ApolloLinkTimeout from 'apollo-link-timeout';
+import { ApolloClient } from 'apollo-client';
 import { ApolloProvider } from '@apollo/react-hooks';
 import SplashScreen from 'react-native-splash-screen';
 import { Router, Scene, Stack, Tabs } from 'react-native-router-flux';
@@ -19,24 +21,61 @@ import FloatSignup from './src/screens/FloatSignup';
 import Search from './src/screens/Search';
 import ForgotPassword from './src/screens/ForgotPassword';
 import ChangePasswordLock from './src/screens/ChangePasswordLock';
+import Profile from './src/screens/Profile';
 import { colors, gStyles, shape } from './src/assets/styles/Styles';
+import { setContext } from 'apollo-link-context';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { createHttpLink } from 'apollo-link-http';
+import ChangePassword from './src/screens/ChangePassword';
 
-const client = new ApolloClient({
-  uri: 'https://1254b2d5.ngrok.io/graphql',
+const httpLink = createHttpLink({
+  uri: 'http://194.5.178.254:3600/graphql',
 });
+const timeoutLink = new ApolloLinkTimeout(12000);
+const getData = async () => {
+  try {
+    const value = await AsyncStorage.getItem('tok');
+    if (value !== null) {
+      return value;
+    }
+  } catch (e) {
+    // error reading value
+  }
+};
 
-const SearchIcon = () => {
+const authLink = setContext(async (_, { headers }) => {
+  const token = await getData();
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+const client = new ApolloClient({
+  link: authLink.concat(timeoutLink).concat(httpLink),
+  cache: new InMemoryCache(),
+});
+const SearchIcon = ({ focused }: any) => {
   return (
     <View>
-      <MaterialIcons name="search" size={shape.iconSize - shape.spacing()} />
+      <MaterialIcons
+        name="search"
+        color={focused ? colors.blue : 'black'}
+        size={shape.iconSize - shape.spacing()}
+      />
     </View>
   );
 };
 
-const ProfileIcon = () => {
+const ProfileIcon = ({ focused }: any) => {
   return (
     <View>
-      <FontAwesome name="user-circle" size={shape.iconSize - shape.spacing(1.5)} />
+      <FontAwesome
+        name="user-circle"
+        color={focused ? colors.blue : 'black'}
+        size={shape.iconSize - shape.spacing(1.5)}
+      />
     </View>
   );
 };
@@ -49,7 +88,7 @@ const App = () => {
     <ApolloProvider client={client}>
       <Router>
         <Stack key="root">
-          <Scene key="auth" hideNavBar>
+          <Scene key="auth" type="reset" hideNavBar>
             <Scene
               key="login"
               component={Login}
@@ -66,13 +105,6 @@ const App = () => {
               key="changePasswordLock"
               component={ChangePasswordLock}
               title="تغییر اولیه رمز عبور"
-              hideNavBar
-            />
-            <Scene
-              key="floatLogin"
-              // initial
-              component={FloatLogin}
-              title="ورود"
               hideNavBar
             />
           </Scene>
@@ -99,11 +131,17 @@ const App = () => {
                 key="profile"
                 icon={ProfileIcon}
                 tabBarLabel={'پروفایل'}
-                component={Search}
+                component={Profile}
                 title="پروفایل"
                 hideNavBar
               />
             </Tabs>
+            <Scene
+              key="changePassword"
+              component={ChangePassword}
+              title="تغییر رمز عبور"
+              hideNavBar
+            />
           </Scene>
         </Stack>
       </Router>
