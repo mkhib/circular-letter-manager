@@ -1,9 +1,21 @@
 import React, { ReactElement } from 'react';
-import { View, Text, TouchableWithoutFeedback, StyleSheet, Image, ImageBackground, StyleProp, ViewStyle } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableHighlight,
+  StyleSheet,
+  Image,
+  ImageBackground,
+  StyleProp,
+  ViewStyle,
+  TouchableOpacity,
+} from 'react-native';
 import { colors, gStyles, shape } from '../assets/styles/Styles';
+import { Actions } from 'react-native-router-flux';
 import backImage from '../assets/images/letterThumbnailBackground.jpg';
 
 interface ThumbnailProps {
+  id: string;
   image: string;
   title: string;
   date: string;
@@ -63,35 +75,40 @@ const Line: React.FC<LineProps> = (props) => (
 
 const LetterThumbnail: React.FC<ThumbnailProps> = (props) => {
   return (
-    <TouchableWithoutFeedback>
-      <ImageBackground
+    <TouchableOpacity
+      onPress={() => {
+        console.log('farteer');
+        Actions.letter({ id: props.id });
+      }}
+    >
+      {/* <ImageBackground
         source={backImage}
         resizeMode="stretch"
         style={styles.imageBackground}
-      >
-        <View style={styles.container}>
-          <Image
-            resizeMode="contain"
-            defaultSource={require('../assets/images/imageLoading.png')}
-            style={styles.imageStyle}
-            source={{ uri: props.image }}
-          />
-          <Line title="عنوان:" value={props.title} style={StyleSheet.flatten([{ flex: 1 }])} />
-          <Line title="تاریخ:" value={props.date} />
-          <View style={styles.lineContainer}>
-            <View>
-              <Text style={styles.lineTitle}>
-                شماره:
+      > */}
+      <View style={styles.container}>
+        <Image
+          resizeMode="contain"
+          defaultSource={require('../assets/images/imageLoading.png')}
+          style={styles.imageStyle}
+          source={{ uri: props.image }}
+        />
+        <Line title="عنوان:" value={props.title} style={StyleSheet.flatten([{ flex: 1 }])} />
+        <Line title="تاریخ:" value={props.date} />
+        <View style={styles.lineContainer}>
+          <View>
+            <Text style={styles.lineTitle}>
+              شماره:
               </Text>
-            </View>
-            <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
-              {handleNumber(props.number)}
-            </View>
           </View>
-          <Line title="صادر کننده:" value={props.sender} style={StyleSheet.flatten([{ flex: 1 }])} />
+          <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
+            {handleNumber(props.number)}
+          </View>
         </View>
-      </ImageBackground>
-    </TouchableWithoutFeedback>
+        <Line title="صادر کننده:" value={props.sender} style={StyleSheet.flatten([{ flex: 1 }])} />
+      </View>
+      {/* </ImageBackground> */}
+    </TouchableOpacity>
   );
 };
 

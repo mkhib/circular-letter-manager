@@ -46,7 +46,7 @@ const ChangedPasswordLock = () => {
   const [changePasswordOnApp, { data, loading, error }] = useMutation(CHANGE_PASSWORD_LOCK);
   const [errorState, setErrorState] = useState<AlertProps>({ state: false, message: '' });
   const [errors, setErrors] = useState<yup.ValidationError | null>(null);
-  const passwordRef = useRef<TextInput>(null);
+  const againNewPasswordRef = useRef<TextInput>(null);
   React.useEffect(() => {
     if (error) {
       if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0') {
@@ -70,7 +70,7 @@ const ChangedPasswordLock = () => {
     setErrorState({ message: '', state: false });
     setErrors(null);
   };
-  const validateAndLogin = () => {
+  const validateAndChangePassword = () => {
     clearErrors();
     schema.validate({
       newPassword,
@@ -119,12 +119,11 @@ const ChangedPasswordLock = () => {
           <View>
             <FloatingTitleTextInputField
               attrName="newPassword"
-              forwardedRef={passwordRef}
               helperText={handleHelperText('newPassword')}
               title="رمزعبور جدید"
               secureTextEntry
               onSubmitEditing={() => {
-                passwordRef.current?.focus();
+                againNewPasswordRef.current?.focus();
               }}
               value={newPassword}
               onChangeText={(text: string) => {
@@ -136,12 +135,12 @@ const ChangedPasswordLock = () => {
           <View>
             <FloatingTitleTextInputField
               attrName="againNewPassword"
-              forwardedRef={passwordRef}
+              forwardedRef={againNewPasswordRef}
               helperText={handleHelperText('againNewPassword')}
               title="تکرار رمزعبور جدید"
               secureTextEntry
               onSubmitEditing={() => {
-                validateAndLogin();
+                validateAndChangePassword();
               }}
               value={againNewPassword}
               onChangeText={(text: string) => {
@@ -155,7 +154,7 @@ const ChangedPasswordLock = () => {
           <TouchableOpacity
             style={[StyleSheet.flatten([gStyles.button, styles.button])]}
             onPress={() => {
-              validateAndLogin();
+              validateAndChangePassword();
             }}
           >
             <Text style={styles.buttonText}>

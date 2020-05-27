@@ -3,12 +3,10 @@ import { connect } from 'react-redux';
 import Box from '@material-ui/core/Box';
 import gql from 'graphql-tag';
 import {
-  Redirect,
   useLocation,
 } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Pagination from '@material-ui/lab/Pagination';
-import DeleteForeverOutlined from '@material-ui/icons/DeleteForeverOutlined';
 import { makeStyles, withStyles, Theme } from '@material-ui/core/styles';
 import { useQuery } from '@apollo/react-hooks';
 import { Mutation } from '@apollo/react-components';
@@ -24,6 +22,7 @@ import searchBack from '../assets/images/searchBack.jpg';
 const useStyles = makeStyles(theme => ({
   container: {
     display: 'flex',
+    flex: 1,
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     padding: 40,
@@ -31,6 +30,8 @@ const useStyles = makeStyles(theme => ({
     paddingLeft: '10vmax',
     backgroundImage: `url(${searchBack})`,
     backgroundAttachment: 'fixed',
+    // backgroundSize: 'auto',
+    // backgroundRepeat: 'round'
   },
   modal: {
     display: 'flex',
@@ -143,7 +144,6 @@ const Letter = (props: any) => {
   }
   const { loading, error, data } = useQuery(LETTER_QUERY, { variables: { id: handleID() }, });
   if (data) {
-    console.log('sadad', data);
     var queryData = data.circularLetterDetails.circularLetter;
     if (data.circularLetterDetails.refrenceId) {
       var refrence = data.circularLetterDetails.refrenceId;
@@ -184,7 +184,6 @@ const Letter = (props: any) => {
     <Mutation mutation={DELETE_CIRCULAR_LETTER}>
       {(deleteCircularLetter: any, { data, loading }: any) => {
         const deleteFunction = () => {
-          console.log('id', queryData._id);
           deleteCircularLetter({ variables: { id: queryData._id } });
         }
         if (data) {
@@ -288,7 +287,7 @@ const Letter = (props: any) => {
               </Box>
               <Box className={classes.line}>
                 <Box style={{ marginRight: 5 }}>
-                  {queryData.importNumber || queryData.exportNumber}
+                  {handleNumber(queryData.importNumber) || handleNumber(queryData.exportNumber)}
                 </Box>
                 {queryData.importNumber ? ':شماره ثبت وارده' : ':شماره ثبت صادره'}
               </Box>

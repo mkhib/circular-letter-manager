@@ -9,7 +9,6 @@ import TextInput from '../components/TextInput';
 import { Mutation } from '@apollo/react-components';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
-import { logoutWithoutChangeRoute } from '../redux/slices/user';
 import {
   setAnything,
   clearPersonelNumber,
@@ -76,7 +75,6 @@ const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
     oldPassword,
     newPassword,
     againNewPassword,
-    location,
   } = props;
   const classes = useStyles();
   const [errs, setErrs] = React.useState([]);

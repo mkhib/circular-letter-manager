@@ -9,6 +9,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { FloatingTitleTextInputField } from '../components/floating_title_text_input_field';
 import { colors, gStyles, shape } from '../assets/styles/Styles';
 import TextAlert from '../components/TextAlert';
+import SuccessTextAlert from '../components/SuccessTextAlert';
 import Loading from '../components/Loading';
 var CryptoJS = require('react-native-crypto-js');
 const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
@@ -45,7 +46,18 @@ const ChangedPassword = () => {
   const [oldPassword, setOldPassword] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [againNewPassword, setAgainNewPassword] = useState<string>('');
-  const [changePassword, { data, loading, error }] = useMutation(CHANGE_THAT_PASSWORD);
+  const [changePassword, { data, loading, error }] = useMutation(CHANGE_THAT_PASSWORD, {
+    onCompleted: () => {
+      console.log('here is');
+      clearFields();
+      setSuccessState({
+        message: 'رمزعبور شما با موفقیت تغییر یافت.',
+        state: true,
+      });
+      // setTimeout(() => Actions.main(), 0);
+    }
+  });
+  const [successState, setSuccessState] = useState<AlertProps>({ state: false, message: '' });
   const [errorState, setErrorState] = useState<AlertProps>({ state: false, message: '' });
   const [errors, setErrors] = useState<yup.ValidationError | null>(null);
   const newPasswordRef = useRef<TextInput>(null);
@@ -57,19 +69,31 @@ const ChangedPassword = () => {
           message: 'اتصال خود را به اینترنت بررسی کنید.',
           state: true,
         });
-      } else {
+      } else if (error.message === 'GraphQL error: Wrong password!') {
         setErrorState({
-          message: 'اتصال خود را به اینترنت بررسی کنید.',
+          message: 'رمزعبور قبلی نادرست است.',
+          state: true,
+        });
+      } else {
+        console.log('errrr', error.message);
+        setErrorState({
+          message: 'مشکلی پیش‌آمده است.',
           state: true,
         });
       }
     }
   }, [error]);
-  if (data) {
-    setTimeout(() => Actions.main(), 0);
+  const clearFields = () => {
+    setOldPassword('');
+    setNewPassword('');
+    setAgainNewPassword('');
   }
   const clearErrors = () => {
-    setErrorState({ message: '', state: false });
+    setSuccessState({ message: '', state: false });
+    setErrorState({
+      message: '',
+      state: false,
+    });
     setErrors(null);
   };
   const validateAndLogin = () => {
@@ -89,8 +113,10 @@ const ChangedPassword = () => {
     let cipherNewPass = CryptoJS.AES.encrypt(fixNumbers(newPassword), key).toString();
     changePassword({
       variables: {
-        oldPassword: cipherOldPass,
-        newPassword: cipherNewPass,
+        data: {
+          oldPassword: cipherOldPass,
+          newPassword: cipherNewPass,
+        },
       },
     });
   };
@@ -122,6 +148,7 @@ const ChangedPassword = () => {
         </View>
         <View>
           <TextAlert text={errorState.message} state={errorState.state} />
+          <SuccessTextAlert state={successState.state} text={successState.message} />
         </View>
         <View style={styles.inputsView}>
           <View>
@@ -173,7 +200,12 @@ const ChangedPassword = () => {
           >
             <Text style={styles.buttonText}>
               ادامه
-          </Text>
+            </Text>
+            {/* {loading &&
+              <View>
+                <Loading />
+              </View>
+            } */}
           </TouchableOpacity>
           <TouchableOpacity
             style={[StyleSheet.flatten([styles.backButton])]}

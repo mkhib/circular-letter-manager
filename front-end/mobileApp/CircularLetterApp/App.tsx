@@ -27,6 +27,8 @@ import { setContext } from 'apollo-link-context';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { createHttpLink } from 'apollo-link-http';
 import ChangePassword from './src/screens/ChangePassword';
+import Letter from './src/screens/Letter';
+import Signup from './src/screens/Signup';
 
 const httpLink = createHttpLink({
   uri: 'http://194.5.178.254:3600/graphql',
@@ -107,6 +109,12 @@ const App = () => {
               title="تغییر اولیه رمز عبور"
               hideNavBar
             />
+            <Scene
+              key="signup"
+              component={Signup}
+              title="ثبت‌نام"
+              hideNavBar
+            />
           </Scene>
           <Scene
             key="main"
@@ -140,6 +148,12 @@ const App = () => {
               key="changePassword"
               component={ChangePassword}
               title="تغییر رمز عبور"
+              hideNavBar
+            />
+            <Scene
+              key="letter"
+              component={Letter}
+              title="بخشنامه"
               hideNavBar
             />
           </Scene>

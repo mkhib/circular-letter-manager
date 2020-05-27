@@ -52,6 +52,11 @@ interface InitialStateProps {
   }>;
   filesName: Array<string>;
   pendingUsers: Array<userType>;
+  newUsername: string;
+  newUserLastName: string;
+  newUserIdentificationCode: string;
+  newUserPersonelNumber: string;
+  newUserPhoneNumber: string;
 }
 
 
@@ -92,6 +97,11 @@ let initialState: InitialStateProps = {
   listOfSubjects: [],
   filesName: [],
   pendingUsers: [],
+  newUsername: '',
+  newUserLastName: '',
+  newUserIdentificationCode: '',
+  newUserPersonelNumber: '',
+  newUserPhoneNumber: '',
 }
 
 const dataSlice = createSlice({
