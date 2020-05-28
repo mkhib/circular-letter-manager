@@ -546,7 +546,7 @@ const EditCircularLetter = (props: any) => {
     }
     window.addEventListener("resize", updateWidthAndHeight);
     return () => window.removeEventListener("resize", updateWidthAndHeight);
-  }, [setListOfCategories, setListOfSubjects, setAnyThing, letterData, lists, propsData, filesNameQuery]);
+  }, [setListOfCategories, setListOfSubjects, setAnyThing, letterData, lists, addFileUpload, setFileUpload, propsData, filesNameQuery]);
 
   if (props.data) {
     if (props.data.error) {

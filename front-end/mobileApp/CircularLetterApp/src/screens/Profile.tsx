@@ -60,7 +60,7 @@ const Profile = () => {
   const { loading, error, data, refetch } = useQuery<IUser>(GET_PROFILE, {
     notifyOnNetworkStatusChange: true,
   });
-  const [logout, { data: _logoutData }] = useMutation(LOGOUT, {
+  const [logout, { data: _logoutData, loading: logoutLoading }] = useMutation(LOGOUT, {
     onCompleted: () => {
       setTimeout(() => {
         Actions.auth();
@@ -75,7 +75,6 @@ const Profile = () => {
     }
   }, [error]);
   if (error) {
-    console.log('daraim', error);
     if (error.message === 'Network error: Unexpected token T in JSON at position 0' || error.message === 'Network error: Network request failed' || error.message === 'Network error: Timeout exceeded') {
       return (<View
         style={styles.alertView}
@@ -99,7 +98,12 @@ const Profile = () => {
   }
   if (loading) {
     return (
-      <Loading />
+      <ImageBackground
+        source={profileBack}
+        style={styles.imageBackground}
+      >
+        <Loading />
+      </ImageBackground>
     );
   }
   return (
@@ -121,7 +125,7 @@ const Profile = () => {
             <Text style={styles.textStyle}>تغییر رمزعبور</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.buttonStyle}
+            style={styles.logoutButtonStyle}
             onPress={() => {
               logout();
             }}
@@ -130,6 +134,8 @@ const Profile = () => {
           </TouchableOpacity>
         </View>
       </View>
+      {logoutLoading &&
+        <Loading />}
     </ImageBackground>
   );
 };
@@ -188,9 +194,21 @@ const styles = StyleSheet.create({
   },
   buttonStyle: {
     ...gStyles.button,
+    width: 140,
+    paddingHorizontal: 0,
     backgroundColor: colors.blue,
     borderRadius: shape.borderRadius,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: shape.spacing(),
+  },
+  logoutButtonStyle: {
+    ...gStyles.button,
+    paddingHorizontal: 0,
+    borderRadius: shape.borderRadius,
+    alignItems: 'center',
+    width: 230,
+    backgroundColor: '#d84315',
     justifyContent: 'center',
     marginBottom: shape.spacing(),
   },

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, FlatList, ImageBackground } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { CheckBox } from 'react-native-elements';
@@ -66,7 +66,7 @@ interface SearchObj {
   startDate: string;
   endDate: string;
 }
-const LIMIT = 3;
+const LIMIT = 15;
 const Search = () => {
   const [searchValue, setSearchValue] = useState<string>('');
   const [search, setSearch] = useState<string>('');
@@ -128,185 +128,193 @@ const Search = () => {
   };
   return (
     <>
-      <FlatList
-        style={styles.flatListStyle}
-        contentContainerStyle={styles.container}
-        data={handleData()}
-        onEndReachedThreshold={2}
-        ListEmptyComponent={!loading ? <EmptySearch /> : null}
-        onEndReached={() => {
-          if (hasMore) {
-            fetchMore({
-              variables: {
-                information: searchValue,
-                page: page + 1,
-                startDate: searchObject.startDate,
-                endDate: searchObject.endDate,
-                limit: LIMIT,
-                sortBy: searchObject.sort,
-                order: searchObject.order,
-              },
-              updateQuery: (prev, { fetchMoreResult }) => {
-                if (fetchMoreResult.appSearch.length === 0) {
-                  setHasMore(false);
-                }
-                if (!fetchMoreResult) {
-                  return prev;
-                }
-                return Object.assign({}, prev, {
-                  appSearch: [...prev.appSearch, ...fetchMoreResult.appSearch],
-                });
-              },
-            });
-            setPage(page + 1);
-          }
+      <ImageBackground
+        style={{
+          flex: 1
         }}
-        keyExtractor={(_item, index) => index.toString()}
-        renderItem={({ item }) => {
-          return (
-            <LetterThumbnail
-              date={item.date}
-              image={item.files[0]}
-              number={item.number}
-              sender={item.from}
-              title={item.title}
-            />
-          );
-        }}
-        ListHeaderComponent={
-          <View>
-            <View style={styles.cardStyle}>
-              <View style={styles.serachView}>
-                <TextInput
-                  value={searchValue}
-                  placeholder="جست و جو در بخشنامه‌ها"
-                  onChangeText={(text) => {
-                    handleResetPage();
-                    setSearchValue(text);
-                  }}
-                  returnKeyType="go"
-                  returnKeyLabel="go"
-                  onSubmitEditing={() => {
-                    handleResetPage();
-                    setSearchObject({
-                      endDate: toDateToSend,
-                      startDate: fromDateToSend,
-                      order: order,
-                      sort: sort,
-                    });
-                  }}
-                  style={styles.searchInput}
-                />
-                <TouchableOpacity
-                  onPress={() => {
-                    handleResetPage();
-                    setSearchObject({
-                      endDate: toDateToSend,
-                      startDate: fromDateToSend,
-                      order: order,
-                      sort: sort,
-                    });
-                  }}
-                >
-                  <MaterialIcons
-                    name="search"
-                    size={shape.iconSize}
-                    style={styles.searchIcon}
-                  />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.pickersView}>
-                <View style={StyleSheet.flatten([styles.gpickerFieldStyle, { marginRight: shape.spacing(0.25) }])}>
-                  <GPicker
-                    items={SORTS}
-                    withoutHelp
-                    selectedValue={sort}
-                    func={(label: string, value: string) => {
-                      setHasMore(true);
-                      setSort(value);
-                    }}
-                    placeholder="مرتب سازی بر اساس"
-                    errors={err}
-                  />
-                </View>
-                <View style={StyleSheet.flatten([styles.gpickerFieldStyle, { marginLeft: shape.spacing(0.25) }])}>
-                  <GPicker
-                    items={ORDERS}
-                    withoutHelp
-                    selectedValue={order}
-                    func={(label: string, value: string) => {
-                      setHasMore(true);
-                      setOrder(value);
-                    }}
-                    placeholder="نوع مرتب سازی"
-                    errors={err}
-                  />
-                </View>
-              </View>
-              <View style={styles.checkBoxContainer}>
-                <CheckBox
-                  // center
-                  iconRight
-                  checkedColor="white"
-                  onPress={() => {
-                    setDateCheck(!dateCheck);
-                    setToDateToSend('');
-                    setToDateToShow('');
-                    setFromDateToSend('');
-                    setFromDateToShow('');
-                  }}
-                  checked={dateCheck}
-                />
-                <Text style={styles.searchInDateText}>
-                  جست و جو در بازه تاریخ
-              </Text>
-              </View>
-              {dateCheck && <View style={styles.dateContainer}>
-                <View style={styles.dateView}>
-                  <DatePicker
-                    label="از تاریخ"
-                    selectedValue={fromDateToShow}
-                    onSelect={(date: any) => {
-                      let m = moment(date);
-                      m.locale('fa');
-                      setFromDateToShow(date);
-                      setFromDateToSend(m.format('jYYYY/jMM/jDD'));
-                    }
-                    }
-                  />
-                </View>
-                {/* <View>
-          <Text style={styles.tillText}>
-            تا
-          </Text>
-        </View> */}
-                <View style={styles.dateView}>
-                  <DatePicker
-                    label="تا تاریخ"
-                    selectedValue={toDateToShow}
-                    onSelect={(date: any) => {
-                      let m = moment(date);
-                      m.locale('fa');
-                      setToDateToShow(date);
-                      setToDateToSend(m.format('jYYYY/jMM/jDD'));
-                    }
-                    }
-                  />
-                </View>
-              </View>}
-            </View>
-          </View>
-        }
-      />
-      {loading && <View
-        style={styles.lottieView}
+        source={require('../assets/images/searchBack.jpg')}
       >
-        <LottieView
-          source={require('../assets/animations/paperLoading.json')}
-          autoPlay
-          loop
+        <FlatList
+          style={styles.flatListStyle}
+          contentContainerStyle={styles.container}
+          data={handleData()}
+          onEndReachedThreshold={4}
+          ListEmptyComponent={!loading ? <EmptySearch /> : null}
+          onEndReached={() => {
+            if (hasMore) {
+              fetchMore({
+                variables: {
+                  information: searchValue,
+                  page: page + 1,
+                  startDate: searchObject.startDate,
+                  endDate: searchObject.endDate,
+                  limit: LIMIT,
+                  sortBy: searchObject.sort,
+                  order: searchObject.order,
+                },
+                updateQuery: (prev, { fetchMoreResult }) => {
+                  if (fetchMoreResult.appSearch.length === 0) {
+                    setHasMore(false);
+                  }
+                  if (!fetchMoreResult) {
+                    return prev;
+                  }
+                  return Object.assign({}, prev, {
+                    appSearch: [...prev.appSearch, ...fetchMoreResult.appSearch],
+                  });
+                },
+              });
+              setPage(page + 1);
+            }
+          }}
+          keyExtractor={(_item, index) => index.toString()}
+          renderItem={({ item }) => {
+            return (
+              <LetterThumbnail
+                id={item._id}
+                date={item.date}
+                image={item.files[0]}
+                number={item.number}
+                sender={item.from}
+                title={item.title}
+              />
+            );
+          }}
+          ListHeaderComponent={
+            <View>
+              <View style={styles.cardStyle}>
+                <View style={styles.serachView}>
+                  <TextInput
+                    value={searchValue}
+                    placeholder="جست و جو در بخشنامه‌ها"
+                    onChangeText={(text) => {
+                      handleResetPage();
+                      setSearchValue(text);
+                    }}
+                    returnKeyType="go"
+                    returnKeyLabel="go"
+                    onSubmitEditing={() => {
+                      handleResetPage();
+                      setSearchObject({
+                        endDate: toDateToSend,
+                        startDate: fromDateToSend,
+                        order: order,
+                        sort: sort,
+                      });
+                    }}
+                    style={styles.searchInput}
+                  />
+                  <TouchableOpacity
+                    onPress={() => {
+                      handleResetPage();
+                      setSearchObject({
+                        endDate: toDateToSend,
+                        startDate: fromDateToSend,
+                        order: order,
+                        sort: sort,
+                      });
+                    }}
+                  >
+                    <MaterialIcons
+                      name="search"
+                      size={shape.iconSize}
+                      style={styles.searchIcon}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.pickersView}>
+                  <View style={StyleSheet.flatten([styles.gpickerFieldStyle, { marginRight: shape.spacing(0.25) }])}>
+                    <GPicker
+                      items={SORTS}
+                      withoutHelp
+                      selectedValue={sort}
+                      func={(label: string, value: string) => {
+                        setHasMore(true);
+                        setSort(value);
+                      }}
+                      placeholder="مرتب سازی بر اساس"
+                      errors={err}
+                    />
+                  </View>
+                  <View style={StyleSheet.flatten([styles.gpickerFieldStyle, { marginLeft: shape.spacing(0.25) }])}>
+                    <GPicker
+                      items={ORDERS}
+                      withoutHelp
+                      selectedValue={order}
+                      func={(label: string, value: string) => {
+                        setHasMore(true);
+                        setOrder(value);
+                      }}
+                      placeholder="نوع مرتب سازی"
+                      errors={err}
+                    />
+                  </View>
+                </View>
+                <View style={styles.checkBoxContainer}>
+                  <CheckBox
+                    // center
+                    iconRight
+                    checkedColor="black"
+                    onPress={() => {
+                      setDateCheck(!dateCheck);
+                      setToDateToSend('');
+                      setToDateToShow('');
+                      setFromDateToSend('');
+                      setFromDateToShow('');
+                    }}
+                    checked={dateCheck}
+                  />
+                  <Text style={styles.searchInDateText}>
+                    جست و جو در بازه تاریخ
+                  </Text>
+                </View>
+                {dateCheck && <View style={styles.dateContainer}>
+                  <View style={styles.dateView}>
+                    <DatePicker
+                      label="از تاریخ"
+                      selectedValue={fromDateToShow}
+                      onSelect={(date: any) => {
+                        let m = moment(date);
+                        m.locale('fa');
+                        setFromDateToShow(date);
+                        setFromDateToSend(m.format('jYYYY/jMM/jDD'));
+                      }
+                      }
+                    />
+                  </View>
+                  {/* <View>
+                    <Text style={styles.tillText}>
+                     تا
+                    </Text>
+                  </View> */}
+                  <View style={styles.dateView}>
+                    <DatePicker
+                      label="تا تاریخ"
+                      selectedValue={toDateToShow}
+                      onSelect={(date: any) => {
+                        let m = moment(date);
+                        m.locale('fa');
+                        setToDateToShow(date);
+                        setToDateToSend(m.format('jYYYY/jMM/jDD'));
+                      }
+                      }
+                    />
+                  </View>
+                </View>}
+              </View>
+            </View>
+          }
         />
-      </View>}
+        {loading && <View
+          style={styles.lottieView}
+        >
+          <LottieView
+            source={require('../assets/animations/paperLoading.json')}
+            autoPlay
+            loop
+          />
+        </View>}
+      </ImageBackground>
     </>
   );
 };
@@ -317,11 +325,11 @@ const styles = StyleSheet.create({
   lottieView: {
     flex: 1,
     paddingBottom: shape.spacing(),
-    backgroundColor: colors.indigo,
+    // backgroundColor: colors.indigo,
   },
   flatListStyle: {
     flex: 1,
-    backgroundColor: colors.indigo,
+    // backgroundColor: colors.indigo,
   },
   checkBoxContainer: {
     flexDirection: 'row',
@@ -343,7 +351,7 @@ const styles = StyleSheet.create({
   },
   searchInDateText: {
     ...gStyles.normalText,
-    color: 'white',
+    // color: 'white',
     marginBottom: shape.spacing(),
   },
   alertView: {
@@ -359,7 +367,7 @@ const styles = StyleSheet.create({
     // backgroundColor: 'red',
   },
   searchIcon: {
-    color: 'white',
+    // color: 'white',
     marginBottom: shape.spacing(),
     marginLeft: shape.spacing(0.5),
   },
@@ -396,7 +404,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     ...gStyles.normalText,
-    color: 'white',
+    // color: 'white',
     fontSize: 20,
   },
 });

@@ -18,9 +18,10 @@ import EditCircularLetter from '../screens/EditCircularLetter';
 import PendingUsers from '../screens/PendingUsers';
 import Profile from '../screens/Profile';
 import ChangePassword from '../screens/ChangePassword';
+import AddNewUser from '../screens/AddNewUser';
+import ManageAllUsers from '../screens/ManageAllUsers';
 
-const PrivateRoute = ({ component, exact = false, path, authenticated, isAdmin }: any) => {
-  console.log('testt', authenticated, isAdmin)
+const PrivateRoute = ({ component, exact = false, path, authenticated }: any) => {
   return (
     <Route
       exact={exact}
@@ -43,7 +44,6 @@ const PrivateRoute = ({ component, exact = false, path, authenticated, isAdmin }
 };
 
 const SuperPrivateRoute = ({ component, exact = false, path, authenticated, isAdmin }: any) => {
-  console.log('ssssuser', authenticated, isAdmin)
   return (<Route
     exact={exact}
     path={path}
@@ -64,10 +64,6 @@ const SuperPrivateRoute = ({ component, exact = false, path, authenticated, isAd
 };
 
 const AuthRouter = ({ authenticated, checked, user }: any) => {
-  console.log('checked', checked, user.isAdmin)
-  if (checked && user.isAdmin) {
-    console.log('trooooooo');
-  }
   return (
     <Router>
       {(checked && user) && (
@@ -86,9 +82,31 @@ const AuthRouter = ({ authenticated, checked, user }: any) => {
             <PrivateRoute path={`/profile`} component={Profile} authenticated={authenticated} />
             <PrivateRoute path={`/change-password`} component={ChangePassword} authenticated={authenticated} />
             {user.isAdmin && <React.Fragment><SuperPrivateRoute path="/uploadNewCircularLetter" component={UploadCircularLetter} isAdmin={user.isAdmin} authenticated={authenticated} />
-              <SuperPrivateRoute path={`/editDropDowns/`} component={EditSubjectsAndCategories} isAdmin={user.isAdmin} authenticated={authenticated} />
-              <SuperPrivateRoute path="/edit-circular-letter" component={EditCircularLetter} isAdmin={user.isAdmin} authenticated={authenticated} />
-              <SuperPrivateRoute path="/authorise-users" component={PendingUsers} isAdmin={user.isAdmin} authenticated={authenticated} />
+              <SuperPrivateRoute path={`/editDropDowns/`}
+                component={EditSubjectsAndCategories}
+                isAdmin={user.isAdmin}
+                authenticated={authenticated}
+              />
+              <SuperPrivateRoute path="/edit-circular-letter"
+                component={EditCircularLetter}
+                isAdmin={user.isAdmin}
+                authenticated={authenticated}
+              />
+              <SuperPrivateRoute path="/authorise-users"
+                component={PendingUsers}
+                isAdmin={user.isAdmin}
+                authenticated={authenticated}
+              />
+              <SuperPrivateRoute path="/add-new-user"
+                component={AddNewUser}
+                isAdmin={user.isAdmin}
+                authenticated={authenticated}
+              />
+              <SuperPrivateRoute path="/manage-all"
+                component={ManageAllUsers}
+                isAdmin={user.isAdmin}
+                authenticated={authenticated}
+              />
               {/* <Route path="*" component={NotFound} /> */}
             </React.Fragment>}
             <Route path="*" component={NotFound} />
@@ -100,9 +118,6 @@ const AuthRouter = ({ authenticated, checked, user }: any) => {
 };
 
 const mapState = ({ session }: any, ) => {
-  let time = 0;
-  console.log(time, session.user);
-  time += 1;
   return ({
     user: session.user,
     checked: session.checked,

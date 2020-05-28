@@ -156,8 +156,6 @@ const Login = () => {
               attrName="personelNumber"
               title="شماره پرسنلی"
               helperText={handleHelperText('personelNumber')}
-              // titleActiveColor="white"
-              // titleInactiveColor="white"
               value={username}
               returnKeyLabel="go"
               returnKeyType="go"
@@ -168,17 +166,12 @@ const Login = () => {
                 setUsername(text);
               }
               }
-            // textInputStyles={{ // here you can add additional TextInput styles
-            //   color: 'white',
-            //   // fontSize: 15,
-            // }}
             />
           </View>
           <View>
             <FloatingTitleTextInputField
               attrName="password"
               forwardedRef={passwordRef}
-              // titleActiveColor="white"z
               helperText={handleHelperText('password')}
               title="رمزعبور"
               secureTextEntry
@@ -190,36 +183,8 @@ const Login = () => {
                 setPassword(text);
               }
               }
-            // textInputStyles={{ // here you can add additional TextInput styles
-            //   color: 'white',
-            //   // fontSize: 15,
-            // }}
             />
           </View>
-          {/* <TextInput
-          style={gStyles.textInput}
-          value={username}
-          placeholder="نام‌کاربری"
-          returnKeyType="next"
-          returnKeyLabel="next"
-          onChangeText={setUsername}
-          onSubmitEditing={() => {
-            passwordRef.current?.focus();
-          }}
-        />
-        <TextInput
-          ref={passwordRef}
-          style={gStyles.textInput}
-          value={password}
-          secureTextEntry
-          returnKeyType="go"
-          returnKeyLabel="go"
-          placeholder="رمزعبور"
-          onChangeText={(text) => setPassword(text)}
-          onSubmitEditing={() => {
-            onRealLogin();
-          }}
-        /> */}
         </View>
         <TouchableOpacity
           onPress={() => {
@@ -240,9 +205,19 @@ const Login = () => {
           >
             <Text style={styles.buttonText}>
               ورود
-          </Text>
+            </Text>
           </TouchableOpacity>
         </View>
+        <TouchableOpacity
+          onPress={() => {
+            clearErrors();
+            Actions.signup();
+          }}
+        >
+          <Text style={styles.forgotPasswordText}>
+            ثبت‌نام
+        </Text>
+        </TouchableOpacity>
         {loading &&
           <Loading />
         }
@@ -257,14 +232,12 @@ const styles = StyleSheet.create({
   container: {
     ...gStyles.container,
     justifyContent: 'center',
-    // backgroundColor: colors.indigo,
     alignItems: 'center',
     padding: shape.spacing(),
   },
   lottieContainer: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(33,33,33,0.6)',
-    // backgroundColor: 'yellow',
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
@@ -275,12 +248,10 @@ const styles = StyleSheet.create({
     right: 0,
   },
   lottieView: {
-    // flex: 1,
     position: 'absolute',
     bottom: 50,
     height: 200,
     width: 200,
-    // backgroundColor: colors.indigo,
   },
   titleText: {
     ...gStyles.boldText,
@@ -294,7 +265,6 @@ const styles = StyleSheet.create({
   },
   inputsView: {
     width: '100%',
-    // height: 50,
   },
   button: {
     marginTop: shape.spacing(),

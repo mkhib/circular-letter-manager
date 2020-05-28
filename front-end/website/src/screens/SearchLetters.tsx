@@ -140,7 +140,6 @@ query SearchQuery($information: String,$sortBy: String,$order: String, $startDat
 function useQueryParam() {
   return new URLSearchParams(useLocation().search);
 }
-
 const SearchLetters = (props: any) => {
   const classes = useStyles();
   const [searchValue, setSearchValue] = useState('');
@@ -153,11 +152,13 @@ const SearchLetters = (props: any) => {
   let queryParam = useQueryParam();
   const updateWidth = () => {
     setWidth(window.innerWidth);
+    console.log(width);
   };
   useEffect(() => {
     window.addEventListener("resize", updateWidth);
     return () => window.removeEventListener("resize", updateWidth);
   });
+  const RESPONSIVE_WIDTH2 = 618;
   const RESPONSIVE_WIDTH = 800;
   const handleSearch = () => {
     const search = queryParam.get('search')
@@ -236,9 +237,8 @@ const SearchLetters = (props: any) => {
       <Box className={classes.searchOptions}>
         <Box className={classes.searchBox} style={{
           flexDirection: width >= RESPONSIVE_WIDTH ? 'row' : 'column-reverse',
-          justifyContent: width <= RESPONSIVE_WIDTH ? 'center' : '',
+          justifyContent: 'center',
           alignItems: width >= RESPONSIVE_WIDTH ? 'center' : '',
-          // backgroundColor: width <= RESPONSIVE_WIDTH ? 'red' : '',
         }}>
           <Box style={{
             display: 'flex',
@@ -395,7 +395,12 @@ const SearchLetters = (props: any) => {
           )}
         </Box>
       </Box>
-      <Box className={classes.letterContainer}>
+      <Box
+        className={classes.letterContainer}
+        style={{
+          justifyContent: width < RESPONSIVE_WIDTH2 ? 'center' : 'flex-start',
+        }}
+      >
         {renderLetters(data.search.circularLetters)}
         {data.search.circularLetters.length === 0 && (
           <Box style={{
