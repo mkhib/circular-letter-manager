@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
+    _id: {
+        type: String,
+        required: true
+    },
     firstName: {
         type: String,
         required: true
@@ -44,8 +49,10 @@ const userSchema = new mongoose.Schema({
     // }
 });
 
-userSchema.set('toObjenct', { viruals: true });
+// userSchema.set('toObjenct', { viruals: true });
 
-var Users = mongoose.model('User', userSchema);
+// var Users = mongoose.model('User', userSchema);
 
-module.exports = Users;
+// module.exports = Users;
+
+export default mongoose.model('User', userSchema);

@@ -53,17 +53,17 @@ const SERVER = new ApolloServer({
         })
 });
 
-let moesifMiddleware = moesif({
-    applicationId: 'eyJhcHAiOiIxOTg6MTIyIiwidmVyIjoiMi4wIiwib3JnIjoiMjQwOjE5NSIsImlhdCI6MTU4ODk4MjQwMH0.boywwjiMTRmbMklx8QC5ebPOsLWaA-pSdSfxvRb4Efs',
+// var moesifMiddleware = moesif({
+//     applicationId: 'eyJhcHAiOiIzNDU6NjUzIiwidmVyIjoiMi4wIiwib3JnIjoiODc6MjM0IiwiaWF0IjoxNTkwNTM3NjAwfQ.LJfUFN2RtgjCMcnznKf6Mn6dep0JNq3yMZj-l_WOm7M',
 
-    // Set to false if you don't want to capture req/resp body
-    logBody: true,
+//     // Set to false if you don't want to capture req/resp body
+//     logBody: true,
 
-    // Optional hook to link API calls to users
-    identifyUser: function (req, res) {
-        return req.user ? req.user.id : undefined;
-    },
-});
+//     // Optional hook to link API calls to users
+//     identifyUser: function (req, res) {
+//         return req.user ? req.user.id : undefined;
+//     },
+// });
 
 existsSync(path.join(__dirname, "../images")) || mkdirSync(path.join(__dirname, "../images"));
 
@@ -82,14 +82,14 @@ app.use("/images", express.static(path.join(__dirname, "../images")));
 
 app.use(cors({
     credentials: true,
-    origin: 'http://localhost:3000'
+    origin: true
 }));
 
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
+// app.use(function (req, res, next) {
+//     res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     next();
+// });
 
 app.use(cookieParser());
 app.use(helmet());
@@ -125,7 +125,7 @@ app.get('/', (req, res, next) => {
 app.post('/', (req, res, next) => {
 });
 
-app.use(moesifMiddleware);
+// app.use(moesifMiddleware);
 
 app.use((req, res, next) => {
     const token = req.cookies["jwt"];
