@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 export type userType = {
-  id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   personelNumber: string;
@@ -52,6 +52,7 @@ interface InitialStateProps {
   }>;
   filesName: Array<string>;
   pendingUsers: Array<userType>;
+  allUsers: Array<userType>;
   newUsername: string;
   newUserLastName: string;
   newUserIdentificationCode: string;
@@ -102,6 +103,7 @@ let initialState: InitialStateProps = {
   newUserIdentificationCode: '',
   newUserPersonelNumber: '',
   newUserPhoneNumber: '',
+  allUsers: [],
 }
 
 const dataSlice = createSlice({
@@ -131,8 +133,22 @@ const dataSlice = createSlice({
     },
     removeFromPendingUsers(state, action) {
       state.pendingUsers.forEach((user: userType, index: number) => {
-        if (user.id === action.payload) {
+        if (user._id === action.payload) {
           state.pendingUsers.splice(index, 1);
+          return true;
+        } return false;
+      });
+    },
+    setAllUsers(state, action) {
+      state.allUsers = [];
+      action.payload.forEach((user: userType) => {
+        state.allUsers.push(user);
+      });
+    },
+    removeFromAllUsers(state, action) {
+      state.allUsers.forEach((user: userType, index: number) => {
+        if (user._id === action.payload) {
+          state.allUsers.splice(index, 1);
           return true;
         } return false;
       });
@@ -266,6 +282,8 @@ export const {
   addFile,
   addTag,
   removeTag,
+  removeFromAllUsers,
+  setAllUsers,
   changeSearchInDate,
   setGraphqlError,
   increamentFileUpload,

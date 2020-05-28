@@ -60,7 +60,7 @@ mutation Login(
   data: $data,
   ){
     user{
-      id
+      _id
       firstName
       lastName
       isAdmin
@@ -179,7 +179,7 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
       const SubmitButton = withRouter(({ history }) => {
         if (data) {
           console.log(data);
-          onSubmit(history, data.login.user.firstName, data.login.user.lastName, data.login.user.isAdmin, data.login.user.id);
+          onSubmit(history, data.login.user.firstName, data.login.user.lastName, data.login.user.isAdmin, data.login.user._id);
         }
         return (
           <Button

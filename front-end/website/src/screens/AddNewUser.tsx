@@ -258,8 +258,8 @@ const ChangePassword: React.FunctionComponent<AddNewUserProps> = (props) => {
           variables: {
             firstName: newUsername,
             lastName: newUserLastName,
-            personelNumber: newUserIdentificationCode,
-            identificationNumber: newUserPersonelNumber,
+            personelNumber: newUserPersonelNumber,
+            identificationNumber: newUserIdentificationCode,
             phoneNumber: newUserPhoneNumber,
             isAdmin: handleUserType(),
           },

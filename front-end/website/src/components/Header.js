@@ -29,7 +29,9 @@ import ExitToAppOutlinedIcon from '@material-ui/icons/ExitToAppOutlined';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import SearchRoundedIcon from '@material-ui/icons/SearchRounded';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import RecentActorsRoundedIcon from '@material-ui/icons/RecentActorsRounded';
+import SupervisorAccountRoundedIcon from '@material-ui/icons/SupervisorAccountRounded';
 import PublishRoundedIcon from '@material-ui/icons/PublishRounded';
 // import "../assets/animationStyle.scss"
 
@@ -97,7 +99,7 @@ const Header = (props) => {
 
     setDrawerState(open);
   };
-
+  const RESPONSIVE_WIDTH = 950;
   const handleClose = (event) => {
     // if (anchorRef.current && anchorRef.current.contains(event.target)) {
     //   return;
@@ -113,11 +115,19 @@ const Header = (props) => {
     }
   }
   const prevOpen = React.useRef(open);
+  const [width, setWidth] = useState(window.innerWidth);
+  const [height, setHeight] = useState(window.innerHeight);
+  const updateWidthAndHeight = () => {
+    setWidth(window.innerWidth);
+    setHeight(window.innerHeight);
+  };
   React.useEffect(() => {
     if (prevOpen.current === true && open === false) {
       anchorRef.current.focus();
     }
     prevOpen.current = open;
+    window.addEventListener("resize", updateWidthAndHeight);
+    return () => window.removeEventListener("resize", updateWidthAndHeight);
   }, [open]);
   const classes = useStyles();
   const {
@@ -136,7 +146,17 @@ const Header = (props) => {
     >
       <List>
         {['جست و جو در بخشنامه‌ها', 'بارگذاری بخشنامه جدید'].map((text, index) => (
-          <ListItem button key={text}>
+          <ListItem
+            button
+            onClick={() => {
+              if (index === 0) {
+                props.history.push('/search-letter')
+              } else if (index === 1) {
+                props.history.push('/uploadNewCircularLetter')
+              }
+            }}
+            key={text}
+          >
             <ListItemIcon>
               {index === 0 && <SearchRoundedIcon />}
               {index === 1 && <PublishRoundedIcon />}
@@ -152,10 +172,24 @@ const Header = (props) => {
       <Divider />
       <List>
         {['بررسی کاربران جدید', 'افزودن کاربر جدید', 'مدیریت همه کاربران'].map((text, index) => (
-          <ListItem button key={text}>
+          <ListItem
+            button
+            onClick={() => {
+              if (index === 0) {
+                props.history.push('/authorise-users')
+              } else if (index === 1) {
+                props.history.push('/add-new-user')
+              } else if (index === 2) {
+                props.history.push('/manage-all')
+              }
+            }}
+            key={text}
+          >
             <ListItemIcon>
-              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
+              {index === 0 && <RecentActorsRoundedIcon />}
+              {index === 1 && <PersonAddIcon />}
+              {index === 2 && <SupervisorAccountRoundedIcon />}
+            </ListItemIcon>
             <ListItemText
               classes={{
                 primary: classes.listItemText
@@ -182,24 +216,28 @@ const Header = (props) => {
               flexDirection: 'row-reverse',
               alignItems: 'center',
             }}>
-              <div>
-                {['left'].map((anchor) => (
-                  <React.Fragment key={anchor}>
-                    <Button onClick={toggleDrawer(true)}>
-                      <MenuRoundedIcon style={{ color: 'white', fontSize: 30 }} />
-                    </Button>
-                    <Drawer anchor={anchor} open={drawerState} onClose={toggleDrawer(false)}>
-                      {list()}
-                    </Drawer>
-                  </React.Fragment>
-                ))}
-              </div>
+              {
+                (user.isAdmin && width < RESPONSIVE_WIDTH) && (
+                  <div>
+                    {['left'].map((anchor) => (
+                      <React.Fragment key={anchor}>
+                        <Button onClick={toggleDrawer(true)}>
+                          <MenuRoundedIcon style={{ color: 'white', fontSize: 30 }} />
+                        </Button>
+                        <Drawer anchor={anchor} open={drawerState} onClose={toggleDrawer(false)}>
+                          {list()}
+                        </Drawer>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                )
+              }
               <Button variant="contained" className={classes.link} href="/search-letter" color="primary">
                 <div className="page-example">
                   جست و جو در بخشنامه‌ها
                 </div>
               </Button>
-              {user.isAdmin && (
+              {(user.isAdmin && width >= RESPONSIVE_WIDTH) && (
                 <React.Fragment>
                   <Button className={classes.link} href="/uploadNewCircularLetter" color="primary">
                     بارگذاری یک بخشنامه جدید
@@ -209,6 +247,9 @@ const Header = (props) => {
                   </Button>
                   <Button className={classes.link} href="/add-new-user" color="primary">
                     افزودن کاربر جدید
+                  </Button>
+                  <Button className={classes.link} href="/manage-all" color="primary">
+                    مدیریت همه کاربران
                   </Button>
                 </React.Fragment>
               )}

@@ -19,8 +19,9 @@ import PendingUsers from '../screens/PendingUsers';
 import Profile from '../screens/Profile';
 import ChangePassword from '../screens/ChangePassword';
 import AddNewUser from '../screens/AddNewUser';
+import ManageAllUsers from '../screens/ManageAllUsers';
 
-const PrivateRoute = ({ component, exact = false, path, authenticated, isAdmin }: any) => {
+const PrivateRoute = ({ component, exact = false, path, authenticated }: any) => {
   return (
     <Route
       exact={exact}
@@ -98,6 +99,11 @@ const AuthRouter = ({ authenticated, checked, user }: any) => {
               />
               <SuperPrivateRoute path="/add-new-user"
                 component={AddNewUser}
+                isAdmin={user.isAdmin}
+                authenticated={authenticated}
+              />
+              <SuperPrivateRoute path="/manage-all"
+                component={ManageAllUsers}
                 isAdmin={user.isAdmin}
                 authenticated={authenticated}
               />

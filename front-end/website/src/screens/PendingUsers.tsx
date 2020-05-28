@@ -26,6 +26,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import usersBack from '../assets/images/usersBack.png';
 import {
   setPendingUsers,
   removeFromPendingUsers,
@@ -67,7 +68,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 interface Row {
-  id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   personelNumber: string;
@@ -82,7 +83,7 @@ interface TableState {
 const GET_PENDING_USERS = gql`
 query GetPendingUsers{
   unauthenticatedUsers{
-    id
+    _id
     firstName
     lastName
     personelNumber
@@ -95,7 +96,7 @@ query GetPendingUsers{
 const AUTHORISE_USER = gql`
 mutation AuthoriseUser($id: ID!){
   authenticateUser(id: $id){
-    id
+    _id
   }
 }
 `;
@@ -103,7 +104,7 @@ mutation AuthoriseUser($id: ID!){
 const REJECT_AND_DELETE_USER = gql`
 mutation RejectAndDelete($id: ID!){
   deleteUser(id: $id){
-    id
+    _id
   }
 }
 `;
@@ -133,7 +134,7 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
   } = props;
   useEffect(() => {
     if (data) {
-      setPendingUsers(data.unauthenticatedUsers);
+      // setPendingUsers(data.unauthenticatedUsers);
     }
   }, [data, setPendingUsers]);
   if (error) {
@@ -164,7 +165,7 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
           severity: 'success',
         });
         openSnackbar();
-        removeFromPendingUsers(data.deleteUser.id);
+        removeFromPendingUsers(data.deleteUser._id);
       }}
       onError={(error: any) => {
         setSnackOption({
@@ -196,7 +197,7 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
                 severity: 'success',
               })
               openSnackbar();
-              removeFromPendingUsers(data.authenticateUser.id)
+              removeFromPendingUsers(data.authenticateUser._id)
             }}
             onError={(error: any) => {
               setSnackOption({
@@ -222,7 +223,13 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
               return (
                 <Box
                   style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flex: 1,
                     padding: 40,
+                    backgroundImage: `url(${usersBack})`,
+                    backgroundSize: '100% 100%',
+                    // backgroundRepeat: 'no-repeat',
                     direction: 'rtl',
                   }}
                 >
@@ -237,55 +244,65 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
                   >
                     لیست کاربران جدید
                   </Box>}
-                  {pendingUsers.length === 0 ? <Box style={{ fontFamily: 'FontNormal' }}>در حال حاضر کاربری وجود ندارد</Box> : <TableContainer component={Paper}>
-                    <Table className={classes.table} aria-label="simple table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell className={classes.tableHeader}>نام</TableCell>
-                          <TableCell className={classes.tableHeader} align="center">نام‌خانوادگی</TableCell>
-                          <TableCell className={classes.tableHeader} align="center">شماره پرسنلی</TableCell>
-                          <TableCell className={classes.tableHeader} align="center">کدملی</TableCell>
-                          <TableCell className={classes.tableHeader} align="center">شماره تلفن</TableCell>
-                          <TableCell className={classes.tableHeader} align="center">تایید کاربران</TableCell>
-                          <TableCell className={classes.tableHeader} align="center">ردکردن کاربران</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {pendingUsers.map((row, index) => (
-                          <TableRow key={index.toString()}>
-                            <TableCell className={classes.tableCells} component="th" scope="row">
-                              {row.firstName}
-                            </TableCell>
-                            <TableCell className={classes.tableCells} align="center">{row.lastName}</TableCell>
-                            <TableCell className={classes.tableCells} align="center">{row.personelNumber}</TableCell>
-                            <TableCell className={classes.tableCells} align="center">{row.identificationNumber}</TableCell>
-                            <TableCell className={classes.tableCells} align="center">{row.phoneNumber}</TableCell>
-                            <TableCell className={classes.tableCells} align="center">
-                              <Button
-                                variant="contained"
-                                onClick={() => {
-                                  authenticateUser({ variables: { id: row.id } });
-                                }}
-                              >
-                                <Check />
-                              </Button>
-                            </TableCell>
-                            <TableCell className={classes.tableCells} align="center">
-                              <Button
-                                variant="contained"
-                                style={{ backgroundColor: '#d32f2f' }}
-                                onClick={() => {
-                                  deleteUser({ variables: { id: row.id } });
-                                }}
-                              >
-                                <Clear style={{ color: 'white' }} />
-                              </Button>
-                            </TableCell>
+                  {pendingUsers.length === 0 ? 
+                    <Box style={{
+                      display: 'flex',
+                      flex: 1,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: 'FontNormal'
+                    }}>
+                      در حال حاضر کاربری وجود ندارد
+                    </Box> : <TableContainer component={Paper}
+                    >
+                      <Table className={classes.table} aria-label="simple table">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell className={classes.tableHeader}>نام</TableCell>
+                            <TableCell className={classes.tableHeader} align="center">نام‌خانوادگی</TableCell>
+                            <TableCell className={classes.tableHeader} align="center">شماره پرسنلی</TableCell>
+                            <TableCell className={classes.tableHeader} align="center">کدملی</TableCell>
+                            <TableCell className={classes.tableHeader} align="center">شماره تلفن</TableCell>
+                            <TableCell className={classes.tableHeader} align="center">تایید کاربران</TableCell>
+                            <TableCell className={classes.tableHeader} align="center">ردکردن کاربران</TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>}
+                        </TableHead>
+                        <TableBody>
+                          {pendingUsers.map((row, index) => (
+                            <TableRow key={index.toString()}>
+                              <TableCell className={classes.tableCells} component="th" scope="row">
+                                {row.firstName}
+                              </TableCell>
+                              <TableCell className={classes.tableCells} align="center">{row.lastName}</TableCell>
+                              <TableCell className={classes.tableCells} align="center">{row.personelNumber}</TableCell>
+                              <TableCell className={classes.tableCells} align="center">{row.identificationNumber}</TableCell>
+                              <TableCell className={classes.tableCells} align="center">{row.phoneNumber}</TableCell>
+                              <TableCell className={classes.tableCells} align="center">
+                                <Button
+                                  variant="contained"
+                                  onClick={() => {
+                                    authenticateUser({ variables: { id: row._id } });
+                                  }}
+                                >
+                                  <Check />
+                                </Button>
+                              </TableCell>
+                              <TableCell className={classes.tableCells} align="center">
+                                <Button
+                                  variant="contained"
+                                  style={{ backgroundColor: '#d32f2f' }}
+                                  onClick={() => {
+                                    deleteUser({ variables: { id: row._id } });
+                                  }}
+                                >
+                                  <Clear style={{ color: 'white' }} />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>}
                 </Box>
               );
             }}
