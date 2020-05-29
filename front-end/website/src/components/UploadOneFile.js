@@ -145,10 +145,6 @@ const UploadOneFile = (props) => {
                           accept=".jpg,.jpeg,.png,.bmp,.til,.tiff"
                           required
                           onChange={({ target: { validity, files: [file], } }) => {
-                            if (file) {
-                              console.log('inner', file.name);
-                              props.getFileName(file.name);
-                            }
                             validity.valid && uploadFile({ variables: { file } })
                           }
                           }

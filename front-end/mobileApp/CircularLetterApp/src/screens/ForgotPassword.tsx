@@ -83,7 +83,7 @@ const ForgotPassword = () => {
   const validateAndSendForgetPasswordRequest = () => {
     clearErrors();
     schema.validate({
-      personelNumber: username,
+      personelNumber: fixNumbers(username),
     }, { abortEarly: false }).then(() => {
       onRealLogin();
     }).catch((e: yup.ValidationError) => {
