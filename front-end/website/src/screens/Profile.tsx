@@ -69,6 +69,7 @@ query user{
   firstName
   lastName
   personelNumber
+  identificationNumber
   phoneNumber
   }
 }
@@ -122,6 +123,7 @@ const Profile = () => {
       >
         <Line title="نام و  نام‌خانوادگی" value={`${data.user.firstName} ${data.user.lastName}`} />
         <Line title="شماره پرسنلی" value={data.user.personelNumber} />
+        <Line title="کدملی" value={data.user.identificationNumber} />
         <Line title="شماره تلفن" value={data.user.phoneNumber} />
         <Button style={{
           fontFamily: 'FontNormal',

@@ -324,12 +324,9 @@ const UploadCircularLetter = (props: any) => {
   const { loading, error, data } = useQuery(GET_ALL);
   useEffect(() => {
     if (data) {
-      console.log(data);
       setListOfCategories(data.categoriesQuery.toCategories);
       setListOfSubjects(data.categoriesQuery.subjectedTos);
-      console.log('tedad', data.categoriesQuery.subjectedTos.length)
       if (data.categoriesQuery.subjectedTos.length > 0) {
-        console.log('farteeee');
         setAnyThing({
           theThing: 'subjectedTo',
           data: data.categoriesQuery.subjectedTos[0].name,
@@ -347,7 +344,6 @@ const UploadCircularLetter = (props: any) => {
   }, [data, setListOfCategories, setListOfSubjects, setAnyThing]);
 
   if (error) {
-    console.log(error.message);
     if (error.message === 'GraphQL error: Authentication required') {
       return (<Redirect to={{
         pathname: '/login',
@@ -400,9 +396,6 @@ const UploadCircularLetter = (props: any) => {
               });
               addFile(data.uploadFile.filename);
             }}
-            getFileName={(name: string) => {
-              console.log(name);
-            }}
           />
         </Box>
       );
@@ -448,7 +441,6 @@ const UploadCircularLetter = (props: any) => {
   }
 
   const handleDisabled = () => {
-    console.log('actt', activeStep);
     if (activeStep === 0) {
       if (!(title && date && number && type && sender && toCategory && subjectedTo && tags.length > 0)) {
         return true;
@@ -519,8 +511,6 @@ const UploadCircularLetter = (props: any) => {
         return (
           <Mutation mutation={UPLOAD_CIRCULAR_LETTER}>
             {(circularLetterInit: any, { data, loading }: any) => {
-              console.log('joovab', data);
-              console.log('acttt', activeStep);
               return (
                 <Box style={{
                   display: 'flex',
@@ -534,10 +524,6 @@ const UploadCircularLetter = (props: any) => {
                   <Stepper
                     disabled={handleDisabled()}
                     onNext={(e: any) => {
-                      console.log('eeee', e);
-                      // if (e === 0) {
-                      //   validateDetails();
-                      // }
                       if (e === 2) {
                         circularLetterInit({
                           variables: {
@@ -935,7 +921,21 @@ const UploadCircularLetter = (props: any) => {
                               تاریخ: {date}
                             </Box>
                             <Box className={classes.checkInfoBox}>
-                              صادر کننده: {sender}
+                              <Box style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}>
+                                {sender}
+                                <Box style={{
+                                  marginLeft: 5
+                                }}>
+                                  :
+                                </Box>
+                                <Box>
+                                  صادرکننده
+                                </Box>
+                              </Box>
                             </Box>
                             <Box className={classes.checkInfoBox}>
                               مرتبط با مقطع: {toCategory}
@@ -961,11 +961,38 @@ const UploadCircularLetter = (props: any) => {
                             <Box className={classes.checkInfoBox}>
                               حوزه مربوطه: {subjectedTo}
                             </Box>
+                            {refrenceCircularID && <Box className={classes.checkInfoBox}>
+                              <Box style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}>
+                                {handleNumber(refrenceCircularID)}
+                                <Box style={{ marginLeft: 5, }}>
+                                  :
+                                </Box>
+                                <Box>
+                                  ارجاع به شماره
+                                </Box>
+                              </Box>
+                            </Box>}
                             <Box className={classes.checkInfoBox}>
-                              {!refrenceCircularID ? ".ارجاعی به بخشنامه دیگری ندارد" : `ارجاع به بخشنامه شماره ${refrenceCircularID}`}
+                              {!refrenceCircularID && ".ارجاعی به بخشنامه دیگری ندارد"}
                             </Box>
-                            <Box className={classes.checkInfoBox}>
-                              تگ‌ها: {handleTags(tags)}
+                            <Box className={classes.checkInfoBox}
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                              }}
+                            >
+                              <Box
+                                style={{
+                                  marginRight: 5,
+                                }}
+                              >
+                                {handleTags(tags)}
+                              </Box>
+                              :تگ‌ها
                             </Box>
                           </Box>
                         </Box>

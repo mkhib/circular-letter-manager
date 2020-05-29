@@ -1,9 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
 import {
-  SafeAreaView,
-  StatusBar,
-  Text,
   View,
   StyleSheet,
 } from 'react-native';
@@ -16,13 +13,11 @@ import { Router, Scene, Stack, Tabs } from 'react-native-router-flux';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome5';
 import Login from './src/screens/Login';
-import FloatLogin from './src/screens/FloatLogin';
-import FloatSignup from './src/screens/FloatSignup';
 import Search from './src/screens/Search';
 import ForgotPassword from './src/screens/ForgotPassword';
 import ChangePasswordLock from './src/screens/ChangePasswordLock';
 import Profile from './src/screens/Profile';
-import { colors, gStyles, shape } from './src/assets/styles/Styles';
+import { colors, shape } from './src/assets/styles/Styles';
 import { setContext } from 'apollo-link-context';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { createHttpLink } from 'apollo-link-http';
@@ -31,7 +26,7 @@ import Letter from './src/screens/Letter';
 import Signup from './src/screens/Signup';
 
 const httpLink = createHttpLink({
-  uri: 'http://194.5.178.254:3600/graphql',
+  uri: 'https://6317c2c5b5aa.ngrok.io/graphql',
 });
 const timeoutLink = new ApolloLinkTimeout(12000);
 const getData = async () => {
@@ -95,6 +90,7 @@ const App = () => {
               key="login"
               component={Login}
               title="ورود"
+              initial
               hideNavBar
             />
             <Scene
@@ -119,7 +115,7 @@ const App = () => {
           <Scene
             key="main"
             type="reset"
-            initial
+            // initial
             hideNavBar
           >
             <Tabs

@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, useImperativeHandle } from 'react';
+import React, { useState } from 'react';
 import gql from 'graphql-tag';
 import * as yup from 'yup';
 import { useMutation } from '@apollo/react-hooks';
@@ -7,10 +7,10 @@ import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import TextInput from '../components/TextInput';
 import { Mutation } from '@apollo/react-components';
+import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import { logoutWithoutChangeRoute } from '../redux/slices/user';
-import Link from '@material-ui/core/Link';
 import {
   setAnything,
   clearPersonelNumber,
@@ -23,13 +23,12 @@ import {
   setGraphqlError,
   clearGraphqlError,
 } from '../redux/slices/data';
+import Snack from '../components/Snack';
 import loginBack from '../assets/images/loginBack.jpg'
-var CryptoJS = require('react-native-crypto-js');
 
 const useStyles = makeStyles(theme => ({
   button: {
     marginBottom: 15,
-    // marginLeft: 20,
     fontFamily: 'FontNormalFD',
   },
   titleBox: {
@@ -37,13 +36,21 @@ const useStyles = makeStyles(theme => ({
     marginBottom: 20,
   },
 }));
-
+var
+  persianNumbers = [/۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g],
+  arabicNumbers = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g],
+  fixNumbers = function (str: any) {
+    if (typeof str === 'string') {
+      for (var i = 0; i < 10; i++) {
+        str = str.replace(persianNumbers[i], i).replace(arabicNumbers[i], i);
+      }
+    }
+    return str;
+  };
 interface LoginProps {
   personelNumber: string;
-  password: string;
   setAnything: any;
   location: any;
-  history: any;
   user: string;
   login: any;
   errors: Array<string>;
@@ -54,65 +61,36 @@ interface LoginProps {
   logoutWithoutChangeRoute: any;
 }
 
-const LOGIN = gql`
-mutation Login(
- $data: LoginUserInput!){
-  login(
-  data: $data,
-  ){
-    user{
-      _id
-      firstName
-      lastName
-      isAdmin
-      changedPassword
-    }
-  }
-}
-`;
-
-const LOGOUT = gql`
-mutation Logout{
-  logout
+const FORGOT_PASSWORD = gql`
+mutation ForgotPassword($personelNumber: String!){
+forgotPassword(personelNumber: $personelNumber)
 }
 `;
 
 let schema = yup.object().shape({
   personelNumber: yup.string().required('شماره پرسنلی وارد نشده است.'),
-  password: yup.string().required('رمزعبور وارد نشده است.'),
 });
-
-const Login: React.FunctionComponent<LoginProps> = (props) => {
-  const [
-    logout,
-    { loading: logoutLoading, error: logoutnError },
-  ] = useMutation(LOGOUT);
+interface SnackState {
+  message: string;
+  severity: 'success' | 'error';
+}
+const ForgotPassword: React.FunctionComponent<LoginProps> = (props) => {
   const {
     personelNumber,
-    password,
     setAnything,
-    logoutWithoutChangeRoute,
-    location,
-    user,
   } = props;
   const classes = useStyles();
-
-  React.useEffect(() => {
-    logout();
-    logoutWithoutChangeRoute();
-  }, [logout, logoutWithoutChangeRoute]);
-
-
-  const onSubmit = (history: any, firstName: string, lastName: string, isAdmin: boolean, id: string) => {
-    const { login } = props;
-    login({
-      personelNumber,
-      id,
-      isAdmin,
-      firstName,
-      lastName,
-    }, history);
-  }
+  const [openSnack, setOpenSnack] = useState(false);
+  const [snackOption, setSnackOption] = useState<SnackState>({ message: '', severity: "success" })
+  const openSnackbar = () => {
+    setOpenSnack(true);
+  };
+  const closeSnackbar = (event?: React.SyntheticEvent, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnack(false);
+  };
 
   const errorCheck = (name: string) => {
     let hasError = false;
@@ -127,8 +105,12 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
   const handleErrorMessage = (message: string) => {
     if (message === 'Network error: Failed to fetch') {
       return '.لطفا اتصال خود به اینترنت را بررسی کنید'
+    } if (message === 'GraphQL error: User not found!') {
+      return '.شماره پرسنلی وارد شده نادرست است';
+    } if (message === 'GraphQL error: User is not authorized!') {
+      return '.حساب کاربری شما هنوز تایید نشده است';
     } else {
-      return '.نام‌کاربری یا رمز عبور نادرست است'
+      return '.مشکلی پیش‌آمده است'
     }
   }
 
@@ -144,54 +126,41 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
       );
     }
   }
-  const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
   return (<Mutation
-    mutation={LOGIN}
+    mutation={FORGOT_PASSWORD}
+    onCompleted={() => {
+      setSnackOption({
+        message: 'رمزعبور برای شماره همراه شما پیامک شد پس از ورود از صفحه حساب کاربری اقدام به تغییر رمزعبور خود نمایید',
+        severity: 'success',
+      });
+      openSnackbar();
+    }}
     onError={(err: any) => {
+      console.log(err.message);
       props.setGraphqlError(err);
     }}
   >
-    {(login: any, { data, error, loading }: any) => {
-      const onRealLogin = () => {
-        let cipherPass = CryptoJS.AES.encrypt(password, key).toString();
-        login({
+    {(forgotPassword: any, { data, error, loading }: any) => {
+      const onForgotPassword = () => {
+        forgotPassword({
           variables: {
-            data: {
-              personelNumber: personelNumber,
-              password: cipherPass
-            },
+            personelNumber: fixNumbers(personelNumber),
           },
         });
       };
-      const validateAndLogin = () => {
+      const validateAndContinue = () => {
         props.clearGraphqlError();
         schema.validate({
           personelNumber,
-          password,
         }, {
           abortEarly: false
         }).then(() => {
           props.setErrors([]);
-          onRealLogin();
+          onForgotPassword();
         }).catch((e: any) => {
           props.setErrors(e.inner);
         });
       }
-      const SubmitButton = withRouter(({ history }) => {
-        if (data) {
-          onSubmit(history, data.login.user.firstName, data.login.user.lastName, data.login.user.isAdmin, data.login.user._id);
-        }
-        return (
-          <Button
-            className={classes.button}
-            variant="outlined"
-            color="primary"
-            onClick={validateAndLogin}
-          >
-            {loading ? <CircularProgress style={{ height: 24, width: 24 }} /> : 'ورود'}
-          </Button>
-        );
-      });
       return (
         <Box style={{
           display: 'flex',
@@ -201,6 +170,12 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
           alignItems: 'center',
           backgroundImage: `url(${loginBack})`,
         }}>
+          <Snack
+            open={openSnack}
+            message={snackOption.message}
+            severity={snackOption.severity}
+            autoHideDuration={30000}
+            onClose={closeSnackbar} />
           <Box style={{
             display: 'flex',
             flexDirection: 'column',
@@ -211,7 +186,7 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
             flex: 1,
           }}>
             <Box className={classes.titleBox}>
-              به سامانه بارگذاری و جست و جو بخشنامه‌ها خوش‌آمدید
+              برای ادامه، شماره پرسنلی خود را وارد نمایید
             </Box>
             {renderError(error)}
             <TextInput
@@ -228,29 +203,12 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
               onKeyUp={(e: any) => {
                 const enterCode = 13;
                 if (e.which === enterCode) {
-                  validateAndLogin();
-                }
-              }}
-            />
-            <TextInput
-              id="password"
-              label="رمزعبور"
-              error={errorCheck('password')}
-              type="password"
-              value={password}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAnything({
-                theThing: 'password',
-                data: event.target.value
-              })}
-              onKeyUp={(e: any) => {
-                const enterCode = 13;
-                if (e.which === enterCode) {
-                  validateAndLogin();
+                  validateAndContinue();
                 }
               }}
             />
             <Link
-              href="forgot-password"
+              href="login"
               style={{
                 marginBottom: 10,
               }}
@@ -261,10 +219,17 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
                 fontFamily: 'FontNormal',
                 fontSize: 14,
               }}>
-                رمزعبور خود را فراموش کرده‌اید؟
+              ورود به حساب کاربری
               </Box>
             </Link>
-            <SubmitButton />
+            <Button
+              className={classes.button}
+              variant="outlined"
+              color="primary"
+              onClick={validateAndContinue}
+            >
+              {loading ? <CircularProgress style={{ height: 24, width: 24 }} /> : 'ادامه'}
+            </Button>
           </Box>
         </Box>
       )
@@ -276,7 +241,6 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
 const mapStateToProps = (state: any) => {
   const {
     personelNumber,
-    password,
     errors,
     user,
   } = state.userData;
@@ -292,7 +256,6 @@ const mapStateToProps = (state: any) => {
     authenticated,
     personelNumber,
     graphqlError,
-    password,
     errors,
     user,
   };
@@ -309,4 +272,4 @@ export default connect(mapStateToProps, {
   setGraphqlError,
   clearAnyThing,
   clearPersonelNumber,
-})(Login);
+})(ForgotPassword);

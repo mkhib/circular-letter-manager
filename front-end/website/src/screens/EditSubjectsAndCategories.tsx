@@ -88,7 +88,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
-    marginLeft: 100,
+    // marginLeft: 100,
     fontFamily: 'FontNormalFD',
   },
   eachItem: {
@@ -145,7 +145,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 15,
   },
 }));
-
+const RESPONSIVE_WIDTH = 950;
 const EditSubjectsAndCategories: React.FunctionComponent<IEditProps> = (props) => {
   const [newCategory, setNewCategory] = useState('');
   const [newSubject, setNewSubject] = useState('');
@@ -158,6 +158,12 @@ const EditSubjectsAndCategories: React.FunctionComponent<IEditProps> = (props) =
   const [addNewCatFailure, setAddNewCatFailure] = useState(false);
   const [addNewSubjSuccess, setAddNewSubjSuccess] = useState(false);
   const [addNewSubjFailure, setAddNewSubjFailure] = useState(false);
+  const [width, setWidth] = useState(window.innerWidth);
+  const [height, setHeight] = useState(window.innerHeight);
+  const updateWidthAndHeight = () => {
+    setWidth(window.innerWidth);
+    setHeight(window.innerHeight);
+  };
   const [itemToDelete, setItemToDelete] = useState({ type: '', id: '' });
   const { loading, error, data } = useQuery(GET_ALL);
   const classes = useStyles();
@@ -168,6 +174,8 @@ const EditSubjectsAndCategories: React.FunctionComponent<IEditProps> = (props) =
       setListOfCategories(data.categoriesQuery.toCategories);
       setListOfSubjects(data.categoriesQuery.subjectedTos);
     }
+    window.addEventListener("resize", updateWidthAndHeight);
+    return () => window.removeEventListener("resize", updateWidthAndHeight);
   }, [data, setListOfCategories, setListOfSubjects]);
   if (loading) {
     return (<Box style={{
@@ -254,20 +262,6 @@ const EditSubjectsAndCategories: React.FunctionComponent<IEditProps> = (props) =
     setAddNewSubjFailure(false);
   };
 
-  // if (loading) {
-  //   return (
-  //     <Box style={{
-  //       display: 'flex',
-  //       justifyContent: 'center',
-  //       alignItems: 'center',
-  //       flex: 1,
-  //     }}>
-  //       <Backdrop className={classes.backdrop} open>
-  //         <CircularProgress style={{ height: '8vmax', width: '8vmax' }} />
-  //       </Backdrop>
-  //     </Box>
-  //   );
-  // }
   if (error) {
     if (error.message === 'GraphQL error: Authentication required') {
       return (<Redirect to={{
@@ -382,7 +376,9 @@ const EditSubjectsAndCategories: React.FunctionComponent<IEditProps> = (props) =
                               display: 'flex',
                               flex: 1,
                               justifyContent: 'center',
-                              backgroundImage: `url(${webBack})`
+                              backgroundImage: `url(${webBack})`,
+                              backgroundSize: '190% 150%',
+                              backgroundAttachment: 'fixed',
                             }}>
                               <Modal
                                 aria-labelledby="modal-title"
@@ -429,7 +425,14 @@ const EditSubjectsAndCategories: React.FunctionComponent<IEditProps> = (props) =
                                   </Box>
                                 </Fade>
                               </Modal>
-                              <Box className={classes.topContainer}>
+                              <Box
+                                className={classes.topContainer}
+                                style={{
+                                  flexDirection: width < RESPONSIVE_WIDTH ? 'column' : 'row',
+                                  alignItems: width < RESPONSIVE_WIDTH ? 'center' : 'flex-start',
+                                  flex: 1,
+                                }}
+                              >
                                 <Box style={{ direction: 'rtl' }}>
                                   <Box>
                                     مقاطع فعلی
@@ -469,7 +472,7 @@ const EditSubjectsAndCategories: React.FunctionComponent<IEditProps> = (props) =
                                     {renderModalItems(props.listOfCategories, 'category')}
                                   </Box>
                                 </Box>
-                                <Divider orientation="vertical" style={{ width: 3, marginLeft: 40, marginRight: 40 }} flexItem />
+                                <Divider orientation={width < RESPONSIVE_WIDTH ? "horizontal" : "vertical"} style={{ width: 3, marginLeft: 40, marginRight: 40 }} flexItem />
                                 <Box style={{ direction: 'rtl' }}>
                                   <Box>
                                     حوزه‌های فعلی

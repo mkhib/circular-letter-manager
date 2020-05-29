@@ -13,7 +13,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Backdrop from '@material-ui/core/Backdrop';
 import Modal from '@material-ui/core/Modal';
 import Fade from '@material-ui/core/Fade';
-import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
 import { makeStyles, withStyles, Theme, createStyles } from '@material-ui/core/styles';
 import MaterialTable, { Column } from 'material-table';
@@ -159,7 +158,6 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
   return (
     <Mutation mutation={REJECT_AND_DELETE_USER}
       onCompleted={(data: any) => {
-        console.log(data);
         setSnackOption({
           message: 'درخواست شما با موفقیت انجام شد',
           severity: 'success',
@@ -191,7 +189,6 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
         return (
           <Mutation mutation={AUTHORISE_USER}
             onCompleted={(data: any) => {
-              console.log(data);
               setSnackOption({
                 message: 'کاربر با موفقیت تایید شد و پیامک رمزعبور برای ایشان ارسال گردید',
                 severity: 'success',

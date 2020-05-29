@@ -69,6 +69,18 @@ let schema = yup.object().shape({
   againNewPassword: yup.string().min(8, 'تکرار رمزعبور باید حداقل 8 کاراکتر باشد').required('تکرار رمزعبور وارد نشده است').oneOf([yup.ref('newPassword')], 'تکرار رمزعبور جدید منطبق نیست')
 });
 
+var
+  persianNumbers = [/۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g],
+  arabicNumbers = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g],
+  fixNumbers = function (str: any) {
+    if (typeof str === 'string') {
+      for (var i = 0; i < 10; i++) {
+        str = str.replace(persianNumbers[i], i).replace(arabicNumbers[i], i);
+      }
+    }
+    return str;
+  };
+
 const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
   const {
     setAnything,
@@ -169,8 +181,8 @@ const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
   >
     {(changePassword: any, { data, error, loading }: any) => {
       const onChangePassword = () => {
-        let cipherOldPass = CryptoJS.AES.encrypt(oldPassword, key).toString();
-        let cipherNewPass = CryptoJS.AES.encrypt(newPassword, key).toString();
+        let cipherOldPass = CryptoJS.AES.encrypt(fixNumbers(oldPassword), key).toString();
+        let cipherNewPass = CryptoJS.AES.encrypt(fixNumbers(newPassword), key).toString();
         changePassword({
           variables: {
             data: {
@@ -181,6 +193,7 @@ const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
         });
       };
       const validateAndLogin = () => {
+        setErrs([]);
         props.clearGraphqlError();
         schema.validate({
           oldPassword,

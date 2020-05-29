@@ -20,6 +20,7 @@ import Profile from '../screens/Profile';
 import ChangePassword from '../screens/ChangePassword';
 import AddNewUser from '../screens/AddNewUser';
 import ManageAllUsers from '../screens/ManageAllUsers';
+import ForgotPassword from '../screens/ForgotPassword';
 
 const PrivateRoute = ({ component, exact = false, path, authenticated }: any) => {
   return (
@@ -76,6 +77,7 @@ const AuthRouter = ({ authenticated, checked, user }: any) => {
         }}>
           <Switch>
             <Route path="/login" component={Login} />
+            <Route path="/forgot-password" component={ForgotPassword} />
             <PrivateRoute exact path="/" component={SearchLetters} authenticated={authenticated} />
             <PrivateRoute path={`/letter/`} component={Letter} authenticated={authenticated} />
             <PrivateRoute path={`/search-letter`} component={SearchLetters} authenticated={authenticated} />

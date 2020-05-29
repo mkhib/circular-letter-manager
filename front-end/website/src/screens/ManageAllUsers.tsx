@@ -9,6 +9,7 @@ import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Check from '@material-ui/icons/Check';
 import Clear from '@material-ui/icons/ClearRounded';
+import Pagination from '@material-ui/lab/Pagination';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Backdrop from '@material-ui/core/Backdrop';
 import Modal from '@material-ui/core/Modal';
@@ -26,6 +27,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import { useApolloClient } from '@apollo/react-hooks';
 import DeleteForeverRoundedIcon from '@material-ui/icons/DeleteForeverRounded';
 import usersBack from '../assets/images/usersBack.png';
 import {
@@ -129,13 +131,23 @@ interface SnackState {
   message: string;
   severity: 'success' | 'error';
 }
-
-const ManageAllUsers: React.FC<PendingProps> = (props) => {
+function useQueryParam() {
+  return new URLSearchParams(useLocation().search);
+}
+const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
+  const client = useApolloClient();
+  let queryParam = useQueryParam();
+  const handlePageNumber = () => {
+    const page = queryParam.get('page');
+    if (page !== null) {
+      return parseInt(page, 10);
+    } return 1;
+  }
   const { loading, error, data } = useQuery(GET_ALL_USERS, {
     variables: {
       information: '',
-      page: 1,
-      limit: 4,
+      page: handlePageNumber(),
+      limit: 15,
     },
   });
   const [openSnack, setOpenSnack] = useState(false);
@@ -166,7 +178,6 @@ const ManageAllUsers: React.FC<PendingProps> = (props) => {
   } = props;
   useEffect(() => {
     if (data) {
-      console.log(data);
       setAllUsers(data.users.users);
     }
   }, [data, setAllUsers]);
@@ -192,13 +203,13 @@ const ManageAllUsers: React.FC<PendingProps> = (props) => {
   return (
     <Mutation mutation={DELETE_USER}
       onCompleted={(data: any) => {
-        console.log(data);
         setSnackOption({
           message: 'کاربر با موفقیت حذف شد',
           severity: 'success',
-        })
+        });
         openSnackbar();
-        removeFromAllUsers(data.authenticateUser._id)
+        removeFromAllUsers(data.deleteUser._id);
+        client.resetStore();
       }}
       onError={(error: any) => {
         setSnackOption({
@@ -262,7 +273,6 @@ const ManageAllUsers: React.FC<PendingProps> = (props) => {
                   </Button>
                     <Button
                       onClick={() => {
-                        console.log('ine:', currentUseridToDelete);
                         deleteUser({ variables: { id: currentUseridToDelete } });
                         handleClose();
                       }}
@@ -334,6 +344,23 @@ const ManageAllUsers: React.FC<PendingProps> = (props) => {
                   </TableBody>
                 </Table>
               </TableContainer>}
+            <Box style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
+            }}>
+              {data.users.quantity !== 0 && <Pagination
+                page={handlePageNumber()}
+                count={data.users.quantity}
+                style={{ direction: 'rtl', marginTop: 20, marginBottom: 40 }}
+                color="primary"
+                onChange={(_a, b) => {
+                  if (handlePageNumber() !== b) {
+                    props.history.push(`${window.location.pathname}?page=${b}`)
+                  }
+                }}
+              />}
+            </Box>
           </Box>
         );
       }}
@@ -350,8 +377,9 @@ export default connect(mapState, {
   removeFromAllUsers,
 })(ManageAllUsers);
 
-interface PendingProps {
+interface ManageUsersProps {
   setAllUsers: (users: Array<userType>) => void;
   removeFromAllUsers: (id: string) => void;
   allUsers: Array<userType>;
+  history: any;
 }
