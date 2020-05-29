@@ -403,7 +403,6 @@ const handleNumber = (numberToProcess: string) => {
     });
   }
 }
-var letterId: string = '';
 const EditCircularLetter = (props: any) => {
   const {
     title,
@@ -442,11 +441,11 @@ const EditCircularLetter = (props: any) => {
   const [disabledButton, setDisabledButton] = useState(true);
   const [deleteFileSuccess, setDeleteFileSuccess] = useState(false);
   const [deleteFileFailure, setDeleteFileFailure] = useState(false);
+  const [deleteCircularFailure, setDeleteCircularFailure] = useState(false);
   const [editFileFailure, setEditFileFailure] = useState(false);
   const [lastStepMessage, setLastStepMessage] = useState('');
   const client = useApolloClient();
   let queryParam = useQueryParam();
-  console.log(props.data);
   if (props.data) {
     var propsData = props.data;
     if (props.data.circularLetterDetails) {
@@ -589,6 +588,15 @@ const EditCircularLetter = (props: any) => {
     }
     setDeleteFileFailure(false);
   };
+  const openDeleteCircularFailure = () => {
+    setDeleteCircularFailure(true);
+  };
+  const closeDeleteCircularFailure = (event?: React.SyntheticEvent, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setDeleteCircularFailure(false);
+  };
   const openEditFileFailure = () => {
     setEditFileFailure(true);
   };
@@ -645,9 +653,6 @@ const EditCircularLetter = (props: any) => {
                 name: data.uploadFile.filename,
               });
               props.addFilesName(data.uploadFile.filename);
-            }}
-            getFileName={(name: string) => {
-              console.log(name);
             }}
           />
         </Box>
@@ -775,13 +780,30 @@ const EditCircularLetter = (props: any) => {
           }}
         >
           {(deleteFileWhileUpdate: any, { loading, error, data }: any) => {
-            if (data) {
-              var deleteWhileUpdate = data;
-            }
             return (
-              <Mutation mutation={DELETE_CIRCULAR_LETTER}>
+              <Mutation mutation={DELETE_CIRCULAR_LETTER}
+                onCompleted={() => {
+                  props.history.push('/search-letter')
+                }}
+                onError={() => {
+                  openDeleteCircularFailure();
+                }}
+              >
                 {(deleteCircularLetter: any, { data, loading }: any) => {
-                  let deleteData = data;
+                  if (loading) {
+                    return (
+                      <Box style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        flex: 1,
+                      }}>
+                        <Backdrop className={classes.backdrop} open>
+                          <CircularProgress style={{ height: '8vmax', width: '8vmax' }} />
+                        </Backdrop>
+                      </Box>
+                    );
+                  }
                   return (
                     <Mutation mutation={UPLOAD_CIRCULAR_LETTER}>
                       {(circularLetterInit: any, { data, loading }: any) => {
@@ -790,8 +812,6 @@ const EditCircularLetter = (props: any) => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            // backgroundColor:'blue',
-                            // maxWidth:'50vmax',
                           }}>
                             <Stepper
                               disabled={handleDisabled()}
@@ -800,10 +820,6 @@ const EditCircularLetter = (props: any) => {
                               customLastStep={lastStepMessage}
                               customLabels={['ویرایش مشخصات بخشنامه', 'ویرایش  فایل‌های بخشنامه', 'کنترل اطلاعات ویرایش شده']}
                               onNext={(e: any) => {
-                                console.log('eeee', e);
-                                // if (e === 0) {
-                                //   validateDetails();
-                                // }
                                 if (e === 2) {
                                   updateCircularLetter({
                                     variables: {
@@ -826,19 +842,12 @@ const EditCircularLetter = (props: any) => {
                                 }
                               }}
                               getNextStep={(activeStep: number) => {
-                                // if (activeStep - 1 === 0) {
-                                //   // validateDetails();
-                                // } else {
                                 setActiveStep(activeStep);
-                                // }
                               }}
                               getPreviousStep={(activeStep: number) => {
                                 setActiveStep(activeStep);
                               }}
                             >
-                              {/* <div className={classes.titleDiv}>
-                              .مشخصات بخشنامه را وارد نمایید
-                              </div> */}
                               {
                                 activeStep === 0 && (
                                   <Box className={classes.fieldTopBox}
@@ -847,6 +856,13 @@ const EditCircularLetter = (props: any) => {
                                       justifyContent: width < RESPONSIVE_WIDTH ? 'center' : 'space-between',
                                       alignItems: width < RESPONSIVE_WIDTH ? 'center' : 'flex-start',
                                     }}>
+                                    <Snackbar open={deleteCircularFailure} autoHideDuration={10000} onClose={closeDeleteCircularFailure}>
+                                      <Alert className={classes.snackStyle} onClose={closeDeleteCircularFailure} severity="error">
+                                        <Box className={classes.snackBox}>
+                                          حذف بخشنامه با مشکل مواجه شد، لطفا دوباره تلاش کنید
+                                      </Box>
+                                      </Alert>
+                                    </Snackbar>
                                     <Box className={classes.tagsTopBoxField}>
                                       <Button
                                         variant="contained"
@@ -908,7 +924,11 @@ const EditCircularLetter = (props: any) => {
                                               </Button>
                                               <Button
                                                 onClick={() => {
-                                                  deleteCircularLetter();
+                                                  deleteCircularLetter({
+                                                    variables: {
+                                                      id: props.data.variables.id,
+                                                    }
+                                                  });
                                                 }}
                                                 className={classes.modalButtons}
                                                 style={{ backgroundColor: 'red', color: 'white' }}>
@@ -1318,7 +1338,21 @@ const EditCircularLetter = (props: any) => {
                                         تاریخ: {date}
                                       </Box>
                                       <Box className={classes.checkInfoBox}>
-                                        صادر کننده: {sender}
+                                        <Box style={{
+                                          display: 'flex',
+                                          flexDirection: 'row',
+                                          alignItems: 'center',
+                                        }}>
+                                          {sender}
+                                          <Box style={{
+                                            marginLeft: 5
+                                          }}>
+                                            :
+                                          </Box>
+                                          <Box>
+                                            صادرکننده
+                                          </Box>
+                                        </Box>
                                       </Box>
                                       <Box className={classes.checkInfoBox}>
                                         مرتبط با مقطع: {toCategory}
@@ -1344,12 +1378,39 @@ const EditCircularLetter = (props: any) => {
                                       <Box className={classes.checkInfoBox}>
                                         حوزه مربوطه: {subjectedTo}
                                       </Box>
+                                      {refrenceCircularID && <Box className={classes.checkInfoBox}>
+                                        <Box style={{
+                                          display: 'flex',
+                                          flexDirection: 'row',
+                                          alignItems: 'center',
+                                        }}>
+                                          {handleNumber(refrenceCircularID)}
+                                          <Box style={{ marginLeft: 5, }}>
+                                            :
+                                          </Box>
+                                          <Box>
+                                            ارجاع به شماره
+                                          </Box>
+                                        </Box>
+                                      </Box>}
                                       <Box className={classes.checkInfoBox}>
-                                        {!refrenceCircularID ? ".ارجاعی به بخشنامه دیگری ندارد" : `ارجاع به بخشنامه شماره ${refrenceCircularID}`}
+                                        {!refrenceCircularID && ".ارجاعی به بخشنامه دیگری ندارد"}
                                       </Box>
-                                      <Box className={classes.checkInfoBox}>
-                                        تگ‌ها: {handleTags(tags)}
-                                      </Box>
+                                      <Box className={classes.checkInfoBox}
+                                        style={{
+                                          display: 'flex',
+                                          flexDirection: 'row',
+                                        }}
+                                      >
+                                        <Box
+                                          style={{
+                                            marginRight: 5,
+                                          }}
+                                        >
+                                          {handleTags(tags)}
+                                        </Box>
+                                          :تگ‌ها
+                                        </Box>
                                     </Box>
                                   </Box>
                                 )

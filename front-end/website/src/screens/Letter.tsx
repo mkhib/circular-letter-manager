@@ -282,8 +282,18 @@ const Letter = (props: any) => {
                 marginTop: props.user.isAdmin ? 50 : 10,
               }}
             >
-              <Box className={classes.detailBox}>
-                عنوان: {queryData.title}
+              <Box className={classes.detailBox}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                }}
+              >
+                <Box style={{
+                  marginRight: 5,
+                }}>
+                  {queryData.title}
+                </Box>
+              :عنوان
               </Box>
               <Box className={classes.line}>
                 <Box style={{ marginRight: 5, display: 'flex', flexDirection: 'row' }}>
@@ -294,8 +304,18 @@ const Letter = (props: any) => {
               <Box className={classes.detailBox}>
                 {queryData.date} :تاریخ
                 </Box>
-              <Box className={classes.detailBox}>
-                صادرکننده: {queryData.from}
+              <Box className={classes.detailBox}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                }}
+              >
+                <Box style={{
+                  marginRight: 5,
+                }}>
+                  {queryData.from}
+                </Box>
+              :صادرکننده
               </Box>
               <Box className={classes.detailBox}>
                 مرتبط با مقطع: {queryData.toCategory}
@@ -313,8 +333,18 @@ const Letter = (props: any) => {
               <Box className={classes.detailBox}>
                 {queryData.files.length} :تعداد فایل‌ها
               </Box>
-              <Box className={classes.detailBox}>
-                کلمات کلیدی:{' '}{handleTags(queryData.tags)}
+              <Box className={classes.detailBox}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                }}
+              >
+                <Box style={{
+                  marginRight: 5,
+                }}>
+                  {handleTags(queryData.tags)}
+                </Box>
+              :کلمات کلیدی
               </Box>
               <Modal
                 aria-labelledby="modal-title"

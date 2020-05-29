@@ -14,6 +14,7 @@ query user{
   user{
   firstName
   lastName
+  identificationNumber
   personelNumber
   phoneNumber
   }
@@ -30,6 +31,7 @@ interface IUser {
   user: {
     firstName: string;
     lastName: string;
+    identificationNumber: string;
     personelNumber: string;
     phoneNumber: string;
   }
@@ -116,6 +118,7 @@ const Profile = () => {
           <Line title="نام: " style={styles.lineFlex} value={data?.user.firstName} />
           <Line title="نام‌خانوادگی: " style={styles.lineFlex} value={data?.user.lastName} />
           <Line title="شماره پرسنلی: " value={data?.user.personelNumber} />
+          <Line title="کدملی: " value={data?.user.identificationNumber} />
           <Line title="شماره تلفن: " value={data?.user.phoneNumber} />
           <TouchableOpacity
             onPress={() => {

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, FlatList, ImageBackground } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, FlatList, ImageBackground, Keyboard } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { CheckBox } from 'react-native-elements';
 import { Actions } from 'react-native-router-flux';
@@ -61,6 +60,7 @@ query SearchQuery($information: String,$sortBy: String,$order: String, $startDat
 }
 `;
 interface SearchObj {
+  searchText: string;
   sort: string;
   order: string;
   startDate: string;
@@ -80,15 +80,16 @@ const Search = () => {
   const [page, setPage] = useState<number>(1);
   const [err, setErr] = useState(new Set());
   const [searchObject, setSearchObject] = useState<SearchObj>({
+    searchText: '',
     startDate: '',
     endDate: '',
-    order: 'asc',
+    order: 'desc',
     sort: 'dateOfCreation',
   });
   const [hasMore, setHasMore] = useState(true);
   const { loading, error, data, fetchMore } = useQuery(SEARCH_QUERY, {
     variables: {
-      information: searchValue,
+      information: searchObject.searchText,
       page: 1,
       startDate: searchObject.startDate,
       endDate: searchObject.endDate,
@@ -139,6 +140,8 @@ const Search = () => {
           contentContainerStyle={styles.container}
           data={handleData()}
           onEndReachedThreshold={4}
+          keyboardShouldPersistTaps={'handled'}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={!loading ? <EmptySearch /> : null}
           onEndReached={() => {
             if (hasMore) {
@@ -195,7 +198,9 @@ const Search = () => {
                     returnKeyLabel="go"
                     onSubmitEditing={() => {
                       handleResetPage();
+                      Keyboard.dismiss();
                       setSearchObject({
+                        searchText: searchValue,
                         endDate: toDateToSend,
                         startDate: fromDateToSend,
                         order: order,
@@ -207,7 +212,9 @@ const Search = () => {
                   <TouchableOpacity
                     onPress={() => {
                       handleResetPage();
+                      Keyboard.dismiss();
                       setSearchObject({
+                        searchText: searchValue,
                         endDate: toDateToSend,
                         startDate: fromDateToSend,
                         order: order,
@@ -380,6 +387,7 @@ const styles = StyleSheet.create({
     ...gStyles.textInput,
     borderWidth: 1,
     borderColor: '#bdbdbd',
+    paddingLeft: shape.spacing(),
     borderRadius: 7,
     flex: 1,
   },

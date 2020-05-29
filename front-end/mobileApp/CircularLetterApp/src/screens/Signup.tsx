@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Keyboard } from 'react-native';
 import { gql } from 'apollo-boost';
 import * as yup from 'yup';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -84,13 +84,6 @@ const schema = yup.object().shape({
     }).required('کدملی وارد شده است.'),
 });
 
-const storeData = async (value: string) => {
-  try {
-    await AsyncStorage.setItem('tok', value);
-  } catch (e) {
-    // saving error
-  }
-};
 
 const Signup = () => {
   const [name, setName] = useState<string>('');
@@ -140,9 +133,9 @@ const Signup = () => {
     schema.validate({
       name,
       lastName,
-      phoneNumber,
-      personelNumber: username,
-      identificationNumber,
+      phoneNumber: fixNumbers(phoneNumber),
+      personelNumber: fixNumbers(username),
+      identificationNumber: fixNumbers(identificationNumber),
     }, { abortEarly: false }).then(() => {
       onRealLogin();
     }).catch((e: yup.ValidationError) => {
@@ -181,7 +174,7 @@ const Signup = () => {
         <View>
           <Text style={styles.titleText}>
             مشخصات خواسته شده را وارد نمایید.
-        </Text>
+          </Text>
         </View>
         <View>
           <TextAlert text={errorState.message} state={errorState.state} />
@@ -267,6 +260,7 @@ const Signup = () => {
           <TouchableOpacity
             style={[StyleSheet.flatten([gStyles.button, styles.button])]}
             onPress={() => {
+              Keyboard.dismiss();
               validateAndSignup();
             }}
           >

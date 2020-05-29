@@ -313,7 +313,7 @@ const ChangePassword: React.FunctionComponent<AddNewUserProps> = (props) => {
             paddingRight: 100,
             flex: 1,
           }}>
-            <Snack open={openSnack} message={snackOption.message} severity={snackOption.severity} onClose={closeSnackbar} />
+            <Snack open={openSnack} autoHideDuration={15000} message={snackOption.message} severity={snackOption.severity} onClose={closeSnackbar} />
             <Box className={classes.titleBox}>
               مشخصات کاربر را وارد نمایید
             </Box>

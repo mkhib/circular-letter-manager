@@ -152,7 +152,6 @@ const SearchLetters = (props: any) => {
   let queryParam = useQueryParam();
   const updateWidth = () => {
     setWidth(window.innerWidth);
-    console.log(width);
   };
   useEffect(() => {
     window.addEventListener("resize", updateWidth);
@@ -214,7 +213,6 @@ const SearchLetters = (props: any) => {
     </Box>
   );
   if (error) {
-    console.log(error.message);
     if (error.message === 'GraphQL error: Authentication required') {
       return (<Redirect to={{
         pathname: '/login',
@@ -222,7 +220,6 @@ const SearchLetters = (props: any) => {
     }
     return `Error! ${error}`;
   }
-  console.log('activam', props.searchInDate);
   return (
     <Box
       style={{

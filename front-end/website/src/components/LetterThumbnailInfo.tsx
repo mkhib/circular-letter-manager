@@ -63,8 +63,21 @@ const LetterThumbnailInfo = ({ title, date, files, from, id, setAnyThing, number
     >
       <Box className={classes.container}>
         <img className={classes.imageThumbnail} src={files[0]} alt="thumbnail" />
-        <Box>
-          عنوان: {title}
+        <Box style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent:'center',
+        }}>
+          {title}
+          <Box style={{
+            marginLeft: 5
+          }}>
+            :
+          </Box>
+          <Box>
+            عنوان
+          </Box>
         </Box>
         <Box>
           تاریخ: {date}
@@ -80,8 +93,21 @@ const LetterThumbnailInfo = ({ title, date, files, from, id, setAnyThing, number
             :شماره
           </Box>
         </Box>
-        <Box>
-          صادرکننده: {from}
+        <Box style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent:'center',
+        }}>
+          {from}
+          <Box style={{
+            marginLeft: 5
+          }}>
+            :
+          </Box>
+          <Box>
+            صادرکننده
+          </Box>
         </Box>
       </Box>
     </Button>
