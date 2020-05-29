@@ -1,4 +1,4 @@
-import bcrypt, { hash } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import fs, { createReadStream, createWriteStream, unlink } from 'fs';
 import path from 'path';
 import randomstring from 'randomstring';
@@ -23,7 +23,7 @@ import { handleUnderTen } from './util/handleUnderTen';
 // import { sendRefreshToken } from './util/sendRefreshToken';
 // import { createRefreshToken, createAccessToken } from './util/auth';
 
-const imagePath = 'http://localhost:3600/images/';
+const imagePath = 'https://f23c40f46169.ngrok.io/images/';
 String.prototype.allTrim = String.prototype.allTrim || function () {
     return this
         .replace(/ +/g, ' ')
@@ -36,10 +36,40 @@ String.prototype.allTrim = String.prototype.allTrim || function () {
 
 export const resolvers = {
     Query: {
-        users: (parent, args, context, info) => {
+        users: async (parent, { information, page, limit }, context, info) => {
             // getUserId(context.req);
             isAuthenticated(context.req);
-            return Users.find();
+            let users = [];
+            if (context.session.userSearch
+                && context.session.userPage == page
+                && context.session.userLimit == limit) {
+                users = context.session.userSearch;
+            }
+            else {
+                users = await Users.find({
+                    $or: [
+                        { firstName: { $regex: `${information}` } },
+                        { lastName: { $regex: `${information}` } },
+                        { personelNumber: { $regex: `${information}` } },
+                        { identificationNumber: { $regex: `${information}` } },
+                        { phoneNumber: { $regex: `${information}` } },
+                    ],
+                    authorized: true
+                });
+
+                users.sort(dynamicSort('lastName', 'asc'));
+                context.session.userSearch = users;
+                context.session.userPage = page;
+                context.session.userLimit = limit;
+            }
+
+            const pages = Math.ceil((users.length) / limit);
+            users = paginator(users, page, limit).data;
+
+            return {
+                users,
+                quantity: pages
+            };
         },
         user: async (parent, args, context, info) => {
             const userId = isAuthenticated(context.req);
@@ -120,7 +150,6 @@ export const resolvers = {
                 const regExp = /(\d{2,4})\/(\d{1,2})\/(\d{1,2})/;
                 const trimmed = information.allTrim();
                 const paste = trimmed.split(" ");
-                const nowDate = jMoment();
 
                 if (paste.length <= 1) {
                     const newLetter = await CircularLetters.find({
@@ -227,7 +256,6 @@ export const resolvers = {
                 const regExp = /(\d{2,4})\/(\d{1,2})\/(\d{1,2})/;
                 const trimmed = information.allTrim();
                 const paste = trimmed.split(" ");
-                const nowDate = jMoment();
 
                 if (paste.length === 1) {
                     const newLetter = await CircularLetters.find({
@@ -407,24 +435,33 @@ export const resolvers = {
     Mutation: {
         adminSignUp: async (parent, args, context, info) => {
             isAuthenticated(context.req);
+            const exist = await Users.findOne({ personelNumber: args.personelNumber });
+            if (exist) {
+                throw new Error("Duplicate personelNumber!");
+            }
             const rndPassword = randomstring.generate(8);
             const password = await hashPassword(rndPassword);
             const user = new Users({
                 ...args,
+                _id: ObjectId().toString(),
                 password,
                 authorized: true,
                 changedPassword: false
             });
             await user.save();
             sendSMS(user.id, user.phoneNumber);
-            return user;
+            return true;
         },
         userSignUp: async (parent, args, context, info) => {
+            const exist = await Users.findOne({ personelNumber: args.personelNumber });
+            if (exist) {
+                throw new Error("Duplicate personelNumber!");
+            }
             const rndPassword = randomstring.generate(8);
-            console.log(rndPassword);
             const password = await hashPassword(rndPassword);
             const user = new Users({
                 ...args,
+                _id: ObjectId().toString(),
                 password,
                 authorized: false,
                 changedPassword: false,
@@ -451,7 +488,7 @@ export const resolvers = {
             return user;
         },
         updateUser: async (parent, args, context, info) => {
-            const userId = isAuthenticated(context.req);;
+            const userId = isAuthenticated(context.req);
             const user = await Users.findByIdAndUpdate(userId, args, { upsert: true, new: true });
             // const values = {};
             // Object.entries(args).forEach(([key, value]) => {
@@ -541,6 +578,9 @@ export const resolvers = {
         },
         forgotPassword: async (parent, { personelNumber }, context, info) => {
             const user = await Users.findOne({ personelNumber });
+            if (!user) {
+                throw new Error("User not found!");
+            }
             sendSMS(user.id, user.phoneNumber);
             return true;
         },
@@ -650,7 +690,7 @@ export const resolvers = {
             //         subjectedTo: 'همه',
             //         toCategory: 'همه',
             //         tags: [`کلاس${i}`, `سال${i}`],
-            //         files: ['8498498421.jpg', 'asfdewrf2566.jpg', 'dwdqa46w48d.jpg']
+            //         files: ['d5ESsyXZunnamed (5).jpg', 'DYSwHigkunnamed (7).jpg']
             //     });
             //     await circularLetter.save();
             //     i++;

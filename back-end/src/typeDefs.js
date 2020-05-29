@@ -3,7 +3,7 @@ import { gql } from 'apollo-server-express';
 export const typeDefs = gql`
     
     type Query {
-        users: [UserOutput!]!
+        users(information: String, page: Int, limit: Int): userSearch!
         user: UserOutput!
         unauthenticatedUsers: [UserOutput]!
         files: [String]
@@ -20,7 +20,7 @@ export const typeDefs = gql`
 
     type Mutation {
         adminSignUp(firstName: String!, lastName: String!,
-         personelNumber: String!, identificationNumber: String!, phoneNumber: String!, isAdmin: Boolean!): UserOutput!
+         personelNumber: String!, identificationNumber: String!, phoneNumber: String!, isAdmin: Boolean!): Boolean!
         userSignUp(firstName: String!, lastName: String!,
          personelNumber: String!, identificationNumber: String!, phoneNumber: String!): Boolean!
         authenticateUser(id: ID!): UserOutput!
@@ -48,7 +48,7 @@ export const typeDefs = gql`
     }
 
     type User {
-        id: ID!
+        _id: String!
         firstName: String!
         lastName: String!
         password: String!
@@ -100,7 +100,7 @@ export const typeDefs = gql`
     }
 
     type UserOutput {
-        id: ID!
+        _id: String!
         firstName: String!
         lastName: String!
         personelNumber: String!
@@ -135,6 +135,11 @@ export const typeDefs = gql`
         circularLetter: CircularLetter!
         refrenceId: String
         filesName: [String]
+    }
+
+    type userSearch {
+        users: [UserOutput!]!
+        quantity: Int
     }
 
     input LoginUserInput {
