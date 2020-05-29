@@ -120,6 +120,7 @@ export const resolvers = {
                 throw new Error('Letter not found!');
             }
 
+            context.session.oldFile = circularLetter.files[0];
             let refrenceId = "";
             const referedTo = await CircularLetters.findOne({ number: circularLetter.referTo });
             if (referedTo) {
@@ -133,7 +134,6 @@ export const resolvers = {
                 tempFiles.push(`${imagePath}${file}`);
             });
             circularLetter.files = tempFiles;
-            context.session.oldFile = circularLetter.files[0];
 
             return {
                 circularLetter: circularLetter,
@@ -789,9 +789,9 @@ export const resolvers = {
 
             await CircularLetters.findByIdAndUpdate(args.id, args.data, { upsert: true, new: true });
 
-            if (context.session.oldFile && context.session.oldFile !== args.data.files[0]) {
-                const fileName = context.session.oldFile[0];
-                const index = fileName.lastIndexOf(".");
+            if (context.session.oldFile !== args.data.files[0]) {
+                let fileName = context.session.oldFile;
+                let index = fileName.lastIndexOf(".");
                 fs.unlinkSync(`./thumbnails/${fileName.substring(0, index)}-thumb${fileName.substring(index, fileName.length)}`, (err) => {
                     if (err) {
                         throw err;
