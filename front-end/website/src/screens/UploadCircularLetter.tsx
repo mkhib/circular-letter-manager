@@ -43,10 +43,6 @@ import {
   Redirect,
 } from 'react-router-dom';
 
-// const clientWidth = () => {
-//   return Math.max(window.innerWidth, document.documentElement.clientWidth) < RESPONSIVE_WIDTH ? 'column' : 'row';
-// };
-
 const useStyles = makeStyles(theme => ({
   titleDiv: {
     marginBottom: 15,
@@ -54,7 +50,6 @@ const useStyles = makeStyles(theme => ({
     fontFamily: 'FontNormalFD',
   },
   fieldTopBox: {
-    // flex: 1,
     display: 'flex',
     padding: 40,
     paddingRight: '10vmax',
@@ -105,14 +100,12 @@ const useStyles = makeStyles(theme => ({
   },
   menuItem: {
     fontFamily: 'FontNormal',
-    // fontSize: '2.1vmin',
     direction: 'ltr',
   },
   renderTagsBox: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    // alignSelf: 'center',
     width: '100%',
     flexWrap: 'wrap',
     marginRight: 103,
@@ -123,12 +116,10 @@ const useStyles = makeStyles(theme => ({
   select: {
     width: '100%',
     fontFamily: 'FontNormal',
-    // fontSize: '2.1vmin',
     marginBottom: 10,
   },
   leftSelect: {
     fontFamily: 'FontNormal',
-    // fontSize: '2vmin',
     width: '100%',
     marginBottom: 10,
   },
@@ -543,19 +534,12 @@ const UploadCircularLetter = (props: any) => {
                       }
                     }}
                     getNextStep={(activeStep: number) => {
-                      // if (activeStep - 1 === 0) {
-                      //   // validateDetails();
-                      // } else {
                       setActiveStep(activeStep);
-                      // }
                     }}
                     getPreviousStep={(activeStep: number) => {
                       setActiveStep(activeStep);
                     }}
                   >
-                    {/* <div className={classes.titleDiv}>
-          .مشخصات بخشنامه را وارد نمایید
-          </div> */}
                     {
                       activeStep === 0 && (
                         <Box className={classes.fieldTopBox}
@@ -567,7 +551,6 @@ const UploadCircularLetter = (props: any) => {
                           <Box className={classes.tagsTopBoxField}>
                             <Button
                               variant="contained"
-                              // onClick={handleOpen}
                               href="/editDropDowns"
                               style={{
                                 paddingRight: 50,
@@ -575,7 +558,6 @@ const UploadCircularLetter = (props: any) => {
                                 fontFamily: 'FontNormal',
                                 marginTop: 25,
                                 marginBottom: 20,
-                                // alignSelf: 'center',
                               }}
                             >
                               مدیریت مقاطع و حوزه‌ها

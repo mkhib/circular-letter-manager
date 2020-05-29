@@ -2,17 +2,14 @@ import React, { ReactElement } from 'react';
 import {
   View,
   Text,
-  TouchableHighlight,
   StyleSheet,
   Image,
-  ImageBackground,
   StyleProp,
   ViewStyle,
   TouchableOpacity,
 } from 'react-native';
 import { colors, gStyles, shape } from '../assets/styles/Styles';
 import { Actions } from 'react-native-router-flux';
-import backImage from '../assets/images/letterThumbnailBackground.jpg';
 
 interface ThumbnailProps {
   id: string;
@@ -99,7 +96,7 @@ const LetterThumbnail: React.FC<ThumbnailProps> = (props) => {
           <View>
             <Text style={styles.lineTitle}>
               شماره:
-              </Text>
+            </Text>
           </View>
           <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
             {handleNumber(props.number)}

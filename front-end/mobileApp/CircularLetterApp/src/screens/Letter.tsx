@@ -5,7 +5,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Actions } from 'react-native-router-flux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Loading from '../components/Loading';
-import ImageView from 'react-native-image-viewing';
 import { useQuery } from '@apollo/react-hooks';
 import { gStyles, colors, shape } from '../assets/styles/Styles';
 import TextAlert from '../components/TextAlert';
@@ -206,6 +205,9 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
           <ImageViewer
             imageUrls={images}
             // saveToLocalByLongPress
+            onCancel={()=>{
+              setIsVisible(false);
+            }}
             renderHeader={(currentInd) => {
               return (<CustomImageHeader
                 currentIndex={currentInd}
@@ -218,9 +220,6 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
               );
             }}
             enableSwipeDown
-            onCancel={() => {
-              setIsVisible(false);
-            }}
           />
         </Modal>
         <View
