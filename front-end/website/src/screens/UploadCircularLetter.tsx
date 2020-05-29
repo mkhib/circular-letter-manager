@@ -312,6 +312,7 @@ const UploadCircularLetter = (props: any) => {
   const [width, setWidth] = useState(window.innerWidth);
   const [height, setHeight] = useState(window.innerHeight);
   const [disabledButton, setDisabledButton] = useState(true);
+  const [lastStepMessage, setLastStepMessage] = useState('');
   const { loading, error, data } = useQuery(GET_ALL);
   useEffect(() => {
     if (data) {
@@ -406,31 +407,6 @@ const UploadCircularLetter = (props: any) => {
     return hasError;
   }
 
-  const validateDetails = () => {
-    schema.validate({
-      title,
-      date,
-      number,
-      type,
-      sender,
-      toCategory,
-      subjectedTo,
-      exportNumber,
-      tags,
-      importNumber,
-      numberOfFiles,
-      refrenceCircularID,
-    }, {
-      abortEarly: false,
-    }).then(() => {
-      props.setErrors([]);
-      setDisabledButton(false);
-    }).catch(e => {
-      props.setErrors(e.inner);
-      setDisabledButton(true);
-    });
-  }
-
   const handleDisabled = () => {
     if (activeStep === 0) {
       if (!(title && date && number && type && sender && toCategory && subjectedTo && tags.length > 0)) {
@@ -498,10 +474,23 @@ const UploadCircularLetter = (props: any) => {
   return (
     <Mutation mutation={DELETE_MULTI_FILES}>
       {(deleteMultiFiles: any, { data, loading }: any) => {
-        let deleteData = data;
         return (
-          <Mutation mutation={UPLOAD_CIRCULAR_LETTER}>
+          <Mutation mutation={UPLOAD_CIRCULAR_LETTER}
+          onCompleted={()=>{
+            setLastStepMessage('بخشنامه با موفقیت به ثبت رسید.');
+          }}
+          onError={(error: any) => {
+            if (error.message === 'GraphQL error: Number is taken!') {
+              setLastStepMessage('این شماره بخشنامه قبلا ثبت شده است');
+            } else {
+              setLastStepMessage('در ثبت بخشنامه خطایی رخ داده است لطفا دوباره تلاش کنید.');
+            }
+          }}
+          >
             {(circularLetterInit: any, { data, loading }: any) => {
+              if(loading){
+                setLastStepMessage('در حال ثبت بخشنامه...');
+              }
               return (
                 <Box style={{
                   display: 'flex',
@@ -514,6 +503,7 @@ const UploadCircularLetter = (props: any) => {
                 }}>
                   <Stepper
                     disabled={handleDisabled()}
+                    customLastStep={lastStepMessage}
                     onNext={(e: any) => {
                       if (e === 2) {
                         circularLetterInit({
