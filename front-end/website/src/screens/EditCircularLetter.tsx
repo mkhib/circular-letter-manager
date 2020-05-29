@@ -7,7 +7,6 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { useApolloClient } from '@apollo/react-hooks';
-import moment from 'moment';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
 import { withApollo, graphql } from 'react-apollo';
@@ -54,10 +53,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 
-// const clientWidth = () => {
-//   return Math.max(window.innerWidth, document.documentElement.clientWidth) < RESPONSIVE_WIDTH ? 'column' : 'row';
-// };
-
 const useStyles = makeStyles(theme => ({
   titleDiv: {
     marginBottom: 15,
@@ -65,7 +60,6 @@ const useStyles = makeStyles(theme => ({
     fontFamily: 'FontNormalFD',
   },
   fieldTopBox: {
-    // flex: 1,
     display: 'flex',
     padding: 40,
     paddingRight: '10vmax',
@@ -116,14 +110,12 @@ const useStyles = makeStyles(theme => ({
   },
   menuItem: {
     fontFamily: 'FontNormal',
-    // fontSize: '2.1vmin',
     direction: 'ltr',
   },
   renderTagsBox: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    // alignSelf: 'center',
     width: '100%',
     flexWrap: 'wrap',
     marginRight: 103,
@@ -134,12 +126,10 @@ const useStyles = makeStyles(theme => ({
   select: {
     width: '100%',
     fontFamily: 'FontNormal',
-    // fontSize: '2.1vmin',
     marginBottom: 10,
   },
   leftSelect: {
     fontFamily: 'FontNormal',
-    // fontSize: '2vmin',
     width: '100%',
     marginBottom: 10,
   },
@@ -294,14 +284,6 @@ mutation UploadCircular(
 }
 `;
 
-const DELETE_MULTI_FILES = gql`
-mutation DeleteMultiFiles(
-  $filenames:[String]!
-){
-  deleteMultiFiles(filenames: $filenames)
-}
-`;
-
 
 const schema = yup.object().shape({
   title: yup.string().required(),
@@ -356,21 +338,6 @@ query QueryLetters($id: ID!){
   }
 }
 `;
-
-// export const GET_ALL = gql`
-// query GetBothLists{
-//   categoriesQuery{
-//     subjectedTos { 
-//       id,
-//       name 
-//     },
-//     toCategories{
-//       id,
-//       name
-//     }
-//   }
-// }
-// `;
 
 function useQueryParam() {
   return new URLSearchParams(useLocation().search);
@@ -816,7 +783,7 @@ const EditCircularLetter = (props: any) => {
                             <Stepper
                               disabled={handleDisabled()}
                               returnDisabled={disableReturnStep()}
-                              returnHref={`/letter?${queryParam.get('id')}`}
+                              returnHref={`/letter?id=${queryParam.get('id')}`}
                               customLastStep={lastStepMessage}
                               customLabels={['ویرایش مشخصات بخشنامه', 'ویرایش  فایل‌های بخشنامه', 'کنترل اطلاعات ویرایش شده']}
                               onNext={(e: any) => {

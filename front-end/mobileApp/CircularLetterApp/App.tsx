@@ -3,7 +3,9 @@ import React, { useEffect } from 'react';
 import {
   View,
   StyleSheet,
+  BackHandler,
 } from 'react-native';
+import { Actions } from 'react-native-router-flux';
 import AsyncStorage from '@react-native-community/async-storage';
 import ApolloLinkTimeout from 'apollo-link-timeout';
 import { ApolloClient } from 'apollo-client';
@@ -80,17 +82,33 @@ const ProfileIcon = ({ focused }: any) => {
 const App = () => {
   useEffect(() => {
     SplashScreen.hide();
+    BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () =>
+      BackHandler.removeEventListener('hardwareBackPress', backAction);
   });
+  const backAction = () => {
+    const scene = Actions.currentScene;
+    console.log(scene);
+    if (scene === '_search') {
+      BackHandler.exitApp();
+      return true;
+    } else {
+      Actions.pop();
+    }
+    return true;
+  };
   return (
     <ApolloProvider client={client}>
-      <Router>
+      <Router
+        backAndroidHandler={() => { return Actions.pop(); }}
+      >
         <Stack key="root">
           <Scene key="auth" type="reset" hideNavBar>
             <Scene
               key="login"
               component={Login}
               title="ورود"
-              initial
+              // initial
               hideNavBar
             />
             <Scene
@@ -115,7 +133,7 @@ const App = () => {
           <Scene
             key="main"
             type="reset"
-            // initial
+            initial
             hideNavBar
           >
             <Tabs
