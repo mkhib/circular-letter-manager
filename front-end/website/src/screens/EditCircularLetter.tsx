@@ -711,7 +711,7 @@ const EditCircularLetter = (props: any) => {
       onCompleted={() => {
         client.resetStore();
         setLastStepMessage('تغییرات با موفقیت اعمال شد');
-        props.history.push(`/letter?id=${queryParam.get('id')}`);
+        // props.history.push(`/letter?id=${queryParam.get('id')}`);
       }}
       onError={(error: any) => {
         if (error.message === 'GraphQL error: Number is taken!') {

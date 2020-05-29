@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
   lineContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
+    backgroundColor: 'red',
   },
   imageBackground: {
     flex: 1,
