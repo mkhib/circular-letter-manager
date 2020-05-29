@@ -4,6 +4,7 @@ import path from 'path';
 import randomstring from 'randomstring';
 import { ObjectId } from 'mongodb';
 import moment from 'moment';
+import Jimp from 'jimp';
 import jMoment from 'moment-jalaali';
 import { encrypt, decrypt } from './util/securePassword';
 import Users from './models/user';
@@ -23,7 +24,8 @@ import { handleUnderTen } from './util/handleUnderTen';
 // import { sendRefreshToken } from './util/sendRefreshToken';
 // import { createRefreshToken, createAccessToken } from './util/auth';
 
-const imagePath = 'https://f23c40f46169.ngrok.io/images/';
+const imagePath = 'https://6317c2c5b5aa.ngrok.io/images/';
+const thumbPath = 'https://6317c2c5b5aa.ngrok.io/thumbnails/';
 String.prototype.allTrim = String.prototype.allTrim || function () {
     return this
         .replace(/ +/g, ' ')
@@ -57,6 +59,7 @@ export const resolvers = {
                     authorized: true
                 });
 
+                users.sort(dynamicSort('authorized', 'asc'));
                 users.sort(dynamicSort('lastName', 'asc'));
                 context.session.userSearch = users;
                 context.session.userPage = page;
@@ -219,7 +222,8 @@ export const resolvers = {
                 letters.forEach((letter) => {
                     const tempFiles = [];
                     letter.files.forEach((file) => {
-                        tempFiles.push(`${imagePath}${file}`);
+                        const index = file.lastIndexOf(".");
+                        tempFiles.push(`${thumbPath}${file.substring(0, index)}-thumb-${file.substring(index, file.length)}`);
                     });
                     letter.files = tempFiles;
                 });
@@ -385,7 +389,8 @@ export const resolvers = {
                 letters.forEach((letter) => {
                     const tempFiles = [];
                     letter.files.forEach((file) => {
-                        tempFiles.push(`${imagePath}${file}`);
+                        const index = file.lastIndexOf(".");
+                        tempFiles.push(`${thumbPath}${file.substring(0, index)}-thumb-${file.substring(index, file.length)}`);
                     });
                     letter.files = tempFiles;
                 });
@@ -450,6 +455,7 @@ export const resolvers = {
             });
             await user.save();
             sendSMS(user.id, user.phoneNumber);
+            context.session.userSearch = null;
             return true;
         },
         userSignUp: async (parent, args, context, info) => {
@@ -485,6 +491,7 @@ export const resolvers = {
                 throw new Error("User not found!")
             }
             await user.deleteOne();
+            context.session.userSearch = null;
             return user;
         },
         updateUser: async (parent, args, context, info) => {
@@ -580,6 +587,9 @@ export const resolvers = {
             const user = await Users.findOne({ personelNumber });
             if (!user) {
                 throw new Error("User not found!");
+            }
+            if (!user.authorized) {
+                throw new Error("User is not authorized!");
             }
             sendSMS(user.id, user.phoneNumber);
             return true;
@@ -712,8 +722,21 @@ export const resolvers = {
             //     });
             //     await circularLetter.save();
             // }
-
             const circularLetter = new CircularLetters({ ...args, _id: ObjectId().toString(), dateOfCreation: moment().unix().toString() });
+            for (const fileName of circularLetter.files) {
+                const index = fileName.lastIndexOf(".");
+                Jimp.read(`../images/${fileName}`)
+                    .then(smallFile => {
+                        return smallFile
+                            .resize(192, 256)
+                            .quality(72)
+                            .greyscale()
+                            .write(`../thumbnails/${fileName.substring(0, index)}-thumb${fileName.substring(index, fileName.length)}`);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+            }
             await circularLetter.save();
             context.session.searchResult = null;
             return true;
@@ -735,6 +758,7 @@ export const resolvers = {
             });
 
             await letter.deleteOne();
+            context.session.searchResult = null;
             return true;
         },
         updateCircularLetter: async (parent, args, context, info) => {
@@ -772,6 +796,7 @@ export const resolvers = {
             //         console.log(err)
             //     });
             // await newLetter.save();
+            context.session.searchResult = null;
             return true;
         },
         createToCategoryType: async (parent, args, context, info) => {

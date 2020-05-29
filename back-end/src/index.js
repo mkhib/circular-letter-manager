@@ -66,6 +66,7 @@ const SERVER = new ApolloServer({
 // });
 
 existsSync(path.join(__dirname, "../images")) || mkdirSync(path.join(__dirname, "../images"));
+existsSync(path.join(__dirname, "../thumbnails")) || mkdirSync(path.join(__dirname, "../thumbnails"));
 
 const limiter = new RateLimit({
     store: new MongoDBStore({
@@ -79,6 +80,7 @@ const limiter = new RateLimit({
 app.use(limiter);
 
 app.use("/images", express.static(path.join(__dirname, "../images")));
+app.use("/thumbnails", express.static(path.join(__dirname, "../thumbnails")));
 
 app.use(cors({
     credentials: true,
@@ -118,12 +120,6 @@ app.use(
         }
     })
 );
-
-app.get('/', (req, res, next) => {
-});
-
-app.post('/', (req, res, next) => {
-});
 
 // app.use(moesifMiddleware);
 
@@ -168,7 +164,6 @@ app.use((req, res, next) => {
 
 //     return res.send({ ok: true, accessToken: createAccessToken(user) });
 // });
-
 
 SERVER.applyMiddleware({
     app,

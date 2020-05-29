@@ -3,7 +3,7 @@ import { gql } from 'apollo-server-express';
 export const typeDefs = gql`
     
     type Query {
-        users(information: String, page: Int, limit: Int): userSearch!
+        users(information: String, page: Int, limit: Int): UserSearch!
         user: UserOutput!
         unauthenticatedUsers: [UserOutput]!
         files: [String]
@@ -137,7 +137,7 @@ export const typeDefs = gql`
         filesName: [String]
     }
 
-    type userSearch {
+    type UserSearch {
         users: [UserOutput!]!
         quantity: Int
     }
