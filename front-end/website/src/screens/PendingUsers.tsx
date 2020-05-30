@@ -133,7 +133,7 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
   } = props;
   useEffect(() => {
     if (data) {
-      // setPendingUsers(data.unauthenticatedUsers);
+      setPendingUsers(data.unauthenticatedUsers);
     }
   }, [data, setPendingUsers]);
   if (error) {
