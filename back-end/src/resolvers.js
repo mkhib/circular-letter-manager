@@ -24,7 +24,7 @@ import { handleUnderTen } from './util/handleUnderTen';
 // import { sendRefreshToken } from './util/sendRefreshToken';
 // import { createRefreshToken, createAccessToken } from './util/auth';
 
-const uri = 'https://6317c2c5b5aa.ngrok.io/';
+const uri = 'http://localhost:3600/';
 const imagePath = `${uri}images/`;
 const thumbPath = `${uri}thumbnails/`;
 String.prototype.allTrim = String.prototype.allTrim || function () {
@@ -44,8 +44,9 @@ export const resolvers = {
             isAuthenticated(context.req);
             let users = [];
             if (context.session.userSearch
-                && context.session.userPage == page
-                && context.session.userLimit == limit) {
+                && context.session.userSearchParam === information
+                && context.session.userPage === page
+                && context.session.userLimit === limit) {
                 users = context.session.userSearch;
             }
             else {
@@ -60,9 +61,9 @@ export const resolvers = {
                     authorized: true
                 });
 
-                users.sort(dynamicSort('authorized', 'asc'));
                 users.sort(dynamicSort('lastName', 'asc'));
                 context.session.userSearch = users;
+                context.session.userSearchParam = information;
                 context.session.userPage = page;
                 context.session.userLimit = limit;
             }
@@ -79,7 +80,7 @@ export const resolvers = {
             const userId = isAuthenticated(context.req);
             return Users.findById(userId);
         },
-        unauthenticatedUsers: (parent, args, context, info) => {
+        unauthenticatedUsers: async (parent, { page, limit }, context, info) => {
             isAuthenticated(context.req);
             return Users.find({ authorized: false });
         },
@@ -476,6 +477,7 @@ export const resolvers = {
                 isAdmin: false
             });
             await user.save();
+            context.session.newUsers = null;
             return true;
         },
         authenticateUser: async (parent, args, context, info) => {
@@ -484,6 +486,7 @@ export const resolvers = {
                 throw new Error("User not found!");
             }
             sendSMS(user.id, user.phoneNumber);
+            context.session.newUsers = null;
             return user;
         },
         deleteUser: async (parent, args, context, info) => {
@@ -494,6 +497,7 @@ export const resolvers = {
             }
             await user.deleteOne();
             context.session.userSearch = null;
+            context.session.newUsers = null;
             return user;
         },
         updateUser: async (parent, args, context, info) => {
@@ -515,7 +519,7 @@ export const resolvers = {
             const user = await Users.findOne({
                 personelNumber: args.data.personelNumber
             }, function (err, myUser) {
-                console.log(err);
+                console.error(err);
             });
 
             if (!user) {
@@ -751,14 +755,17 @@ export const resolvers = {
             }
 
             letter.files.forEach(async (file) => {
-                const index = fileName.lastIndexOf(".");
                 await Files.deleteOne({ filename: file });
                 fs.unlinkSync(`./images/${file}`);
             }, (err) => {
                 console.error(err);
-                fs.unlinkSync(`./thumbnails/${thumbPath}${file.substring(0, index)}-thumb${file.substring(index, file.length)}`);
-            }, (err) => {
-                console.error(err);
+            });
+            const fileName = letter.files[0];
+            const index = fileName.lastIndexOf(".");
+            fs.unlinkSync(`./thumbnails/${fileName.substring(0, index)}-thumb${fileName.substring(index, fileName.length)}`, (err) => {
+                if (err) {
+                    throw err;
+                }
             });
 
             await letter.deleteOne();
