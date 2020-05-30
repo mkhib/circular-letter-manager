@@ -90,7 +90,11 @@ const LetterThumbnail: React.FC<ThumbnailProps> = (props) => {
           style={styles.imageStyle}
           source={{ uri: props.image }}
         />
-        <Line title="عنوان:" value={props.title} style={StyleSheet.flatten([{ flex: 1 }])} />
+        <Line
+          title="عنوان:"
+          value={props.title}
+          style={StyleSheet.flatten([{ flex: 1, alignItems: 'flex-start' }])}
+        />
         <Line title="تاریخ:" value={props.date} />
         <View style={styles.lineContainer}>
           <View>
@@ -102,7 +106,7 @@ const LetterThumbnail: React.FC<ThumbnailProps> = (props) => {
             {handleNumber(props.number)}
           </View>
         </View>
-        <Line title="صادر کننده:" value={props.sender} style={StyleSheet.flatten([{ flex: 1 }])} />
+        <Line title="صادر کننده:" value={props.sender} style={StyleSheet.flatten([{ flex: 1, alignItems: 'flex-start' }])} />
       </View>
       {/* </ImageBackground> */}
     </TouchableOpacity>
@@ -138,7 +142,8 @@ const styles = StyleSheet.create({
   lineContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    backgroundColor: 'red',
+    alignItems: 'center',
+    // backgroundColor: 'red',
   },
   imageBackground: {
     flex: 1,
