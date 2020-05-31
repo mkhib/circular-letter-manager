@@ -251,6 +251,7 @@ const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
               flexDirection: 'column',
               flex: 1,
               padding: 40,
+              backgroundAttachment: 'fixed',
               backgroundImage: `url(${usersBack})`,
               backgroundSize: '100% 100%',
               direction: 'rtl',
