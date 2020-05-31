@@ -5,3 +5,4 @@ ngrok.exe
 images
 .vercel
 thumbnails
+access.log

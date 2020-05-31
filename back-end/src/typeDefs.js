@@ -44,7 +44,6 @@ export const typeDefs = gql`
         deleteToCategoryType(id: ID!): ToCategoryType!
         createSubjectedToType(name: String!): SubjectedToType!
         deleteSubjectedToType(id: ID!): SubjectedToType!
-        # revokeRefreshTokenForUser(id: ID!): Boolean!
     }
 
     type User {
@@ -58,17 +57,11 @@ export const typeDefs = gql`
         authorized: Boolean!
         changedPassword: Boolean!
         isAdmin: Boolean!
-        # tokenVersion: Int
     }
     
     type AuthPayLoad {
         user: UserOutput!
         token: String!
-    }
-
-    type Response {
-        condition: Boolean!
-        filename: String!
     }
 
     type File {

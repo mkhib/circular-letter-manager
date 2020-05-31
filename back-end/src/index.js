@@ -15,6 +15,8 @@ import uuid from 'uuid';
 import helmet from 'helmet';
 import RateLimit from 'express-rate-limit';
 import MongoDBStore from 'rate-limit-mongo';
+import morgan from 'morgan';
+import fs from 'fs';
 import { typeDefs } from './typeDefs';
 import { resolvers } from './resolvers';
 
@@ -53,7 +55,7 @@ const SERVER = new ApolloServer({
         })
 });
 
-// var moesifMiddleware = moesif({
+// let moesifMiddleware = moesif({
 //     applicationId: 'eyJhcHAiOiIzNDU6NjUzIiwidmVyIjoiMi4wIiwib3JnIjoiODc6MjM0IiwiaWF0IjoxNTkwNTM3NjAwfQ.LJfUFN2RtgjCMcnznKf6Mn6dep0JNq3yMZj-l_WOm7M',
 
 //     // Set to false if you don't want to capture req/resp body
@@ -64,6 +66,10 @@ const SERVER = new ApolloServer({
 //         return req.user ? req.user.id : undefined;
 //     },
 // });
+
+let acessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
+
+app.use(morgan('combined', { stream: acessLogStream }));
 
 existsSync(path.join(__dirname, "../images")) || mkdirSync(path.join(__dirname, "../images"));
 existsSync(path.join(__dirname, "../thumbnails")) || mkdirSync(path.join(__dirname, "../thumbnails"));
@@ -109,7 +115,7 @@ app.use(
         }),
         genid: uuid,
         secret: "dwpoqreKPO@KWEPD24ePOWRFKI0i90w*W^$%xklczm",
-        name: 'qid',
+        name: 'GraphSeSSID',
         resave: false,
         saveUninitialized: false,
         cookie: {
@@ -124,7 +130,7 @@ app.use(
 // app.use(moesifMiddleware);
 
 app.use((req, res, next) => {
-    const token = req.cookies["jwt"];
+    const token = req.cookies["prpss"];
     try {
         const userId = verify(token, JWT_TOKEN_SECRET)
         req.userId = userId;
@@ -132,38 +138,6 @@ app.use((req, res, next) => {
     catch{ }
     next();
 });
-
-// app.get("/", (_req, res) => res.send("hello"));
-// app.post("/refresh_token", async (req, res) => {
-//     const token = req.cookies.jid;
-//     if (!token) {
-//         return res.send({ ok: false, accessToken: "" });
-//     }
-
-//     let payload: any = null;
-//     try {
-//         payload = verify(token, process.env.REFRESH_TOKEN_SECRET!);
-//     } catch (err) {
-//         console.log(err);
-//         return res.send({ ok: false, accessToken: "" });
-//     }
-
-//     // token is valid and
-//     // we can send back an access token
-//     const user = await User.findOne({ id: payload.userId });
-
-//     if (!user) {
-//         return res.send({ ok: false, accessToken: "" });
-//     }
-
-//     if (user.tokenVersion !== payload.tokenVersion) {
-//         return res.send({ ok: false, accessToken: "" });
-//     }
-
-//     sendRefreshToken(res, createRefreshToken(user));
-
-//     return res.send({ ok: true, accessToken: createAccessToken(user) });
-// });
 
 SERVER.applyMiddleware({
     app,
