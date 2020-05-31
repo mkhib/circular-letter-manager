@@ -14,8 +14,10 @@ import {
   addFileUpload,
   setFileUpload,
   setErrors,
+  setFileLoading,
   setListOfCategories,
   setListOfSubjects,
+  fileStatusType,
 } from '../redux/slices/data';
 import * as yup from 'yup';
 import Box from '@material-ui/core/Box';
@@ -33,8 +35,6 @@ import { MenuItem, InputLabel } from '@material-ui/core';
 import Stepper from '../components/Stepper';
 import DatePickerFarsi from '../components/DatePickerFarsi';
 import Backdrop from '@material-ui/core/Backdrop';
-import Modal from '@material-ui/core/Modal';
-import Fade from '@material-ui/core/Fade';
 import { GET_ALL } from './EditSubjectsAndCategories';
 import { useQuery } from '@apollo/react-hooks';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -298,6 +298,7 @@ const UploadCircularLetter = (props: any) => {
     exportNumber,
     tags,
     importNumber,
+    setFileLoading,
     numberOfFiles,
     refrenceCircularID,
     setAnyThing,
@@ -311,7 +312,7 @@ const UploadCircularLetter = (props: any) => {
   const [open, setOpen] = React.useState(false);
   const [width, setWidth] = useState(window.innerWidth);
   const [height, setHeight] = useState(window.innerHeight);
-  const [disabledButton, setDisabledButton] = useState(true);
+  const [disabledButton, setDisabledButton] = useState(false);
   const [lastStepMessage, setLastStepMessage] = useState('');
   const { loading, error, data } = useQuery(GET_ALL);
   useEffect(() => {
@@ -358,6 +359,16 @@ const UploadCircularLetter = (props: any) => {
     })
   };
 
+  const handleBackDisable = () => {
+    let disabled = false;
+    uploadFilesStatus.forEach((fileStatus: fileStatusType) => {
+      if (fileStatus.loading) {
+        disabled = true;
+      }
+    });
+    return disabled;
+  }
+
   const handleUploadFiles = (no: number, addFile: any) => {
     const upload = [];
     for (let i = 0; i < no; i++) {
@@ -366,6 +377,12 @@ const UploadCircularLetter = (props: any) => {
           style={{ marginTop: 40 }}
           key={i.toString()}>
           <UploadOneFile
+            getLoading={(loading: boolean) => {
+              setFileLoading({
+                index: i,
+                loading: loading,
+              });
+            }}
             file={uploadFilesStatus[i]}
             imageStyle={{
               height: 256,
@@ -377,12 +394,14 @@ const UploadCircularLetter = (props: any) => {
                 index: i,
                 status: false,
                 link: '',
+                loading: false,
               });
             }}
             onCompleted={(data: any) => {
               setFileUpload({
                 index: i,
                 status: true,
+                loading: false,
                 link: data.uploadFile.filePath,
                 name: data.uploadFile.filename,
               });
@@ -476,25 +495,24 @@ const UploadCircularLetter = (props: any) => {
       {(deleteMultiFiles: any, { data, loading }: any) => {
         return (
           <Mutation mutation={UPLOAD_CIRCULAR_LETTER}
-          onCompleted={()=>{
-            setLastStepMessage('بخشنامه با موفقیت به ثبت رسید.');
-          }}
-          onError={(error: any) => {
-            if (error.message === 'GraphQL error: Number is taken!') {
-              setLastStepMessage('این شماره بخشنامه قبلا ثبت شده است');
-            } else {
-              setLastStepMessage('در ثبت بخشنامه خطایی رخ داده است لطفا دوباره تلاش کنید.');
-            }
-          }}
+            onCompleted={() => {
+              setLastStepMessage('بخشنامه با موفقیت به ثبت رسید.');
+            }}
+            onError={(error: any) => {
+              if (error.message === 'GraphQL error: Number is taken!') {
+                setLastStepMessage('این شماره بخشنامه قبلا ثبت شده است');
+              } else {
+                setLastStepMessage('در ثبت بخشنامه خطایی رخ داده است لطفا دوباره تلاش کنید.');
+              }
+            }}
           >
             {(circularLetterInit: any, { data, loading }: any) => {
-              if(loading){
+              if (loading) {
                 setLastStepMessage('در حال ثبت بخشنامه...');
               }
               return (
                 <Box style={{
                   display: 'flex',
-                  // minHeight: height,
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundImage: `url(${circularBack})`,
@@ -503,6 +521,7 @@ const UploadCircularLetter = (props: any) => {
                 }}>
                   <Stepper
                     disabled={handleDisabled()}
+                    backDisabled={handleBackDisable()}
                     customLastStep={lastStepMessage}
                     onNext={(e: any) => {
                       if (e === 2) {
@@ -548,6 +567,7 @@ const UploadCircularLetter = (props: any) => {
                                 fontFamily: 'FontNormal',
                                 marginTop: 25,
                                 marginBottom: 20,
+                                alignSelf: width <= RESPONSIVE_WIDTH ? 'center' : '',
                               }}
                             >
                               مدیریت مقاطع و حوزه‌ها
@@ -1040,6 +1060,7 @@ export default connect(mapStateToProps, {
   addFile,
   addTag,
   removeTag,
+  setFileLoading,
   clearGraphqlError,
   setErrors,
 })(UploadCircularLetter as any);

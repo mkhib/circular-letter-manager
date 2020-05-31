@@ -4,6 +4,7 @@ import Box from '@material-ui/core/Box';
 import gql from 'graphql-tag';
 import {
   useLocation,
+  Redirect,
 } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Pagination from '@material-ui/lab/Pagination';
@@ -188,7 +189,14 @@ const Letter = (props: any) => {
     return tagsToShow;
   }
   if (loading) return null;
-  if (error) return `Error! ${error}`;
+  if (error) {
+    if (error.message === 'GraphQL error: Authentication required') {
+      return (<Redirect to={{
+        pathname: '/login',
+      }} />)
+    }
+    return `Error! ${error}`;
+  }
   return (
     <Mutation mutation={DELETE_CIRCULAR_LETTER}>
       {(deleteCircularLetter: any, { data, loading }: any) => {
@@ -323,6 +331,11 @@ const Letter = (props: any) => {
               <Box className={classes.line}>
                 <Box style={{ marginRight: 5, display: 'flex', flexDirection: 'row' }}>
                   {handleNumber(queryData.importNumber) || handleNumber(queryData.exportNumber)}
+                </Box>
+                <Box
+                  style={{ marginRight: 5 }}
+                >
+                  {(!queryData.importNumber && !queryData.exportNumber) && 'ندارد'}
                 </Box>
                 {queryData.importNumber ? ':شماره ثبت وارده' : ':شماره ثبت صادره'}
               </Box>

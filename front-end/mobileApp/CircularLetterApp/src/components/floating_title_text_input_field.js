@@ -93,7 +93,7 @@ export class FloatingTitleTextInputField extends Component {
                         value={this.props.value}
                         style={[Styles.textInput, this.props.textInputStyles]}
                         ref={forwardedRef}
-                        autoCapitalize={false}
+                        autoCapitalize="none"
                         underlineColorAndroid="transparent"
                         onFocus={this._handleFocus}
                         returnKeyType={this.props.returnKeyType}

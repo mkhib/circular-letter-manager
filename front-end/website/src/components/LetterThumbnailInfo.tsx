@@ -1,9 +1,7 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
-import { setAnyThing } from '../redux/slices/data';
 
 const useStyles = makeStyles(theme => ({
   wholeButton: {
@@ -11,7 +9,10 @@ const useStyles = makeStyles(theme => ({
     marginBottom: 20,
   },
   container: {
-    fontFamily: 'FontNormalFD'
+    fontFamily: 'FontNormalFD',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   imageThumbnail: {
     height: 256,
@@ -48,16 +49,10 @@ const handleNumber = (numberToProcess: string) => {
   }
 }
 
-const LetterThumbnailInfo = ({ title, date, files, from, id, setAnyThing, number }: any) => {
+const LetterThumbnailInfo = ({ title, date, files, from, id, number }: any) => {
   const classes = useStyles();
   return (
     <Button
-      onClick={() => {
-        setAnyThing({
-          theThing: 'requestedLetter',
-          data: id
-        });
-      }}
       className={classes.wholeButton}
       href={`/letter?id=${id}`}
     >
@@ -66,12 +61,11 @@ const LetterThumbnailInfo = ({ title, date, files, from, id, setAnyThing, number
         <Box style={{
           display: 'flex',
           flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent:'center',
+          justifyContent: 'center',
         }}>
           {title}
           <Box style={{
-            marginLeft: 5
+            marginLeft: 2.5
           }}>
             :
           </Box>
@@ -85,28 +79,43 @@ const LetterThumbnailInfo = ({ title, date, files, from, id, setAnyThing, number
         <Box style={{
           display: 'flex',
           flexDirection: 'row',
-          alignItems: 'center',
           justifyContent: 'center',
         }}>
           {handleNumber(number)}
-          <Box style={{ marginLeft: 5 }}>
+          <Box style={{ marginLeft: 2.5 }}>
             :شماره
           </Box>
         </Box>
         <Box style={{
           display: 'flex',
+          // flexWrap: 'wrap-reverse',
           flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent:'center',
+          justifyContent: 'center',
         }}>
-          {from}
-          <Box style={{
-            marginLeft: 5
-          }}>
-            :
+          <Box
+            style={{
+              flexWrap: 'wrap',
+              // alignSelf: 'flex-start',
+              justifyContent:'flex-end'
+            }}
+          >
+            {from}
           </Box>
-          <Box>
-            صادرکننده
+          <Box
+            style={{
+              flexWrap: 'nowrap',
+              display: 'flex',
+              flexDirection: 'row',
+            }}
+          >
+            <Box style={{
+              marginLeft: 2.5,
+            }}>
+              :
+          </Box>
+            <Box>
+              صادرکننده
+          </Box>
           </Box>
         </Box>
       </Box>
@@ -115,6 +124,4 @@ const LetterThumbnailInfo = ({ title, date, files, from, id, setAnyThing, number
 }
 
 
-export default connect(null, {
-  setAnyThing
-})(LetterThumbnailInfo);
+export default LetterThumbnailInfo;

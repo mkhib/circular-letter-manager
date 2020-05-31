@@ -42,11 +42,6 @@ export const QUERY_IMAGE = gql`
 
 
 const UploadOneFile = (props) => {
-  // const { data, loading } = useQuery(QUERY_IMAGE);
-  // console.log('data', data);
-  // if (loading) {
-  //   return <div>loading...</div>;
-  // }
   function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
   }
@@ -65,17 +60,17 @@ const UploadOneFile = (props) => {
   return (
     <Mutation mutation={UPLOAD_FILE} onError={(e) => {
       openEditFileFailure();
-      console.log('uploadError', e);
     }} onCompleted={(data) => {
       props.onCompleted(data);
     }}>
       {(uploadFile, { data, loading }) => {
         let loading1 = loading;
-        console.log('okkkk', data, loading);
+        if (props.getLoading) {
+          props.getLoading(loading);
+        }
         return (
           <Mutation mutation={DELETE_FILE}>
             {(deleteFile, { data, loading }) => {
-              console.log('newLoad', loading, data);
               return (
                 <React.Fragment>
                   <Snackbar open={openError} autoHideDuration={6000} onClose={closeEditFileFailure}>

@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "سامانه بخشنامه‌ها",
+  "name": "سامانه جست و جو و بارگذاری بخشنامه‌ها",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,12 +8,7 @@
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
+      "src": "clogo512.png",
       "type": "image/png",
       "sizes": "512x512"
     }

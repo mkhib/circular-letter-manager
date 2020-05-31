@@ -230,7 +230,7 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
                     direction: 'rtl',
                   }}
                 >
-                  <Snack open={openSnack} message={snackOption.message} severity={snackOption.severity} onClose={closeSnackbar} />
+                  <Snack open={openSnack} autoHideDuration={10000} message={snackOption.message} severity={snackOption.severity} onClose={closeSnackbar} />
                   {pendingUsers.length !== 0 && <Box
                     style={{
                       display: 'flex',

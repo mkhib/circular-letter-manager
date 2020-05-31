@@ -1,7 +1,6 @@
 import React, { forwardRef, useRef, useImperativeHandle } from 'react';
 import gql from 'graphql-tag';
 import * as yup from 'yup';
-import { useMutation } from '@apollo/react-hooks';
 import { connect } from 'react-redux';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -9,8 +8,6 @@ import TextInput from '../components/TextInput';
 import { Mutation } from '@apollo/react-components';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
-import { logoutWithoutChangeRoute } from '../redux/slices/user';
-import Link from '@material-ui/core/Link';
 import {
   setAnything,
   clearPersonelNumber,
@@ -23,8 +20,10 @@ import {
   setGraphqlError,
   clearGraphqlError,
 } from '../redux/slices/data';
-import loginBack from '../assets/images/loginBack.jpg'
+import loginBack from '../assets/images/loginBack.jpg';
+import Snack from '../components/Snack';
 var CryptoJS = require('react-native-crypto-js');
+var { sessionService } = require('redux-react-session');
 
 const useStyles = makeStyles(theme => ({
   button: {
@@ -38,81 +37,68 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-interface LoginProps {
-  personelNumber: string;
-  password: string;
+interface ChangePasswordLockProps {
+  oldPassword: string;
+  newPassword: string;
+  againNewPassword: string;
   setAnything: any;
   location: any;
   history: any;
   user: string;
-  login: any;
   errors: Array<string>;
   setGraphqlError: any;
   graphqlError: any;
   setErrors: any;
   clearGraphqlError: any;
-  logoutWithoutChangeRoute: any;
 }
 
-const LOGIN = gql`
-mutation Login(
- $data: LoginUserInput!){
-  login(
-  data: $data,
-  ){
-    user{
-      _id
-      firstName
-      lastName
-      isAdmin
-      changedPassword
-    }
-  }
+interface SnackState {
+  message: string;
+  severity: 'success' | 'error';
 }
-`;
 
-const LOGOUT = gql`
-mutation Logout{
-  logout
+const CHANGE_THAT_PASSWORD = gql`
+mutation ChangePassword($password: String!){
+  changePasswordOnApp(password: $password)
 }
 `;
 
 let schema = yup.object().shape({
-  personelNumber: yup.string().required('شماره پرسنلی وارد نشده است.'),
-  password: yup.string().required('رمزعبور وارد نشده است.'),
+  newPassword: yup.string().min(8, 'رمزعبور جدید باید حداقل 8 کاراکتر باشد').required('رمزعبور جدید وارد نشده است'),
+  againNewPassword: yup.string().min(8, 'تکرار رمزعبور باید حداقل 8 کاراکتر باشد').required('تکرار رمزعبور وارد نشده است').oneOf([yup.ref('newPassword')], 'تکرار رمزعبور جدید منطبق نیست')
 });
 
-const Login: React.FunctionComponent<LoginProps> = (props) => {
-  const [
-    logout,
-    { loading: logoutLoading, error: logoutnError },
-  ] = useMutation(LOGOUT);
+var
+  persianNumbers = [/۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g],
+  arabicNumbers = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g],
+  fixNumbers = function (str: any) {
+    if (typeof str === 'string') {
+      for (var i = 0; i < 10; i++) {
+        str = str.replace(persianNumbers[i], i).replace(arabicNumbers[i], i);
+      }
+    }
+    return str;
+  };
+
+const ChangePasswordLock: React.FunctionComponent<ChangePasswordLockProps> = (props) => {
   const {
-    personelNumber,
-    password,
     setAnything,
-    logoutWithoutChangeRoute,
+    newPassword,
+    againNewPassword,
   } = props;
   const classes = useStyles();
-
-  React.useEffect(() => {
-    logout();
-    logoutWithoutChangeRoute();
-  }, [logout, logoutWithoutChangeRoute]);
-
-
-  const onSubmit = (history: any, firstName: string, lastName: string, isAdmin: boolean, id: string, changedPassword: boolean) => {
-    const { login } = props;
-    login({
-      personelNumber,
-      id,
-      isAdmin,
-      firstName,
-      lastName,
-      changedPassword,
-    }, history);
-  }
-
+  const [errs, setErrs] = React.useState([]);
+  const [openSnack, setOpenSnack] = React.useState(false);
+  const [snackOption, setSnackOption] = React.useState<SnackState>({ message: '', severity: "success" })
+  const openSnackbar = () => {
+    setOpenSnack(true);
+  };
+  const closeSnackbar = (event?: React.SyntheticEvent, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnack(false);
+  };
   const errorCheck = (name: string) => {
     let hasError = false;
     props.errors.forEach((errorName) => {
@@ -126,8 +112,22 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
   const handleErrorMessage = (message: string) => {
     if (message === 'Network error: Failed to fetch') {
       return '.لطفا اتصال خود به اینترنت را بررسی کنید'
-    } else {
-      return '.نام‌کاربری یا رمز عبور نادرست است'
+    }
+    else {
+      return '.مشکلی پیش آمده است'
+    }
+  }
+
+  const findErr = (name: string) => {
+    let errorMessage = '';
+    if (errs.length > 0) {
+      errs.forEach((error: any) => {
+        if (error.params.path === name) {
+          errorMessage = error.message;
+          return true;
+        }
+      });
+      return errorMessage;
     }
   }
 
@@ -144,43 +144,67 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
     }
   }
   const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
+
   return (<Mutation
-    mutation={LOGIN}
+    mutation={CHANGE_THAT_PASSWORD}
+    onCompleted={() => {
+      setAnything({
+        theThing: 'newPassword',
+        data: ''
+      });
+      setAnything({
+        theThing: 'againNewPassword',
+        data: ''
+      });
+      setSnackOption({
+        message: 'رمزعبور شما با موفقیت به تغییر کرد شما به صورت خودکار به صفحه بعد منتقل خواهید شد',
+        severity: 'success',
+      });
+      openSnackbar();
+      sessionService.loadUser().then((user: any) => {
+        console.log('mokh', user);
+        sessionService.saveUser({ ...user, changedPassword: true })
+          .then(() => {
+            props.history.push('/search-letter');
+          }).catch((err: any) => console.error(err));
+      })
+    }}
     onError={(err: any) => {
+      console.log(err.message);
+      setSnackOption({
+        message: 'تغییر رمز عبور شما با مشکل مواجه شد',
+        severity: 'error',
+      });
+      openSnackbar();
       props.setGraphqlError(err);
     }}
   >
-    {(login: any, { data, error, loading }: any) => {
-      const onRealLogin = () => {
-        let cipherPass = CryptoJS.AES.encrypt(password, key).toString();
-        login({
+    {(changePassword: any, { data, error, loading }: any) => {
+      const onChangePassword = () => {
+        let cipherNewPass = CryptoJS.AES.encrypt(fixNumbers(newPassword), key).toString();
+        changePassword({
           variables: {
-            data: {
-              personelNumber: personelNumber,
-              password: cipherPass
-            },
+            password: cipherNewPass,
           },
         });
       };
       const validateAndLogin = () => {
+        setErrs([]);
         props.clearGraphqlError();
         schema.validate({
-          personelNumber,
-          password,
+          newPassword,
+          againNewPassword,
         }, {
           abortEarly: false
         }).then(() => {
           props.setErrors([]);
-          onRealLogin();
+          onChangePassword();
         }).catch((e: any) => {
+          setErrs(e.inner);
           props.setErrors(e.inner);
         });
       }
       const SubmitButton = withRouter(({ history }) => {
-        if (data) {
-          console.log(data);
-          onSubmit(history, data.login.user.firstName, data.login.user.lastName, data.login.user.isAdmin, data.login.user._id, data.login.user.changedPassword);
-        }
         return (
           <Button
             className={classes.button}
@@ -188,7 +212,7 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
             color="primary"
             onClick={validateAndLogin}
           >
-            {loading ? <CircularProgress style={{ height: 24, width: 24 }} /> : 'ورود'}
+            {loading ? <CircularProgress style={{ height: 24, width: 24 }} /> : 'تغییر رمزعبور'}
           </Button>
         );
       });
@@ -210,36 +234,20 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
             paddingRight: 100,
             flex: 1,
           }}>
+            <Snack open={openSnack} message={snackOption.message} severity={snackOption.severity} onClose={closeSnackbar} />
             <Box className={classes.titleBox}>
-              به سامانه بارگذاری و جست و جو بخشنامه‌ها خوش‌آمدید
+              برای ادامه لطفا یک رمز عبور جدید انتخاب کنید
             </Box>
             {renderError(error)}
             <TextInput
-              id="personelNumber"
-              label="شماره پرسنلی"
-              error={errorCheck('personelNumber')}
-              value={personelNumber}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setAnything({
-                  theThing: 'personelNumber',
-                  data: event.target.value,
-                });
-              }}
-              onKeyUp={(e: any) => {
-                const enterCode = 13;
-                if (e.which === enterCode) {
-                  validateAndLogin();
-                }
-              }}
-            />
-            <TextInput
-              id="password"
-              label="رمزعبور"
-              error={errorCheck('password')}
+              id="newPassword"
+              label="رمزعبور جدید"
+              error={errorCheck('newPassword')}
               type="password"
-              value={password}
+              helperText={findErr('newPassword')}
+              value={newPassword}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAnything({
-                theThing: 'password',
+                theThing: 'newPassword',
                 data: event.target.value
               })}
               onKeyUp={(e: any) => {
@@ -249,21 +257,24 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
                 }
               }}
             />
-            <Link
-              href="forgot-password"
-              style={{
-                marginBottom: 10,
+            <TextInput
+              id="againNewPassword"
+              label="تکرار رمزعبور جدید"
+              error={errorCheck('againNewPassword')}
+              helperText={findErr('againNewPassword')}
+              type="password"
+              value={againNewPassword}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAnything({
+                theThing: 'againNewPassword',
+                data: event.target.value
+              })}
+              onKeyUp={(e: any) => {
+                const enterCode = 13;
+                if (e.which === enterCode) {
+                  validateAndLogin();
+                }
               }}
-            >
-              <Box style={{
-                display: 'flex',
-                flexDirection: 'row',
-                fontFamily: 'FontNormal',
-                fontSize: 14,
-              }}>
-                رمزعبور خود را فراموش کرده‌اید؟
-              </Box>
-            </Link>
+            />
             <SubmitButton />
           </Box>
         </Box>
@@ -275,8 +286,9 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
 
 const mapStateToProps = (state: any) => {
   const {
-    personelNumber,
-    password,
+    oldPassword,
+    newPassword,
+    againNewPassword,
     errors,
     user,
   } = state.userData;
@@ -290,18 +302,18 @@ const mapStateToProps = (state: any) => {
   return {
     checked,
     authenticated,
-    personelNumber,
     graphqlError,
-    password,
     errors,
     user,
+    oldPassword,
+    newPassword,
+    againNewPassword,
   };
 };
 
 export default connect(mapStateToProps, {
   login,
   setErrors,
-  logoutWithoutChangeRoute,
   clearGraphqlError,
   setPersonelNumber,
   setPassword,
@@ -309,4 +321,4 @@ export default connect(mapStateToProps, {
   setGraphqlError,
   clearAnyThing,
   clearPersonelNumber,
-})(Login);
+})(ChangePasswordLock);

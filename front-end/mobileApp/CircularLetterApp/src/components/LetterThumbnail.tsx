@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   lineContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    alignItems: 'center',
+    // alignItems: 'center',
     // backgroundColor: 'red',
   },
   imageBackground: {

@@ -38,7 +38,7 @@ const userSlice = createSlice({
           .then(() => {
             action.payload.history.push('/search-letter');
           }).catch(err => console.error(err));
-      })
+      });
     },
     logoutAction(_state, action) {
       sessionApi.logout().then(() => {

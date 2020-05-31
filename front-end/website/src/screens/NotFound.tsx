@@ -2,6 +2,7 @@ import React from 'react';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import notFound from '../assets/images/notFound.png';
+document.title = " 404سامانه بخشنامه"
 
 const useStyles = makeStyles(() => ({
   wholePage: {
