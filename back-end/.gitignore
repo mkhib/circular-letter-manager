@@ -4,3 +4,5 @@ ngrok.exe
 .vscode
 images
 .vercel
+thumbnails
+access.log

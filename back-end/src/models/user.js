@@ -42,17 +42,7 @@ const userSchema = new Schema({
     isAdmin: {
         type: Boolean,
         required: true
-    },
-    // tokenVersion: {
-    //     type: Number,
-    //     default: 0
-    // }
+    }
 });
-
-// userSchema.set('toObjenct', { viruals: true });
-
-// var Users = mongoose.model('User', userSchema);
-
-// module.exports = Users;
 
 export default mongoose.model('User', userSchema);

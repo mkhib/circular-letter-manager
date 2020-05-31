@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
 
-const fileSchema = new mongoose.Schema({
+const fileSchema = new Schema({
   filename: {
     type: String,
     required: true
@@ -15,8 +16,4 @@ const fileSchema = new mongoose.Schema({
   }
 });
 
-fileSchema.set('toObjenct', { viruals: true });
-
-var Files = mongoose.model('Upload', fileSchema);
-
-module.exports = Files;
+export default mongoose.model('Upload', fileSchema);

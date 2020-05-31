@@ -4,12 +4,11 @@ import path from 'path';
 import randomstring from 'randomstring';
 import { ObjectId } from 'mongodb';
 import moment from 'moment';
-import jMoment from 'moment-jalaali';
-import { encrypt, decrypt } from './util/securePassword';
+import Jimp from 'jimp';
+import { decrypt } from './util/securePassword';
 import Users from './models/user';
 import { hashPassword } from './util/hashPassword';
 import generateToken from './util/generateToken';
-import getUserId from './util/getUserId';
 import paginator from './util/paginator';
 import Files from './models/upload';
 import CircularLetters from './models/circularLetter';
@@ -19,11 +18,10 @@ import dynamicSort from './util/sorting';
 import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
 import { sendSMS } from './util/sendSMS';
-import { handleUnderTen } from './util/handleUnderTen';
-// import { sendRefreshToken } from './util/sendRefreshToken';
-// import { createRefreshToken, createAccessToken } from './util/auth';
 
-const imagePath = 'https://f23c40f46169.ngrok.io/images/';
+const uri = 'https://b0da96bb8e0f.ngrok.io/';
+const imagePath = `${uri}images/`;
+const thumbPath = `${uri}thumbnails/`;
 String.prototype.allTrim = String.prototype.allTrim || function () {
     return this
         .replace(/ +/g, ' ')
@@ -37,12 +35,12 @@ String.prototype.allTrim = String.prototype.allTrim || function () {
 export const resolvers = {
     Query: {
         users: async (parent, { information, page, limit }, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
             let users = [];
             if (context.session.userSearch
-                && context.session.userPage == page
-                && context.session.userLimit == limit) {
+                && context.session.userSearchParam === information
+                && context.session.userPage === page
+                && context.session.userLimit === limit) {
                 users = context.session.userSearch;
             }
             else {
@@ -59,6 +57,7 @@ export const resolvers = {
 
                 users.sort(dynamicSort('lastName', 'asc'));
                 context.session.userSearch = users;
+                context.session.userSearchParam = information;
                 context.session.userPage = page;
                 context.session.userLimit = limit;
             }
@@ -75,17 +74,15 @@ export const resolvers = {
             const userId = isAuthenticated(context.req);
             return Users.findById(userId);
         },
-        unauthenticatedUsers: (parent, args, context, info) => {
+        unauthenticatedUsers: async (parent, { page, limit }, context, info) => {
             isAuthenticated(context.req);
             return Users.find({ authorized: false });
         },
         files: () => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
             return Files.find();
         },
         circularLetters: async (parent, args, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             const options = {
@@ -108,7 +105,6 @@ export const resolvers = {
             return circularLetters;
         },
         circularLetterDetails: async (parent, args, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             const circularLetter = await CircularLetters.findById(args.id);
@@ -116,6 +112,7 @@ export const resolvers = {
                 throw new Error('Letter not found!');
             }
 
+            context.session.oldFile = circularLetter.files[0];
             let refrenceId = "";
             const referedTo = await CircularLetters.findOne({ number: circularLetter.referTo });
             if (referedTo) {
@@ -137,7 +134,6 @@ export const resolvers = {
             };
         },
         search: async (parent, { information, startDate, endDate, page, limit, sortBy, order }, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             let letters = [];
@@ -219,7 +215,8 @@ export const resolvers = {
                 letters.forEach((letter) => {
                     const tempFiles = [];
                     letter.files.forEach((file) => {
-                        tempFiles.push(`${imagePath}${file}`);
+                        const index = file.lastIndexOf(".");
+                        tempFiles.push(`${thumbPath}${file.substring(0, index)}-thumb${file.substring(index, file.length)}`);
                     });
                     letter.files = tempFiles;
                 });
@@ -243,7 +240,6 @@ export const resolvers = {
             }
         },
         appSearch: async (parent, { information, startDate, endDate, page, limit, sortBy, order }, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             let letters = [];
@@ -298,22 +294,6 @@ export const resolvers = {
                     else {
                         letters = newLetter;
                     }
-
-                    // if (!endDate) {
-                    //     endDate = `${jMoment(nowDate).jYear()}/${handleUnderTen(jMoment(nowDate).jMonth() + 1)}/${handleUnderTen(jMoment(nowDate).jDate())}`;
-                    // }
-
-                    // if (startDate) {
-                    //     newLetter.forEach((letter) => {
-                    //         if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))
-                    //             && parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
-                    //             letters.push(letter);
-                    //         }
-                    //     });
-                    // }
-                    // else {
-                    //     letters = newLetter;
-                    // }
                 }
                 else {
                     let lettersId = [];
@@ -364,28 +344,13 @@ export const resolvers = {
                     else {
                         letters = lettersByWord;
                     }
-
-                    // if (!endDate) {
-                    //     endDate = `${jMoment(nowDate).jYear()}/${handleUnderTen(jMoment(nowDate).jMonth() + 1)}/${handleUnderTen(jMoment(nowDate).jDate())}`;
-                    // }
-
-                    // if (startDate) {
-                    //     lettersByWord.forEach((letter) => {
-                    //         if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))
-                    //             && parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
-                    //             letters.push(letter);
-                    //         }
-                    //     });
-                    // }
-                    // else {
-                    //     letters = lettersByWord;
-                    // }
                 }
 
                 letters.forEach((letter) => {
                     const tempFiles = [];
                     letter.files.forEach((file) => {
-                        tempFiles.push(`${imagePath}${file}`);
+                        const index = file.lastIndexOf(".");
+                        tempFiles.push(`${thumbPath}${file.substring(0, index)}-thumb${file.substring(index, file.length)}`);
                     });
                     letter.files = tempFiles;
                 });
@@ -404,7 +369,6 @@ export const resolvers = {
             return letters;
         },
         categoriesQuery: async (parent, args, context, info) => {
-            // getUserId(context.req);
             const userId = isAuthenticated(context.req);
             const user = await Users.findById(userId);
             if (!user) {
@@ -422,12 +386,10 @@ export const resolvers = {
             }
         },
         toCategories: async (parent, args, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
             return ToCategoryType.find();
         },
         subjectedTos: async (parent, args, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
             return SubjectedToType.find();
         }
@@ -450,6 +412,7 @@ export const resolvers = {
             });
             await user.save();
             sendSMS(user.id, user.phoneNumber);
+            context.session.userSearch = null;
             return true;
         },
         userSignUp: async (parent, args, context, info) => {
@@ -468,6 +431,7 @@ export const resolvers = {
                 isAdmin: false
             });
             await user.save();
+            context.session.newUsers = null;
             return true;
         },
         authenticateUser: async (parent, args, context, info) => {
@@ -476,6 +440,7 @@ export const resolvers = {
                 throw new Error("User not found!");
             }
             sendSMS(user.id, user.phoneNumber);
+            context.session.newUsers = null;
             return user;
         },
         deleteUser: async (parent, args, context, info) => {
@@ -485,28 +450,20 @@ export const resolvers = {
                 throw new Error("User not found!")
             }
             await user.deleteOne();
+            context.session.userSearch = null;
+            context.session.newUsers = null;
             return user;
         },
         updateUser: async (parent, args, context, info) => {
             const userId = isAuthenticated(context.req);
             const user = await Users.findByIdAndUpdate(userId, args, { upsert: true, new: true });
-            // const values = {};
-            // Object.entries(args).forEach(([key, value]) => {
-            //     if (value != null) {
-            //         values[key] = value;
-            //     }
-            // });
-            // const user = await Users.findByIdAndUpdate(userId, { $set: values }, { new: true }).exec()
-            //     .catch((err) => {
-            //         console.log(err)
-            //     });
             return user;
         },
         login: async (parent, args, context, info) => {
             const user = await Users.findOne({
                 personelNumber: args.data.personelNumber
             }, function (err, myUser) {
-                console.log(err);
+                console.error(err);
             });
 
             if (!user) {
@@ -522,13 +479,10 @@ export const resolvers = {
                 throw new Error("Wrong password!");
             }
 
-            // sendRefreshToken(context.res, user.id);
-
             const refreshToken = generateToken(user.id)
-            context.res.cookie("jwt", refreshToken, { httpOnly: true });
+            context.res.cookie("prpss", refreshToken, { httpOnly: true });
             context.session.userID = user.id;
-            console.log(`user ${user.id} logged in!`)
-            // createAccessToken(user.id)
+            console.log(`user ${user.id} logged in!`);
 
             return {
                 user,
@@ -538,8 +492,8 @@ export const resolvers = {
         logout: async (parent, args, context, info) => {
             context.session.destroy();
             console.log(`user ${context.session.userID} logged out!`);
-            context.res.clearCookie("jwt");
-            context.res.clearCookie("qid");
+            context.res.clearCookie("prpss");
+            context.res.clearCookie("GraphSeSSID");
             return true;
         },
         changePassword: async (parent, args, context, info) => {
@@ -567,6 +521,10 @@ export const resolvers = {
         },
         changePasswordOnApp: async (parent, args, context, info) => {
             const userId = isAuthenticated(context.req);
+            const user = await Users.findById(userId);
+            if (user.changedPassword) {
+                throw new Error("Unauthorized access!!!");
+            }
             const decrypted = decrypt(args.password);
             if (decrypted.length < 8) {
                 throw new Error("Password must be more than 8 characters!");
@@ -581,11 +539,13 @@ export const resolvers = {
             if (!user) {
                 throw new Error("User not found!");
             }
+            if (!user.authorized) {
+                throw new Error("User is not authorized!");
+            }
             sendSMS(user.id, user.phoneNumber);
             return true;
         },
         uploadFile: async (parent, { file }, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             const { createReadStream, filename, mimetype, encoding } = await file;
@@ -615,7 +575,6 @@ export const resolvers = {
             };
         },
         deleteFile: async (parent, { filename }, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             await Files.deleteOne({ filename });
@@ -647,7 +606,6 @@ export const resolvers = {
             return true;
         },
         deleteMultiFiles: async (parent, { filenames }, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             filenames.forEach(async (filename) => {
@@ -667,7 +625,6 @@ export const resolvers = {
             return true;
         },
         circularLetterInit: async (parent, args, context, info) => {
-            // getUserId(context.req);
             const userId = isAuthenticated(context.req);
             const user = await Users.findById(userId);
             if (!user) {
@@ -677,49 +634,43 @@ export const resolvers = {
                 throw new Error("Unauthorized action!")
             }
 
-            // var i = 1;
-            // setInterval(async () => {
-            //     const circularLetter = new CircularLetters({
-            //         _id: ObjectId().toString(),
-            //         title: `بخشنامه${i}`,
-            //         number: `۴۲۵/ص/۲۳${i}`,
-            //         importNumber: `۲۱۳۴${i}`,
-            //         date: '1385/05/22',
-            //         dateOfCreation: moment().unix().toString(),
-            //         from: `دانشگاه`,
-            //         subjectedTo: 'همه',
-            //         toCategory: 'همه',
-            //         tags: [`کلاس${i}`, `سال${i}`],
-            //         files: ['d5ESsyXZunnamed (5).jpg', 'DYSwHigkunnamed (7).jpg']
-            //     });
-            //     await circularLetter.save();
-            //     i++;
-            // }, 1000)
-
-            // for (let i = 1; i <= 1000; i++) {
-            //     const circularLetter = new CircularLetters({
-            //         _id: ObjectId().toString(),
-            //         title: `بخشنامه${i}`,
-            //         number: `۴۲۵/ص/۲۳${i}`,
-            //         importNumber: `۲۱۳۴${i}`,
-            //         date: '1385/05/22',
-            //         dateOfCreation: moment().unix().toString(),
-            //         from: `دانشگاه`,
-            //         subjectedTo: 'همه',
-            //         toCategory: 'همه',
-            //         tags: [`کلاس${i}`, `سال${i}`],
-            //         files: ['8498498421.jpg', 'asfdewrf2566.jpg', 'dwdqa46w48d.jpg']
-            //     });
-            //     await circularLetter.save();
-            // }
+            /*var i = 1;
+            setInterval(async () => {
+                const circularLetter = new CircularLetters({
+                    _id: ObjectId().toString(),
+                    title: `بخشنامه${i}`,
+                    number: `۴۲۵/ص/۲۳${i}`,
+                    importNumber: `۲۱۳۴${i}`,
+                    date: '1385/05/22',
+                    dateOfCreation: moment().unix().toString(),
+                    from: `دانشگاه`,
+                    subjectedTo: 'همه',
+                    toCategory: 'همه',
+                    tags: [`کلاس${i}`, `سال${i}`],
+                    files: ['d5ESsyXZunnamed (5).jpg', 'DYSwHigkunnamed (7).jpg']
+                });
+                await circularLetter.save();
+                i++;
+            }, 1000)*/
 
             const circularLetter = new CircularLetters({ ...args, _id: ObjectId().toString(), dateOfCreation: moment().unix().toString() });
             await circularLetter.save();
+            const fileName = circularLetter.files[0];
+            const index = fileName.lastIndexOf(".");
+            Jimp.read(`./images/${fileName}`)
+                .then(smallFile => {
+                    return smallFile
+                        .resize(192, 256)
+                        .quality(72)
+                        .write(`./thumbnails/${fileName.substring(0, index)}-thumb${fileName.substring(index, fileName.length)}`);
+                })
+                .catch(err => {
+                    console.error(err);
+                })
             context.session.searchResult = null;
             return true;
         },
         deleteCircularLetter: async (parent, args, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             const letter = await CircularLetters.findById(args.id);
@@ -731,14 +682,21 @@ export const resolvers = {
                 await Files.deleteOne({ filename: file });
                 fs.unlinkSync(`./images/${file}`);
             }, (err) => {
-                console.log(err);
+                console.error(err);
+            });
+            const fileName = letter.files[0];
+            const index = fileName.lastIndexOf(".");
+            fs.unlinkSync(`./thumbnails/${fileName.substring(0, index)}-thumb${fileName.substring(index, fileName.length)}`, (err) => {
+                if (err) {
+                    throw err;
+                }
             });
 
             await letter.deleteOne();
+            context.session.searchResult = null;
             return true;
         },
         updateCircularLetter: async (parent, args, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             const letter = await CircularLetters.findById(args.id);
@@ -757,25 +715,33 @@ export const resolvers = {
             }
 
             context.session.searchResult = null;
-
-
             await CircularLetters.findByIdAndUpdate(args.id, args.data, { upsert: true, new: true });
 
-            // const values = {};
-            // Object.entries(args.data).forEach(([key, value]) => {
-            //     if (value != null) {
-            //         values[key] = value;
-            //     }
-            // });
-            // const newLetter = await CircularLetters.findByIdAndUpdate(args.id, { $set: values }, { new: true }).exec()
-            //     .catch((err) => {
-            //         console.log(err)
-            //     });
-            // await newLetter.save();
+            if (context.session.oldFile !== args.data.files[0]) {
+                let fileName = context.session.oldFile;
+                let index = fileName.lastIndexOf(".");
+                fs.unlinkSync(`./thumbnails/${fileName.substring(0, index)}-thumb${fileName.substring(index, fileName.length)}`, (err) => {
+                    if (err) {
+                        throw err;
+                    }
+                });
+                fileName = args.data.files[0];
+                index = fileName.lastIndexOf(".");
+                Jimp.read(`./images/${fileName}`)
+                    .then(smallFile => {
+                        return smallFile
+                            .resize(192, 256)
+                            .quality(72)
+                            .write(`./thumbnails/${fileName.substring(0, index)}-thumb${fileName.substring(index, fileName.length)}`);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+            }
+            context.session.searchResult = null;
             return true;
         },
         createToCategoryType: async (parent, args, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             const toCategoryType = new ToCategoryType(args);
@@ -787,7 +753,6 @@ export const resolvers = {
             return toCategoryType;
         },
         deleteToCategoryType: async (parent, args, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             const toCategoryType = await ToCategoryType.findById(args.id);
@@ -798,7 +763,6 @@ export const resolvers = {
             return toCategoryType;
         },
         createSubjectedToType: async (parent, args, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             const subjectedToType = new SubjectedToType(args);
@@ -810,7 +774,6 @@ export const resolvers = {
             return subjectedToType;
         },
         deleteSubjectedToType: async (parent, args, context, info) => {
-            // getUserId(context.req);
             isAuthenticated(context.req);
 
             const subjectedToType = await SubjectedToType.findById(args.id);
@@ -819,13 +782,6 @@ export const resolvers = {
             }
             await subjectedToType.deleteOne();
             return subjectedToType;
-        },
-        // revokeRefreshTokenForUser: async (parent, args, context, info) => {
-        //     const user = await Users.findById(args.id);
-        //     let userToken = user.tokenVersion + 1;
-        //     user.tokenVersion = userToken;
-        //     await user.save();
-        //     return true
-        // }
+        }
     }
 };

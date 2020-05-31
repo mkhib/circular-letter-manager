@@ -3,7 +3,7 @@ import { gql } from 'apollo-server-express';
 export const typeDefs = gql`
     
     type Query {
-        users(information: String, page: Int, limit: Int): userSearch!
+        users(information: String, page: Int, limit: Int): UserSearch!
         user: UserOutput!
         unauthenticatedUsers: [UserOutput]!
         files: [String]
@@ -44,7 +44,6 @@ export const typeDefs = gql`
         deleteToCategoryType(id: ID!): ToCategoryType!
         createSubjectedToType(name: String!): SubjectedToType!
         deleteSubjectedToType(id: ID!): SubjectedToType!
-        # revokeRefreshTokenForUser(id: ID!): Boolean!
     }
 
     type User {
@@ -58,17 +57,11 @@ export const typeDefs = gql`
         authorized: Boolean!
         changedPassword: Boolean!
         isAdmin: Boolean!
-        # tokenVersion: Int
     }
     
     type AuthPayLoad {
         user: UserOutput!
         token: String!
-    }
-
-    type Response {
-        condition: Boolean!
-        filename: String!
     }
 
     type File {
@@ -137,7 +130,7 @@ export const typeDefs = gql`
         filesName: [String]
     }
 
-    type userSearch {
+    type UserSearch {
         users: [UserOutput!]!
         quantity: Int
     }
