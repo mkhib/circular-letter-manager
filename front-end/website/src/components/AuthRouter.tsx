@@ -18,6 +18,7 @@ import EditCircularLetter from '../screens/EditCircularLetter';
 import PendingUsers from '../screens/PendingUsers';
 import Profile from '../screens/Profile';
 import ChangePassword from '../screens/ChangePassword';
+import ChangePasswordLock from '../screens/ChangePasswordLock';
 import AddNewUser from '../screens/AddNewUser';
 import ManageAllUsers from '../screens/ManageAllUsers';
 import ForgotPassword from '../screens/ForgotPassword';
@@ -36,6 +37,28 @@ const PrivateRoute = ({ component, exact = false, path, authenticated }: any) =>
         ) : (
             <Redirect to={{
               pathname: '/login',
+              state: { from: props.location }
+            }} />
+          )
+      )}
+    />
+  )
+};
+
+const ChangePasswordLockRoute = ({ component, exact = false, path, authenticated, changed }: any) => {
+  return (
+    <Route
+      exact={exact}
+      path={path}
+      render={props => (
+        (authenticated && !changed) ? (
+          <React.Fragment>
+            <Header />
+            {React.createElement(component, props)}
+          </React.Fragment>
+        ) : (
+            <Redirect to={{
+              pathname: '/search-letter',
               state: { from: props.location }
             }} />
           )
@@ -78,6 +101,12 @@ const AuthRouter = ({ authenticated, checked, user }: any) => {
           <Switch>
             <Route path="/login" component={Login} />
             <Route path="/forgot-password" component={ForgotPassword} />
+            <ChangePasswordLockRoute exact path="/change-pass-lock" component={ChangePasswordLock} authenticated={authenticated} changed={user.changedPassword} />
+            {(user.id && !user.changedPassword) && (
+              <Redirect to={{
+                pathname: '/change-pass-lock',
+              }} />
+            )}
             <PrivateRoute exact path="/" component={SearchLetters} authenticated={authenticated} />
             <PrivateRoute path={`/letter/`} component={Letter} authenticated={authenticated} />
             <PrivateRoute path={`/search-letter`} component={SearchLetters} authenticated={authenticated} />

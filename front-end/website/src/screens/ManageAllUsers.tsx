@@ -9,6 +9,8 @@ import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Check from '@material-ui/icons/Check';
 import Clear from '@material-ui/icons/ClearRounded';
+import TextInput from '../components/TextInput';
+import SearchOutlinedIcon from '@material-ui/icons/SearchOutlined';
 import Pagination from '@material-ui/lab/Pagination';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Backdrop from '@material-ui/core/Backdrop';
@@ -143,9 +145,15 @@ const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
       return parseInt(page, 10);
     } return 1;
   }
+  const handleSearch = () => {
+    const search = queryParam.get('search')
+    if (search !== null) {
+      return search;
+    } return '';
+  }
   const { loading, error, data } = useQuery(GET_ALL_USERS, {
     variables: {
-      information: '',
+      information: handleSearch(),
       page: handlePageNumber(),
       limit: 15,
     },
@@ -153,7 +161,11 @@ const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
   const [openSnack, setOpenSnack] = useState(false);
   const [snackOption, setSnackOption] = useState<SnackState>({ message: '', severity: "success" });
   const [open, setOpen] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState<string>('');
   const [currentUseridToDelete, setCurrentUseridToDelete] = useState('');
+  const doSearch = () => {
+    props.history.push(`${window.location.pathname}?page=1&search=${searchValue}`);
+  }
   const openSnackbar = () => {
     setOpenSnack(true);
   };
@@ -285,7 +297,7 @@ const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
               </Fade>
             </Modal>
             <Snack open={openSnack} message={snackOption.message} severity={snackOption.severity} onClose={closeSnackbar} />
-            {allUsers.length !== 0 && <Box
+            {((allUsers.length === 0 && queryParam.get('search') !== null) || allUsers.length !== 0) && <Box
               style={{
                 display: 'flex',
                 justifyContent: 'flex-start',
@@ -294,8 +306,59 @@ const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
               }}
             >
               لیست کاربران تایید شده
-          </Box>}
-            {allUsers.length === 0 ?
+            </Box>}
+            {((allUsers.length === 0 && queryParam.get('search') !== null) || allUsers.length !== 0) && (
+              <Box style={{
+                display: 'flex',
+                flexDirection: 'row',
+                minWidth: 300,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+                <Box
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    marginRight: 40,
+                    alignItems: 'center',
+                  }}
+                >
+                  <TextInput
+                    id="refer to"
+                    style={{ width: '25vmax', minWidth: 200, maxWidth: 500, height: 60 }}
+                    label="جست و جو کاربران"
+                    value={searchValue}
+                    onKeyUp={(e: any) => {
+                      const enterCode = 13;
+                      if (e.which === enterCode) {
+                        doSearch();
+                      }
+                    }}
+                    onChange={(event: { target: HTMLInputElement }) => setSearchValue(event.target.value)}
+                  />
+                  <Button
+                    style={{ height: 60, marginBottom: 10, marginRight: 20 }}
+                    onClick={() => {
+                      doSearch();
+                    }}
+                  >
+                    <SearchOutlinedIcon style={{ fontSize: 40 }} />
+                  </Button>
+                </Box>
+              </Box>
+            )}
+            {(allUsers.length === 0 && queryParam.get('search') !== null) && (
+              <Box style={{
+                display: 'flex',
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'FontNormal'
+              }}>
+                کاربری با این مشخصات پیدا نشد
+              </Box>
+            )}
+            {(allUsers.length === 0 && queryParam.get('search') === null) &&
               <Box style={{
                 display: 'flex',
                 flex: 1,
@@ -304,46 +367,51 @@ const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
                 fontFamily: 'FontNormal'
               }}>
                 در حال حاضر کاربری وجود ندارد
-            </Box> : <TableContainer component={Paper}
-              >
-                <Table className={classes.table} aria-label="simple table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell className={classes.tableHeader}>نام</TableCell>
-                      <TableCell className={classes.tableHeader} align="center">نام‌خانوادگی</TableCell>
-                      <TableCell className={classes.tableHeader} align="center">شماره پرسنلی</TableCell>
-                      <TableCell className={classes.tableHeader} align="center">کدملی</TableCell>
-                      <TableCell className={classes.tableHeader} align="center">شماره تلفن</TableCell>
-                      <TableCell className={classes.tableHeader} align="center">حذف کاربران</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {allUsers.map((row, index) => (
-                      <TableRow key={index.toString()}>
-                        <TableCell className={classes.tableCells} component="th" scope="row">
-                          {row.firstName}
-                        </TableCell>
-                        <TableCell className={classes.tableCells} align="center">{row.lastName}</TableCell>
-                        <TableCell className={classes.tableCells} align="center">{row.personelNumber}</TableCell>
-                        <TableCell className={classes.tableCells} align="center">{row.identificationNumber}</TableCell>
-                        <TableCell className={classes.tableCells} align="center">{row.phoneNumber}</TableCell>
-                        <TableCell className={classes.tableCells} align="center">
-                          <Button
-                            variant="contained"
-                            style={{ backgroundColor: '#d32f2f' }}
-                            onClick={() => {
-                              setCurrentUseridToDelete(row._id);
-                              handleOpen();
-                            }}
-                          >
-                            <DeleteForeverRoundedIcon style={{ color: 'white' }} />
-                          </Button>
-                        </TableCell>
+            </Box>}
+            {
+              allUsers.length > 0 && (
+                <TableContainer component={Paper}
+                >
+                  <Table className={classes.table} aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell className={classes.tableHeader}>نام</TableCell>
+                        <TableCell className={classes.tableHeader} align="center">نام‌خانوادگی</TableCell>
+                        <TableCell className={classes.tableHeader} align="center">شماره پرسنلی</TableCell>
+                        <TableCell className={classes.tableHeader} align="center">کدملی</TableCell>
+                        <TableCell className={classes.tableHeader} align="center">شماره تلفن</TableCell>
+                        <TableCell className={classes.tableHeader} align="center">حذف کاربران</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>}
+                    </TableHead>
+                    <TableBody>
+                      {allUsers.map((row, index) => (
+                        <TableRow key={index.toString()}>
+                          <TableCell className={classes.tableCells} component="th" scope="row">
+                            {row.firstName}
+                          </TableCell>
+                          <TableCell className={classes.tableCells} align="center">{row.lastName}</TableCell>
+                          <TableCell className={classes.tableCells} align="center">{row.personelNumber}</TableCell>
+                          <TableCell className={classes.tableCells} align="center">{row.identificationNumber}</TableCell>
+                          <TableCell className={classes.tableCells} align="center">{row.phoneNumber}</TableCell>
+                          <TableCell className={classes.tableCells} align="center">
+                            <Button
+                              variant="contained"
+                              style={{ backgroundColor: '#d32f2f' }}
+                              onClick={() => {
+                                setCurrentUseridToDelete(row._id);
+                                handleOpen();
+                              }}
+                            >
+                              <DeleteForeverRoundedIcon style={{ color: 'white' }} />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )
+            }
             <Box style={{
               display: 'flex',
               flexDirection: 'row',

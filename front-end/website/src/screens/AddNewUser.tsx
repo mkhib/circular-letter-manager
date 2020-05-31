@@ -26,7 +26,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 var CryptoJS = require('react-native-crypto-js');
-
 const useStyles = makeStyles(theme => ({
   button: {
     marginBottom: 15,
@@ -207,8 +206,17 @@ const ChangePassword: React.FunctionComponent<AddNewUserProps> = (props) => {
       );
     }
   }
-  const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
-
+  var
+  persianNumbers = [/۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g],
+  arabicNumbers = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g],
+  fixNumbers = function (str: any) {
+    if (typeof str === 'string') {
+      for (var i = 0; i < 10; i++) {
+        str = str.replace(persianNumbers[i], i).replace(arabicNumbers[i], i);
+      }
+    }
+    return str;
+  };
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsUserAdmin((event.target as HTMLInputElement).value);
   };
@@ -258,9 +266,9 @@ const ChangePassword: React.FunctionComponent<AddNewUserProps> = (props) => {
           variables: {
             firstName: newUsername,
             lastName: newUserLastName,
-            personelNumber: newUserPersonelNumber,
-            identificationNumber: newUserIdentificationCode,
-            phoneNumber: newUserPhoneNumber,
+            personelNumber: fixNumbers(newUserPersonelNumber),
+            identificationNumber: fixNumbers(newUserIdentificationCode),
+            phoneNumber: fixNumbers(newUserPhoneNumber),
             isAdmin: handleUserType(),
           },
         });

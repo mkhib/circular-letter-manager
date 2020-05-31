@@ -84,9 +84,15 @@ const Login = () => {
       storeTok();
     }
     if (error) {
+      console.log(error.message)
       if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0') {
         setErrorState({
           message: 'اتصال خود را به اینترنت بررسی کنید.',
+          state: true,
+        });
+      } if (error.message === 'GraphQL error: Unauthorized user!') {
+        setErrorState({
+          message: 'حساب کاربری شما هنوز تایید نشده است.',
           state: true,
         });
       } else {

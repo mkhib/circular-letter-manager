@@ -1,5 +1,16 @@
 import React, { useState, ReactElement, useEffect } from 'react';
-import { View, Text, StyleSheet, StyleProp, ViewStyle, TouchableOpacity, Image, Modal, ImageBackground } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+  TouchableOpacity,
+  Image,
+  Modal,
+  ImageBackground,
+  BackHandler,
+} from 'react-native';
 import gql from 'graphql-tag';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Actions } from 'react-native-router-flux';
@@ -201,11 +212,13 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
         <Modal
           visible={visible}
           transparent={true}
+          onRequestClose={() => setIsVisible(false)}
         >
           <ImageViewer
             imageUrls={images}
+            swipeDownThreshold={70}
             // saveToLocalByLongPress
-            onCancel={()=>{
+            onCancel={() => {
               setIsVisible(false);
             }}
             renderHeader={(currentInd) => {
@@ -295,6 +308,7 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
           >
             <Image
               source={{ uri: data.circularLetterDetails.circularLetter.files[0] }}
+              defaultSource={require('../assets/images/imageLoading.png')}
               style={styles.image}
             />
           </View>

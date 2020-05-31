@@ -7,7 +7,14 @@ export type userType = {
   personelNumber: string;
   identificationNumber: string;
   phoneNumber: string;
-}
+};
+
+export type fileStatusType = {
+  status: boolean;
+  link: string;
+  name: string;
+  loading: boolean;
+};
 
 interface InitialStateProps {
   title: string;
@@ -31,11 +38,7 @@ interface InitialStateProps {
   type: 'imported' | 'exported';
   toCategory: string;
   subjectedTo: string;
-  uploadFilesStatus: Array<{
-    status: boolean;
-    link: string;
-    name: string;
-  }>;
+  uploadFilesStatus: Array<fileStatusType>;
   fromDate: string;
   toDate: string;
   searchInDate: boolean;
@@ -86,6 +89,7 @@ let initialState: InitialStateProps = {
     link: '',
     status: false,
     name: '',
+    loading: false,
   }],
   refrenceCircularID: '',
   requestedLetter: '',
@@ -229,6 +233,10 @@ const dataSlice = createSlice({
       state.uploadFilesStatus[action.payload.index].status = action.payload.status;
       state.uploadFilesStatus[action.payload.index].link = action.payload.link;
       state.uploadFilesStatus[action.payload.index].name = action.payload.name;
+      state.uploadFilesStatus[action.payload.index].loading = action.payload.loading;
+    },
+    setFileLoading(state, action) {
+      state.uploadFilesStatus[action.payload.index].loading = action.payload.loading;
     },
     addFileUpload(state, action) {
       state.uploadFilesStatus = [];
@@ -237,6 +245,7 @@ const dataSlice = createSlice({
           status: false,
           link: '',
           name: '',
+          loading: false,
         });
       }
     },
@@ -245,6 +254,7 @@ const dataSlice = createSlice({
         status: false,
         link: '',
         name: '',
+        loading: false,
       });
     },
     removeFileUploadStatus(state, action) {
@@ -291,6 +301,7 @@ export const {
   setErrors,
   addFileUpload,
   setFileUpload,
+  setFileLoading,
   removeFilesName,
   setListOfCategories,
   removeFromPendingUsers,

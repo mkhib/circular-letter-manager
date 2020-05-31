@@ -6,18 +6,15 @@ import Drawer from '@material-ui/core/Drawer';
 import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import ListItem from '@material-ui/core/ListItem';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import { useApolloClient } from '@apollo/react-hooks';
 import PersonOutlinedIcon from '@material-ui/icons/PersonOutlined';
-import PersonRoundedIcon from '@material-ui/icons/PersonRounded';
 import { handleLogout } from '../redux/slices/user';
 import { withRouter } from 'react-router-dom';
-import { useCookies } from 'react-cookie';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import MenuRoundedIcon from '@material-ui/icons/MenuRounded';
@@ -69,6 +66,10 @@ const useStyles = makeStyles(theme => ({
   },
   listItemText: {
     fontFamily: 'FontNormal',
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
   },
 }));
 
@@ -306,6 +307,7 @@ const Header = (props) => {
                             handleClose(event);
                             logout();
                           }}>
+                            {loading && <CircularProgress style={{ height: 24, width: 24 }} />}
                             <ListItemIcon>
                               <ExitToAppOutlinedIcon fontSize="small" />
                             </ListItemIcon>

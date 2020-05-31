@@ -24,7 +24,6 @@ import {
 import loginBack from '../assets/images/loginBack.jpg';
 import Snack from '../components/Snack';
 var CryptoJS = require('react-native-crypto-js');
-
 const useStyles = makeStyles(theme => ({
   button: {
     marginBottom: 15,
@@ -37,7 +36,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-interface LoginProps {
+interface ChangePasswordProps {
   oldPassword: string;
   newPassword: string;
   againNewPassword: string;
@@ -81,7 +80,7 @@ var
     return str;
   };
 
-const ChangePassword: React.FunctionComponent<LoginProps> = (props) => {
+const ChangePassword: React.FunctionComponent<ChangePasswordProps> = (props) => {
   const {
     setAnything,
     oldPassword,

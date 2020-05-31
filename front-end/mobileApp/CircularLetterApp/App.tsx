@@ -28,7 +28,7 @@ import Letter from './src/screens/Letter';
 import Signup from './src/screens/Signup';
 
 const httpLink = createHttpLink({
-  uri: 'https://6317c2c5b5aa.ngrok.io/graphql',
+  uri: 'https://758700ae012d.ngrok.io/graphql',
 });
 const timeoutLink = new ApolloLinkTimeout(12000);
 const getData = async () => {

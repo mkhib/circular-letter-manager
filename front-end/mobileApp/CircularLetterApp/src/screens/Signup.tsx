@@ -97,8 +97,35 @@ const Signup = () => {
         message: 'مشخصات شما با موفقیت ثبت شد و پس از تایید آن توسط مدیر سیستم رمزعبور برای شما پیامک خواهد شد.',
         state: true,
       });
-    }
+      setName('');
+      setLastName('');
+      setIdentificationNumber('');
+      setPhoneNumber('');
+      setUsername('');
+    },
+    onError: (err) => {
+      if (err) {
+        console.log(err.message);
+        if (err.message === 'Network error: Failed to fetch' || err.message === 'Network error: Unexpected token T in JSON at position 0') {
+          setErrorState({
+            message: 'اتصال خود را به اینترنت بررسی کنید.',
+            state: true,
+          });
+        } if (err.message === 'GraphQL error: Duplicate personelNumber!') {
+          setErrorState({
+            message: 'کاربری با این شماره پرسنلی قبلا ثبت نام کرده‌است.',
+            state: true,
+          });
+        } else {
+          setErrorState({
+            message: 'مشکلی پیش‌آمده است، لطفا دوباره تلاش کنید.',
+            state: true,
+          });
+        }
+      }
+    },
   });
+
   const [errorState, setErrorState] = useState<AlertProps>({ state: false, message: '' });
   const [errors, setErrors] = useState<yup.ValidationError | null>(null);
   const lastNameRef = useRef<TextInput>(null);
@@ -106,22 +133,6 @@ const Signup = () => {
   const phoneNumberRef = useRef<TextInput>(null);
   const [successState, setSuccessState] = useState<AlertProps>({ state: false, message: '' });
   const identificationNumberRef = useRef<TextInput>(null);
-  React.useEffect(() => {
-    if (error) {
-      console.log(error.message);
-      if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0') {
-        setErrorState({
-          message: 'اتصال خود را به اینترنت بررسی کنید.',
-          state: true,
-        });
-      } else {
-        setErrorState({
-          message: 'نام‌کاربری یا رمز عبور نادرست است.',
-          state: true,
-        });
-      }
-    }
-  }, [error]);
 
   const clearErrors = () => {
     setErrorState({ message: '', state: false });

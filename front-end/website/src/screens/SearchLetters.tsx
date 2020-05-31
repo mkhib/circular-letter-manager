@@ -396,6 +396,7 @@ const SearchLetters = (props: any) => {
         className={classes.letterContainer}
         style={{
           justifyContent: width < RESPONSIVE_WIDTH2 ? 'center' : 'flex-start',
+          alignItems: width < RESPONSIVE_WIDTH2 ? 'flex-start' : 'flex-start',
         }}
       >
         {renderLetters(data.search.circularLetters)}
