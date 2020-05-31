@@ -53,7 +53,6 @@ const ChangePasswordLockRoute = ({ component, exact = false, path, authenticated
       render={props => (
         (authenticated && !changed) ? (
           <React.Fragment>
-            <Header />
             {React.createElement(component, props)}
           </React.Fragment>
         ) : (

@@ -9,6 +9,8 @@ import {
   Image,
   Modal,
   ImageBackground,
+  PermissionsAndroid,
+  Platform,
 } from 'react-native';
 import CameraRoll from '@react-native-community/cameraroll';
 import gql from 'graphql-tag';
@@ -117,6 +119,16 @@ const CustomImageHeader: React.FC<CustomImageHeaderProps> = ({ allSize, currentI
   </View>
 );
 
+const checkAndroidPermission = async () => {
+  try {
+    const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+    await PermissionsAndroid.request(permission);
+    Promise.resolve();
+  } catch (error) {
+    Promise.reject(error);
+  }
+};
+
 const Letter: React.FC<LetterProps> = ({ id }) => {
   const [visible, setIsVisible] = useState(false);
   const { loading, error, data } = useQuery(LETTER_QUERY, { variables: { id: id } });
@@ -218,8 +230,11 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
             imageUrls={images}
             swipeDownThreshold={70}
             saveToLocalByLongPress
-            onSave={(url) => {
-              CameraRoll.save(url, { type: 'photo',album:'بخشنامه‌ها' });
+            onSave={async (url) => {
+              if (Platform.OS === 'android') {
+                await checkAndroidPermission();
+              }
+              CameraRoll.save(url, { type: 'photo', album: 'بخشنامه‌ها' });
             }}
             menuContext={{ saveToLocal: 'ذخیره عکس', cancel: 'بازگشت' }}
             onCancel={() => {
