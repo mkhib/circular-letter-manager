@@ -30,7 +30,7 @@ import Signup from './src/screens/Signup';
 const httpLink = createHttpLink({
   uri: 'https://b0da96bb8e0f.ngrok.io/graphql',
 });
-const timeoutLink = new ApolloLinkTimeout(12000);
+const timeoutLink = new ApolloLinkTimeout(15000);
 const getData = async () => {
   try {
     const value = await AsyncStorage.getItem('tok');
