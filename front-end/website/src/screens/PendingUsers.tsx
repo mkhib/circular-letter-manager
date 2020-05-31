@@ -226,7 +226,7 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
                     padding: 40,
                     backgroundImage: `url(${usersBack})`,
                     backgroundSize: '100% 100%',
-                    // backgroundRepeat: 'no-repeat',
+                    backgroundAttachment: 'fixed',
                     direction: 'rtl',
                   }}
                 >
@@ -241,7 +241,7 @@ const PendingUsers: React.FC<PendingProps> = (props) => {
                   >
                     لیست کاربران جدید
                   </Box>}
-                  {pendingUsers.length === 0 ? 
+                  {pendingUsers.length === 0 ?
                     <Box style={{
                       display: 'flex',
                       flex: 1,

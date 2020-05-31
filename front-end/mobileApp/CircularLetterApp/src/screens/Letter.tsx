@@ -9,8 +9,8 @@ import {
   Image,
   Modal,
   ImageBackground,
-  BackHandler,
 } from 'react-native';
+import CameraRoll from '@react-native-community/cameraroll';
 import gql from 'graphql-tag';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Actions } from 'react-native-router-flux';
@@ -217,7 +217,11 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
           <ImageViewer
             imageUrls={images}
             swipeDownThreshold={70}
-            // saveToLocalByLongPress
+            saveToLocalByLongPress
+            onSave={(url) => {
+              CameraRoll.save(url, { type: 'photo',album:'بخشنامه‌ها' });
+            }}
+            menuContext={{ saveToLocal: 'ذخیره عکس', cancel: 'بازگشت' }}
             onCancel={() => {
               setIsVisible(false);
             }}
