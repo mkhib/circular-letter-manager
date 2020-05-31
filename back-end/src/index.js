@@ -55,17 +55,17 @@ const SERVER = new ApolloServer({
         })
 });
 
-// let moesifMiddleware = moesif({
-//     applicationId: 'eyJhcHAiOiIzNDU6NjUzIiwidmVyIjoiMi4wIiwib3JnIjoiODc6MjM0IiwiaWF0IjoxNTkwNTM3NjAwfQ.LJfUFN2RtgjCMcnznKf6Mn6dep0JNq3yMZj-l_WOm7M',
+/*let moesifMiddleware = moesif({
+    applicationId: 'eyJhcHAiOiIzNDU6NjUzIiwidmVyIjoiMi4wIiwib3JnIjoiODc6MjM0IiwiaWF0IjoxNTkwNTM3NjAwfQ.LJfUFN2RtgjCMcnznKf6Mn6dep0JNq3yMZj-l_WOm7M',
 
-//     // Set to false if you don't want to capture req/resp body
-//     logBody: true,
+    // Set to false if you don't want to capture req/resp body
+    logBody: true,
 
-//     // Optional hook to link API calls to users
-//     identifyUser: function (req, res) {
-//         return req.user ? req.user.id : undefined;
-//     },
-// });
+    // Optional hook to link API calls to users
+    identifyUser: function (req, res) {
+        return req.user ? req.user.id : undefined;
+    },
+});*/
 
 let acessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 
@@ -93,11 +93,11 @@ app.use(cors({
     origin: true
 }));
 
-// app.use(function (req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     next();
-// });
+/*app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});*/
 
 app.use(cookieParser());
 app.use(helmet());
@@ -138,6 +138,11 @@ app.use((req, res, next) => {
     catch{ }
     next();
 });
+
+/*app.use(express.static(path.join(__dirname, 'build')));
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
+});*/
 
 SERVER.applyMiddleware({
     app,
