@@ -12,8 +12,11 @@ import {
   PermissionsAndroid,
   Platform,
 } from 'react-native';
-import CameraRoll from '@react-native-community/cameraroll';
 import gql from 'graphql-tag';
+import CameraRoll from '@react-native-community/cameraroll';
+import RNFetchBlob from 'rn-fetch-blob';
+import AndroidOpenSettings from 'react-native-android-open-settings';
+import AsyncStorage from '@react-native-community/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Actions } from 'react-native-router-flux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -54,6 +57,17 @@ interface LineProps {
   value: string | string[];
   style?: StyleProp<ViewStyle>;
 }
+
+const getData = async () => {
+  try {
+    const value = await AsyncStorage.getItem('tok');
+    if (value !== null) {
+      return value;
+    }
+  } catch (e) {
+    // error reading value
+  }
+};
 
 const handleNumber = (numberToProcess: string, blueText?: boolean) => {
   if (numberToProcess) {
@@ -119,23 +133,26 @@ const CustomImageHeader: React.FC<CustomImageHeaderProps> = ({ allSize, currentI
   </View>
 );
 
-const checkAndroidPermission = async () => {
-  try {
-    const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
-    await PermissionsAndroid.request(permission);
-    Promise.resolve();
-  } catch (error) {
-    Promise.reject(error);
-  }
-};
 
 const Letter: React.FC<LetterProps> = ({ id }) => {
   const [visible, setIsVisible] = useState(false);
   const { loading, error, data } = useQuery(LETTER_QUERY, { variables: { id: id } });
   const [images, setImages] = useState<ImageProp[]>([]);
+  const [alertModal, setAlertModal] = useState<boolean>(false);
+  const checkAndroidPermission = async () => {
+    try {
+      const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+      await PermissionsAndroid.request(permission);
+      if (await PermissionsAndroid.request(permission) === 'never_ask_again' || await PermissionsAndroid.request(permission) === 'denied') {
+        setAlertModal(true);
+      }
+      Promise.resolve();
+    } catch (err) {
+      Promise.reject(err);
+    }
+  };
   useEffect(() => {
     if (error) {
-      console.log(error.message);
       if (error.message === 'GraphQL error: Authentication required') {
         Actions.auth();
       }
@@ -159,7 +176,6 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
     });
     return tagsToShow;
   }
-  console.log(data);
   if (loading) {
     return (
       <ImageBackground
@@ -226,6 +242,47 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
           transparent={true}
           onRequestClose={() => setIsVisible(false)}
         >
+          <Modal
+            visible={alertModal}
+            transparent
+            animationType="fade"
+            onRequestClose={() => { setAlertModal(false); }}
+          >
+            <View
+              style={styles.alertModalView}
+            >
+              <Text
+                style={styles.alertModalText}
+              >
+                لطفا دسترسی لازم را برای ذخیره تصویر، در تنظیمات تلفن همراه خود برای برنامه فراهم کنید.
+            </Text>
+              <View
+                style={styles.modalButtonsView}
+              >
+                <TouchableOpacity
+                  onPress={() => {
+                    setAlertModal(false);
+                    AndroidOpenSettings.appDetailsSettings();
+                  }}
+                  style={StyleSheet.flatten([gStyles.button, { backgroundColor: 'white' }])}
+                >
+                  <Text style={gStyles.normalText}>
+                    ورود به تنظیمات
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setAlertModal(false);
+                  }}
+                  style={StyleSheet.flatten([gStyles.button, { backgroundColor: 'white' }])}
+                >
+                  <Text style={gStyles.normalText}>
+                    بازگشت
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
           <ImageViewer
             imageUrls={images}
             swipeDownThreshold={70}
@@ -234,7 +291,22 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
               if (Platform.OS === 'android') {
                 await checkAndroidPermission();
               }
-              CameraRoll.save(url, { type: 'photo', album: 'بخشنامه‌ها' });
+              const token = await getData();
+              let parts = url.split('.');
+              let fileExt = parts[parts.length - 1];
+              RNFetchBlob
+                .config({
+                  fileCache: true,
+                  appendExt: fileExt,
+                })
+                .fetch('GET', url, {
+                  Authorization: token ? `Bearer ${token}` : '',
+                })
+                .then((res) => {
+                  CameraRoll.save(`${res.path()}`, { type: 'photo', album: 'بخشنامه‌ها' });
+                }).catch((e: any) => {
+                  console.log(e);
+                });
             }}
             menuContext={{ saveToLocal: 'ذخیره عکس', cancel: 'بازگشت' }}
             onCancel={() => {
@@ -431,5 +503,21 @@ const styles = StyleSheet.create({
   lineContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
+  },
+  alertModalView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  alertModalText: {
+    ...gStyles.normalText,
+    backgroundColor: 'white',
+    padding: shape.spacing(),
+  },
+  modalButtonsView: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'center',
+    backgroundColor: 'white',
   },
 });

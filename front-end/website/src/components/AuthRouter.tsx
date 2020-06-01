@@ -100,7 +100,11 @@ const AuthRouter = ({ authenticated, checked, user }: any) => {
           <Switch>
             <Route path="/login" component={Login} />
             <Route path="/forgot-password" component={ForgotPassword} />
-            <ChangePasswordLockRoute exact path="/change-pass-lock" component={ChangePasswordLock} authenticated={authenticated} changed={user.changedPassword} />
+            <ChangePasswordLockRoute exact path="/change-pass-lock"
+              component={ChangePasswordLock}
+              authenticated={authenticated}
+              changed={user.changedPassword}
+            />
             {(user.id && !user.changedPassword) && (
               <Redirect to={{
                 pathname: '/change-pass-lock',
