@@ -112,7 +112,6 @@ export const resolvers = {
                 throw new Error('Letter not found!');
             }
 
-            context.session.oldFile = circularLetter.files[0];
             let refrenceId = "";
             const referedTo = await CircularLetters.findOne({ number: circularLetter.referTo });
             if (referedTo) {
@@ -130,6 +129,29 @@ export const resolvers = {
             return {
                 circularLetter: circularLetter,
                 refrenceId,
+                filesName
+            };
+        },
+        circularLetterDetailsEdit: async (parent, args, context, info) => {
+            isAuthenticated(context.req);
+
+            const circularLetter = await CircularLetters.findById(args.id);
+            if (!circularLetter) {
+                throw new Error('Letter not found!');
+            }
+
+            context.session.oldFile = circularLetter.files[0];
+
+            const filesName = circularLetter.files;
+
+            const tempFiles = [];
+            circularLetter.files.forEach((file) => {
+                tempFiles.push(`${imagePath}${file}`);
+            });
+            circularLetter.files = tempFiles;
+
+            return {
+                circularLetter: circularLetter,
                 filesName
             };
         },
@@ -647,7 +669,7 @@ export const resolvers = {
                     subjectedTo: 'همه',
                     toCategory: 'همه',
                     tags: [`کلاس${i}`, `سال${i}`],
-                    files: ['d5ESsyXZunnamed (5).jpg', 'DYSwHigkunnamed (7).jpg']
+                    files: ['MDFnUeNCYmayqrOp8044284_232.jpg']
                 });
                 await circularLetter.save();
                 i++;

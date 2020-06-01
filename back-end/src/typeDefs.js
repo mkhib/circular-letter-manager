@@ -9,6 +9,7 @@ export const typeDefs = gql`
         files: [String]
         circularLetters(page: Int, limit: Int): [CircularLetter!]!
         circularLetterDetails(id: ID!): CircularLetterDetail!
+        circularLetterDetailsEdit(id: ID!): CircularLetterDetail!
         search(information: String, startDate: String,
          endDate: String, page: Int, limit: Int, sortBy: String, order: String): SearchOutput!
         appSearch(information: String, startDate: String,
