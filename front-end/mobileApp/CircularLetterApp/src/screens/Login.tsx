@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Keyboard } from 'react-native';
 import { gql } from 'apollo-boost';
 import * as yup from 'yup';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -8,7 +8,7 @@ import { Actions } from 'react-native-router-flux';
 import { useMutation } from '@apollo/react-hooks';
 import LinearGradient from 'react-native-linear-gradient';
 import { FloatingTitleTextInputField } from '../components/floating_title_text_input_field';
-import { colors, gStyles, shape } from '../assets/styles/Styles';
+import { gStyles, shape } from '../assets/styles/Styles';
 import TextAlert from '../components/TextAlert';
 import Loading from '../components/Loading';
 var CryptoJS = require('react-native-crypto-js');
@@ -79,12 +79,11 @@ const Login = () => {
           setTimeout(() => Actions.changePasswordLock(), 0);
         }
       }
-    }
+    };
     if (data) {
       storeTok();
     }
     if (error) {
-      console.log(error.message)
       if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0') {
         setErrorState({
           message: 'اتصال خود را به اینترنت بررسی کنید.',
@@ -206,6 +205,7 @@ const Login = () => {
           <TouchableOpacity
             style={[StyleSheet.flatten([gStyles.button, styles.button])]}
             onPress={() => {
+              Keyboard.dismiss();
               validateAndLogin();
             }}
           >
@@ -217,6 +217,7 @@ const Login = () => {
         <TouchableOpacity
           onPress={() => {
             clearErrors();
+            Keyboard.dismiss();
             Actions.signup();
           }}
         >

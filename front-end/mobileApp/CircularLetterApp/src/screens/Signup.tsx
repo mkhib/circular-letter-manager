@@ -105,7 +105,6 @@ const Signup = () => {
     },
     onError: (err) => {
       if (err) {
-        console.log(err.message);
         if (err.message === 'Network error: Failed to fetch' || err.message === 'Network error: Unexpected token T in JSON at position 0') {
           setErrorState({
             message: 'اتصال خود را به اینترنت بررسی کنید.',

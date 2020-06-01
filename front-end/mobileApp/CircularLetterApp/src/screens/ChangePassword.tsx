@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Keyboard } from 'react-native';
 import { gql } from 'apollo-boost';
 import * as yup from 'yup';
 import { Actions } from 'react-native-router-flux';
@@ -7,7 +7,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { useMutation } from '@apollo/react-hooks';
 import LinearGradient from 'react-native-linear-gradient';
 import { FloatingTitleTextInputField } from '../components/floating_title_text_input_field';
-import { colors, gStyles, shape } from '../assets/styles/Styles';
+import { gStyles, shape } from '../assets/styles/Styles';
 import TextAlert from '../components/TextAlert';
 import SuccessTextAlert from '../components/SuccessTextAlert';
 import Loading from '../components/Loading';
@@ -46,15 +46,14 @@ const ChangedPassword = () => {
   const [oldPassword, setOldPassword] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [againNewPassword, setAgainNewPassword] = useState<string>('');
-  const [changePassword, { data, loading, error }] = useMutation(CHANGE_THAT_PASSWORD, {
+  const [changePassword, { loading, error }] = useMutation(CHANGE_THAT_PASSWORD, {
     onCompleted: () => {
-      console.log('here is');
       clearFields();
       setSuccessState({
         message: 'رمزعبور شما با موفقیت تغییر یافت.',
         state: true,
       });
-      // setTimeout(() => Actions.main(), 0);
+      setTimeout(() => Actions.pop(), 1000);
     }
   });
   const [successState, setSuccessState] = useState<AlertProps>({ state: false, message: '' });
@@ -64,6 +63,7 @@ const ChangedPassword = () => {
   const againNewPasswordRef = useRef<TextInput>(null);
   React.useEffect(() => {
     if (error) {
+      console.log(error.message);
       if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0') {
         setErrorState({
           message: 'اتصال خود را به اینترنت بررسی کنید.',
@@ -74,13 +74,15 @@ const ChangedPassword = () => {
           message: 'رمزعبور قبلی نادرست است.',
           state: true,
         });
-      } else {
-        console.log('errrr', error.message);
-        setErrorState({
-          message: 'مشکلی پیش‌آمده است.',
-          state: true,
-        });
-      }
+      } if (error.message === 'GraphQL error: Authentication required') {
+        setTimeout(() => Actions.auth(), 0);
+      } 
+      // else {
+      //   setErrorState({
+      //     message: 'مشکلی پیش‌آمده است.',
+      //     state: true,
+      //   });
+      // }
     }
   }, [error]);
   const clearFields = () => {
@@ -195,6 +197,7 @@ const ChangedPassword = () => {
           <TouchableOpacity
             style={[StyleSheet.flatten([gStyles.button, styles.button])]}
             onPress={() => {
+              Keyboard.dismiss();
               validateAndLogin();
             }}
           >

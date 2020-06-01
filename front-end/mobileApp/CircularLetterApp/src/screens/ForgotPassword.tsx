@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Keyboard } from 'react-native';
 import { gql } from 'apollo-boost';
 import * as yup from 'yup';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -7,7 +7,7 @@ import { Actions } from 'react-native-router-flux';
 import { useMutation } from '@apollo/react-hooks';
 import LinearGradient from 'react-native-linear-gradient';
 import { FloatingTitleTextInputField } from '../components/floating_title_text_input_field';
-import { colors, gStyles, shape } from '../assets/styles/Styles';
+import { gStyles, shape } from '../assets/styles/Styles';
 import SuccessTextAlert from '../components/SuccessTextAlert';
 import TextAlert from '../components/TextAlert';
 import Loading from '../components/Loading';
@@ -42,7 +42,7 @@ const schema = yup.object().shape({
 
 const ForgotPassword = () => {
   const [username, setUsername] = useState<string>('');
-  const [forgotPassword, { data, loading, error }] = useMutation(FORGOT_PASSWORD, {
+  const [forgotPassword, { loading, error }] = useMutation(FORGOT_PASSWORD, {
     onCompleted: () => {
       setSuccessState({
         message: 'رمزعبور موقت برای شما پیامک شد.',
@@ -55,7 +55,6 @@ const ForgotPassword = () => {
   const [errors, setErrors] = useState<yup.ValidationError | null>(null);
   React.useEffect(() => {
     if (error) {
-      console.log(error.message);
       if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0') {
         setErrorState({
           message: 'اتصال خود را به اینترنت بررسی کنید.',
@@ -143,6 +142,7 @@ const ForgotPassword = () => {
           <TouchableOpacity
             style={[StyleSheet.flatten([gStyles.button, styles.button])]}
             onPress={() => {
+              Keyboard.dismiss();
               validateAndSendForgetPasswordRequest();
             }}
           >

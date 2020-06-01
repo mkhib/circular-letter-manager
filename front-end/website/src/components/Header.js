@@ -30,7 +30,6 @@ import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import RecentActorsRoundedIcon from '@material-ui/icons/RecentActorsRounded';
 import SupervisorAccountRoundedIcon from '@material-ui/icons/SupervisorAccountRounded';
 import PublishRoundedIcon from '@material-ui/icons/PublishRounded';
-// import "../assets/animationStyle.scss"
 
 const useStyles = makeStyles(theme => ({
   containerView: {

@@ -308,7 +308,7 @@ mutation UpdateCircularLetter($id: ID!, $data: updateCircularLetter){
 
 const LETTER_QUERY = gql`
 query QueryLetters($id: ID!){
-  circularLetterDetails(id: $id) {
+  circularLetterDetailsEdit(id: $id) {
     circularLetter{
     _id
     title
@@ -324,7 +324,6 @@ query QueryLetters($id: ID!){
     files
     }
     filesName
-    refrenceId
   }
   categoriesQuery{
     subjectedTos { 
@@ -379,7 +378,6 @@ const EditCircularLetter = (props: any) => {
     sender,
     addFileUpload,
     setFileUpload,
-    clearFiles,
     uploadFilesStatus,
     toCategory,
     addFile,
@@ -415,9 +413,9 @@ const EditCircularLetter = (props: any) => {
   let queryParam = useQueryParam();
   if (props.data) {
     var propsData = props.data;
-    if (props.data.circularLetterDetails) {
-      var filesNameQuery = props.data.circularLetterDetails.filesName;
-      var letterData = props.data.circularLetterDetails.circularLetter;
+    if (props.data.circularLetterDetailsEdit) {
+      var filesNameQuery = props.data.circularLetterDetailsEdit.filesName;
+      var letterData = props.data.circularLetterDetailsEdit.circularLetter;
     }
     if (props.data.categoriesQuery) {
       var lists = props.data.categoriesQuery;

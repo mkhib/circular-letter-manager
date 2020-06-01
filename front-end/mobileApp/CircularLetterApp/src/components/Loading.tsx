@@ -5,16 +5,16 @@ import LottieView from 'lottie-react-native';
 
 const Loading = () => {
   return (
-      <View style={styles.container}>
-        <TouchableWithoutFeedback>
-          <LottieView
-            style={styles.lottieView}
-            autoPlay
-            loop
-            source={require('../assets/animations/loading2.json')}
-          />
-        </TouchableWithoutFeedback>
-      </View>
+    <View style={styles.container}>
+      <TouchableWithoutFeedback>
+        <LottieView
+          style={styles.lottieView}
+          autoPlay
+          loop
+          source={require('../assets/animations/loading2.json')}
+        />
+      </TouchableWithoutFeedback>
+    </View>
   );
 }
 

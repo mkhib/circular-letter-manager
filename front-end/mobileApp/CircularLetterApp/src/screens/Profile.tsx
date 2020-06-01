@@ -2,12 +2,13 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, StyleProp, ViewStyle } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import gql from 'graphql-tag';
+import { useApolloClient } from '@apollo/react-hooks';
 import { shape, gStyles, colors } from '../assets/styles/Styles';
 import { useQuery } from '@apollo/react-hooks';
 import { useMutation } from '@apollo/react-hooks';
-import profileBack from '../assets/images/profile.jpg';
 import Loading from '../components/Loading';
 import TextAlert from '../components/TextAlert';
+var profileBack = require('../assets/images/profile.jpg')
 
 const GET_PROFILE = gql`
 query user{
@@ -59,11 +60,14 @@ const Line: React.FC<LineProps> = ({ style, title, value }) => (
 );
 
 const Profile = () => {
-  const { loading, error, data, refetch } = useQuery<IUser>(GET_PROFILE, {
+  const { loading, error, data, refetch, networkStatus } = useQuery<IUser>(GET_PROFILE, {
     notifyOnNetworkStatusChange: true,
   });
-  const [logout, { data: _logoutData, loading: logoutLoading }] = useMutation(LOGOUT, {
+  console.log('bashe', networkStatus);
+  const client = useApolloClient();
+  const [logout, { loading: logoutLoading }] = useMutation(LOGOUT, {
     onCompleted: () => {
+      client.resetStore();
       setTimeout(() => {
         Actions.auth();
       }, 0);
@@ -72,7 +76,7 @@ const Profile = () => {
   useEffect(() => {
     if (error) {
       if (error.message === 'GraphQL error: Authentication required') {
-        Actions.auth();
+        setTimeout(() => Actions.auth(), 0);
       }
     }
   }, [error]);
@@ -94,9 +98,6 @@ const Profile = () => {
         </TouchableOpacity>
       </View>);
     }
-  }
-  if (data) {
-    console.log('fatrt', data);
   }
   if (loading) {
     return (

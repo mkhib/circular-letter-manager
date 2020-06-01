@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Keyboard } from 'react-native';
 import { gql } from 'apollo-boost';
 import * as yup from 'yup';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -63,7 +63,6 @@ const ChangedPasswordLock = () => {
     }
   }, [error]);
   if (data) {
-    console.log('change', data);
     setTimeout(() => Actions.main(), 0);
   }
   const clearErrors = () => {
@@ -154,6 +153,7 @@ const ChangedPasswordLock = () => {
           <TouchableOpacity
             style={[StyleSheet.flatten([gStyles.button, styles.button])]}
             onPress={() => {
+              Keyboard.dismiss();
               validateAndChangePassword();
             }}
           >

@@ -59,6 +59,17 @@ query SearchQuery($information: String,$sortBy: String,$order: String, $startDat
   }
 }
 `;
+var
+  persianNumbers = [/۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g],
+  arabicNumbers = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g],
+  fixNumbers = function (str: any) {
+    if (typeof str === 'string') {
+      for (var i = 0; i < 10; i++) {
+        str = str.replace(persianNumbers[i], i).replace(arabicNumbers[i], i);
+      }
+    }
+    return str;
+  };
 interface SearchObj {
   searchText: string;
   sort: string;
@@ -69,7 +80,6 @@ interface SearchObj {
 const LIMIT = 15;
 const Search = () => {
   const [searchValue, setSearchValue] = useState<string>('');
-  const [search, setSearch] = useState<string>('');
   const [fromDateToShow, setFromDateToShow] = useState<string>('');
   const [fromDateToSend, setFromDateToSend] = useState<string>('');
   const [toDateToShow, setToDateToShow] = useState<string>('');
@@ -78,6 +88,7 @@ const Search = () => {
   const [sort, setSort] = useState<string>('');
   const [order, setOrder] = useState<string>('');
   const [page, setPage] = useState<number>(1);
+  const [fetchMoreLoading, setFetchMoreLoading] = useState<boolean>(true);
   const [err, setErr] = useState(new Set());
   const [searchObject, setSearchObject] = useState<SearchObj>({
     searchText: '',
@@ -87,7 +98,8 @@ const Search = () => {
     sort: 'dateOfCreation',
   });
   const [hasMore, setHasMore] = useState(true);
-  const { loading, error, data, fetchMore } = useQuery(SEARCH_QUERY, {
+  const { loading, error, data, fetchMore, refetch, networkStatus } = useQuery(SEARCH_QUERY, {
+    fetchPolicy: 'network-only',
     variables: {
       information: searchObject.searchText,
       page: 1,
@@ -98,20 +110,30 @@ const Search = () => {
       order: searchObject.order,
     },
   });
+  console.log('nono', networkStatus);
   React.useEffect(() => {
     if (error) {
-      console.log(error.message);
       if (error.message === 'GraphQL error: Authentication required') {
-        Actions.auth();
+        setTimeout(() => Actions.auth(), 0);
       }
     }
-  }, [error]);
+  }, [error, fetchMoreLoading]);
   if (error) {
     if (error.message === 'Network error: Unexpected token T in JSON at position 0' || error.message === 'Network error: Network request failed' || error.message === 'Network error: Timeout exceeded') {
       return (<View
         style={styles.alertView}
       >
         <TextAlert text="اتصال خود را به اینترنت بررسی کنید." state={true} />
+        <TouchableOpacity
+          style={gStyles.button}
+          onPress={() => {
+            refetch();
+          }}
+        >
+          <Text style={styles.tryAgainText}>
+            تلاش مجدد
+          </Text>
+        </TouchableOpacity>
       </View>);
     }
   }
@@ -127,6 +149,15 @@ const Search = () => {
     setPage(1);
     setHasMore(true);
   };
+  const doSearch = () => {
+    setSearchObject({
+      searchText: fixNumbers(searchValue),
+      endDate: toDateToSend,
+      startDate: fromDateToSend,
+      order: order,
+      sort: sort,
+    });
+  };
   return (
     <>
       <ImageBackground
@@ -139,15 +170,29 @@ const Search = () => {
           style={styles.flatListStyle}
           contentContainerStyle={styles.container}
           data={handleData()}
+
           onEndReachedThreshold={4}
           keyboardShouldPersistTaps={'handled'}
           showsVerticalScrollIndicator={false}
+          ListFooterComponent={
+            (fetchMoreLoading && handleData().length > 0) ?
+              <View
+                style={styles.footerLoading}
+              >
+                <LottieView
+                  source={require('../assets/animations/loading2.json')}
+                  autoPlay
+                  loop
+                />
+              </View> : <View />
+          }
           ListEmptyComponent={!loading ? <EmptySearch /> : null}
           onEndReached={() => {
             if (hasMore) {
+              setFetchMoreLoading(true);
               fetchMore({
                 variables: {
-                  information: searchValue,
+                  information: fixNumbers(searchValue),
                   page: page + 1,
                   startDate: searchObject.startDate,
                   endDate: searchObject.endDate,
@@ -155,8 +200,9 @@ const Search = () => {
                   sortBy: searchObject.sort,
                   order: searchObject.order,
                 },
-                updateQuery: (prev, { fetchMoreResult }) => {
+                updateQuery: (prev: any, { fetchMoreResult }: any) => {
                   if (fetchMoreResult.appSearch.length === 0) {
+                    setFetchMoreLoading(false);
                     setHasMore(false);
                   }
                   if (!fetchMoreResult) {
@@ -199,13 +245,7 @@ const Search = () => {
                     onSubmitEditing={() => {
                       handleResetPage();
                       Keyboard.dismiss();
-                      setSearchObject({
-                        searchText: searchValue,
-                        endDate: toDateToSend,
-                        startDate: fromDateToSend,
-                        order: order,
-                        sort: sort,
-                      });
+                      doSearch();
                     }}
                     style={styles.searchInput}
                   />
@@ -213,13 +253,7 @@ const Search = () => {
                     onPress={() => {
                       handleResetPage();
                       Keyboard.dismiss();
-                      setSearchObject({
-                        searchText: searchValue,
-                        endDate: toDateToSend,
-                        startDate: fromDateToSend,
-                        order: order,
-                        sort: sort,
-                      });
+                      doSearch();
                     }}
                   >
                     <MaterialIcons
@@ -238,6 +272,7 @@ const Search = () => {
                       func={(label: string, value: string) => {
                         setHasMore(true);
                         setSort(value);
+                        doSearch();
                       }}
                       placeholder="مرتب سازی بر اساس"
                       errors={err}
@@ -251,6 +286,7 @@ const Search = () => {
                       func={(label: string, value: string) => {
                         setHasMore(true);
                         setOrder(value);
+                        doSearch();
                       }}
                       placeholder="نوع مرتب سازی"
                       errors={err}
@@ -303,6 +339,7 @@ const Search = () => {
                         m.locale('fa');
                         setToDateToShow(date);
                         setToDateToSend(m.format('jYYYY/jMM/jDD'));
+                        doSearch();
                       }
                       }
                     />
@@ -333,6 +370,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingBottom: shape.spacing(),
     // backgroundColor: colors.indigo,
+  },
+  footerLoading: {
+    width: 100,
+    height: 100,
+    alignSelf: 'center',
+    alignItems: 'center',
+    // backgroundColor: 'red',
   },
   flatListStyle: {
     flex: 1,
@@ -414,5 +458,9 @@ const styles = StyleSheet.create({
     ...gStyles.normalText,
     // color: 'white',
     fontSize: 20,
+  },
+  tryAgainText: {
+    ...gStyles.normalText,
+    color: 'white',
   },
 });

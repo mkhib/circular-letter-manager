@@ -74,7 +74,6 @@ const LetterThumbnail: React.FC<ThumbnailProps> = (props) => {
   return (
     <TouchableOpacity
       onPress={() => {
-        console.log('farteer');
         Actions.letter({ id: props.id });
       }}
     >

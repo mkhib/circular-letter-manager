@@ -28,7 +28,7 @@ import Letter from './src/screens/Letter';
 import Signup from './src/screens/Signup';
 
 const httpLink = createHttpLink({
-  uri: 'https://b0da96bb8e0f.ngrok.io/graphql',
+  uri: 'http://194.5.178.254:3600/graphql',
 });
 const timeoutLink = new ApolloLinkTimeout(15000);
 const getData = async () => {
@@ -88,8 +88,7 @@ const App = () => {
   });
   const backAction = () => {
     const scene = Actions.currentScene;
-    console.log(scene);
-    if (scene === '_search') {
+    if (scene === '_search' || scene === 'login') {
       BackHandler.exitApp();
       return true;
     } else {

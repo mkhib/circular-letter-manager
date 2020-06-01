@@ -136,7 +136,21 @@ const CustomImageHeader: React.FC<CustomImageHeaderProps> = ({ allSize, currentI
 
 const Letter: React.FC<LetterProps> = ({ id }) => {
   const [visible, setIsVisible] = useState(false);
-  const { loading, error, data } = useQuery(LETTER_QUERY, { variables: { id: id } });
+  const { loading, error, data } = useQuery(LETTER_QUERY, {
+    onCompleted: (da: any) => {
+      let tempFiles: ImageProp[] = [];
+      da.circularLetterDetails.circularLetter.files.forEach((file: string) => {
+        tempFiles.push({ url: file });
+      });
+      setImages(tempFiles);
+    },
+    onError: (err) => {
+      if (err.message === 'GraphQL error: Authentication required') {
+        setTimeout(() => Actions.auth(), 0);
+      }
+    },
+    variables: { id: id },
+  });
   const [images, setImages] = useState<ImageProp[]>([]);
   const [alertModal, setAlertModal] = useState<boolean>(false);
   const checkAndroidPermission = async () => {
@@ -151,20 +165,6 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
       Promise.reject(err);
     }
   };
-  useEffect(() => {
-    if (error) {
-      if (error.message === 'GraphQL error: Authentication required') {
-        Actions.auth();
-      }
-    }
-    if (data) {
-      let tempFiles: ImageProp[] = [];
-      data.circularLetterDetails.circularLetter.files.forEach((file: string) => {
-        tempFiles.push({ url: file });
-      });
-      setImages(tempFiles);
-    }
-  }, [data, error]);
   const handleTags = (tags: Array<string>) => {
     const tagsToShow: Array<string> = [];
     tags.forEach((tag: string, index: number) => {
@@ -210,7 +210,7 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
             }}
           >
             <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse', alignItems: 'center' }])}>
-              {handleNumber(data.circularLetterDetails.circularLetter.referTo, true)}
+              {data && handleNumber(data.circularLetterDetails.circularLetter.referTo, true)}
             </View>
           </TouchableOpacity>
         </View>
@@ -224,201 +224,205 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
             </Text>
           </View>
           <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
-            {handleNumber(data.circularLetterDetails.circularLetter.referTo)}
+            {data && handleNumber(data.circularLetterDetails.circularLetter.referTo)}
           </View>
         </View>
       );
     }
   };
-
-  return (
-    <ImageBackground
-      source={require('../assets/images/searchBack.jpg')}
-      style={styles.imageBackground}
-    >
-      <View style={styles.topView}>
-        <Modal
-          visible={visible}
-          transparent={true}
-          onRequestClose={() => setIsVisible(false)}
-        >
+  if (!data) {
+    return <View />;
+  }
+  if (data) {
+    return (
+      <ImageBackground
+        source={require('../assets/images/searchBack.jpg')}
+        style={styles.imageBackground}
+      >
+        <View style={styles.topView}>
           <Modal
-            visible={alertModal}
-            transparent
-            animationType="fade"
-            onRequestClose={() => { setAlertModal(false); }}
+            visible={visible}
+            transparent={true}
+            onRequestClose={() => setIsVisible(false)}
           >
-            <View
-              style={styles.alertModalView}
+            <Modal
+              visible={alertModal}
+              transparent
+              animationType="fade"
+              onRequestClose={() => { setAlertModal(false); }}
             >
-              <Text
-                style={styles.alertModalText}
-              >
-                لطفا دسترسی لازم را برای ذخیره تصویر، در تنظیمات تلفن همراه خود برای برنامه فراهم کنید.
-            </Text>
               <View
-                style={styles.modalButtonsView}
+                style={styles.alertModalView}
               >
-                <TouchableOpacity
-                  onPress={() => {
-                    setAlertModal(false);
-                    AndroidOpenSettings.appDetailsSettings();
-                  }}
-                  style={StyleSheet.flatten([gStyles.button, { backgroundColor: 'white' }])}
+                <Text
+                  style={styles.alertModalText}
                 >
-                  <Text style={gStyles.normalText}>
-                    ورود به تنظیمات
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setAlertModal(false);
-                  }}
-                  style={StyleSheet.flatten([gStyles.button, { backgroundColor: 'white' }])}
-                >
-                  <Text style={gStyles.normalText}>
-                    بازگشت
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-          <ImageViewer
-            imageUrls={images}
-            swipeDownThreshold={70}
-            saveToLocalByLongPress
-            onSave={async (url) => {
-              if (Platform.OS === 'android') {
-                await checkAndroidPermission();
-              }
-              const token = await getData();
-              let parts = url.split('.');
-              let fileExt = parts[parts.length - 1];
-              RNFetchBlob
-                .config({
-                  fileCache: true,
-                  appendExt: fileExt,
-                })
-                .fetch('GET', url, {
-                  Authorization: token ? `Bearer ${token}` : '',
-                })
-                .then((res) => {
-                  CameraRoll.save(`${res.path()}`, { type: 'photo', album: 'بخشنامه‌ها' });
-                }).catch((e: any) => {
-                  console.log(e);
-                });
-            }}
-            menuContext={{ saveToLocal: 'ذخیره عکس', cancel: 'بازگشت' }}
-            onCancel={() => {
-              setIsVisible(false);
-            }}
-            renderHeader={(currentInd) => {
-              return (<CustomImageHeader
-                currentIndex={currentInd}
-                allSize={images.length}
-              />);
-            }}
-            renderIndicator={() => {
-              return (
-                <View />
-              );
-            }}
-            enableSwipeDown
-          />
-        </Modal>
-        <View
-          style={styles.backButtonView}>
-          <TouchableOpacity
-            style={styles.backButtonView}
-            onPress={() => {
-              Actions.pop();
-            }}
-          >
-            <Text style={styles.backButtonText}>
-              بازگشت
+                  لطفا دسترسی لازم را برای ذخیره تصویر، در تنظیمات تلفن همراه خود برای برنامه فراهم کنید.
             </Text>
-            <MaterialIcons name="arrow-back" size={22} />
-          </TouchableOpacity>
-        </View>
-        <KeyboardAwareScrollView
-          style={styles.container}
-          contentContainerStyle={styles.contentContainer}
-        >
-          <View style={styles.topCard}>
-            <Line title="عنوان:"
-              style={styles.topView}
-              value={data.circularLetterDetails.circularLetter.title} />
-            <Line title="تاریخ:" value={data.circularLetterDetails.circularLetter.date} />
-            <View style={styles.lineContainer}>
-              <View>
-                <Text style={styles.lineTitle}>
-                  شماره:
-              </Text>
-              </View>
-              <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
-                {handleNumber(data.circularLetterDetails.circularLetter.number)}
-              </View>
-            </View>
-            <Line title="صادر کننده:"
-              style={styles.topView}
-              value={data.circularLetterDetails.circularLetter.from} />
-            {!!data.circularLetterDetails.circularLetter.importNumber &&
-              <View style={styles.lineContainer}>
-                <View>
-                  <Text style={styles.lineTitle}>
-                    شماره ثبت وارده:
-              </Text>
-                </View>
-                <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
-                  {handleNumber(data.circularLetterDetails.circularLetter.importNumber)}
+                <View
+                  style={styles.modalButtonsView}
+                >
+                  <TouchableOpacity
+                    onPress={() => {
+                      setAlertModal(false);
+                      AndroidOpenSettings.appDetailsSettings();
+                    }}
+                    style={StyleSheet.flatten([gStyles.button, { backgroundColor: 'white' }])}
+                  >
+                    <Text style={gStyles.normalText}>
+                      ورود به تنظیمات
+                  </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setAlertModal(false);
+                    }}
+                    style={StyleSheet.flatten([gStyles.button, { backgroundColor: 'white' }])}
+                  >
+                    <Text style={gStyles.normalText}>
+                      بازگشت
+                  </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-            }
-            {!!data.circularLetterDetails.circularLetter.exportNumber &&
-              <View style={styles.lineContainer}>
-                <View>
-                  <Text style={styles.lineTitle}>
-                    شماره ثبت صادره:
-              </Text>
-                </View>
-                <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
-                  {handleNumber(data.circularLetterDetails.circularLetter.exportNumber)}
-                </View>
-              </View>
-            }
-            <Line title="مرتبط با مقطع:" value={data.circularLetterDetails.circularLetter.toCategory} />
-            <Line title="حوزه مربوطه:" value={data.circularLetterDetails.circularLetter.subjectedTo} />
-            {handleReferTo(data.circularLetterDetails.circularLetter.referTo, data.circularLetterDetails.refrenceId)}
-            <Line title="کلمات کلیدی:"
-              style={styles.topView}
-              value={handleTags(data.circularLetterDetails.circularLetter.tags)} />
-            <Line title="تعداد فایل‌ها:" value={data.circularLetterDetails.circularLetter.files.length} />
-          </View>
-          <View
-            style={styles.imageView}
-          >
-            <Image
-              source={{ uri: data.circularLetterDetails.circularLetter.files[0] }}
-              defaultSource={require('../assets/images/imageLoading.png')}
-              style={styles.image}
+            </Modal>
+            <ImageViewer
+              imageUrls={images}
+              swipeDownThreshold={70}
+              saveToLocalByLongPress
+              onSave={async (url) => {
+                if (Platform.OS === 'android') {
+                  await checkAndroidPermission();
+                }
+                const token = await getData();
+                let parts = url.split('.');
+                let fileExt = parts[parts.length - 1];
+                RNFetchBlob
+                  .config({
+                    fileCache: true,
+                    appendExt: fileExt,
+                  })
+                  .fetch('GET', url, {
+                    Authorization: token ? `Bearer ${token}` : '',
+                  })
+                  .then((res) => {
+                    CameraRoll.save(`${res.path()}`, { type: 'photo', album: 'بخشنامه‌ها' });
+                  }).catch((e: any) => {
+                    console.log(e);
+                  });
+              }}
+              menuContext={{ saveToLocal: 'ذخیره عکس', cancel: 'بازگشت' }}
+              onCancel={() => {
+                setIsVisible(false);
+              }}
+              renderHeader={(currentInd) => {
+                return (<CustomImageHeader
+                  currentIndex={currentInd}
+                  allSize={images.length}
+                />);
+              }}
+              renderIndicator={() => {
+                return (
+                  <View />
+                );
+              }}
+              enableSwipeDown
             />
-          </View>
-          <View style={styles.buttonContainer}>
+          </Modal>
+          <View
+            style={styles.backButtonView}>
             <TouchableOpacity
-              style={styles.button}
+              style={styles.backButtonView}
               onPress={() => {
-                setIsVisible(true);
+                Actions.pop();
               }}
             >
-              <Text style={styles.buttonText}>
-                {data.circularLetterDetails.circularLetter.files.length === 1 ? 'مشاهده فایل' : 'مشاهده فایل‌ها'}
-              </Text>
+              <Text style={styles.backButtonText}>
+                بازگشت
+            </Text>
+              <MaterialIcons name="arrow-back" size={22} />
             </TouchableOpacity>
           </View>
-        </KeyboardAwareScrollView>
-      </View>
-    </ImageBackground>
-  );
+          <KeyboardAwareScrollView
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+          >
+            <View style={styles.topCard}>
+              {data && <Line title="عنوان:"
+                style={styles.topView}
+                value={data.circularLetterDetails.circularLetter.title} />}
+              {data && <Line title="تاریخ:" value={data.circularLetterDetails.circularLetter.date} />}
+              <View style={styles.lineContainer}>
+                <View>
+                  <Text style={styles.lineTitle}>
+                    شماره:
+              </Text>
+                </View>
+                <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
+                  {data && handleNumber(data.circularLetterDetails.circularLetter.number)}
+                </View>
+              </View>
+              <Line title="صادر کننده:"
+                style={styles.topView}
+                value={data.circularLetterDetails.circularLetter.from} />
+              {(data && !!data.circularLetterDetails.circularLetter.importNumber) &&
+                <View style={styles.lineContainer}>
+                  <View>
+                    <Text style={styles.lineTitle}>
+                      شماره ثبت وارده:
+              </Text>
+                  </View>
+                  <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
+                    {data && handleNumber(data.circularLetterDetails.circularLetter.importNumber)}
+                  </View>
+                </View>
+              }
+              {(data && !!data.circularLetterDetails.circularLetter.exportNumber) &&
+                <View style={styles.lineContainer}>
+                  <View>
+                    <Text style={styles.lineTitle}>
+                      شماره ثبت صادره:
+              </Text>
+                  </View>
+                  <View style={StyleSheet.flatten([styles.numberContainer, { flexDirection: 'row-reverse' }])}>
+                    {data && handleNumber(data.circularLetterDetails.circularLetter.exportNumber)}
+                  </View>
+                </View>
+              }
+              {data && <Line title="مرتبط با مقطع:" value={data.circularLetterDetails.circularLetter.toCategory} />}
+              {data && <Line title="حوزه مربوطه:" value={data.circularLetterDetails.circularLetter.subjectedTo} />}
+              {data && handleReferTo(data.circularLetterDetails.circularLetter.referTo, data.circularLetterDetails.refrenceId)}
+              {data && <Line title="کلمات کلیدی:"
+                style={styles.topView}
+                value={handleTags(data.circularLetterDetails.circularLetter.tags)} />}
+              {data && <Line title="تعداد فایل‌ها:" value={data.circularLetterDetails.circularLetter.files.length} />}
+            </View>
+            <View
+              style={styles.imageView}
+            >
+              {data && <Image
+                source={{ uri: data.circularLetterDetails.circularLetter.files[0] }}
+                defaultSource={require('../assets/images/imageLoading.png')}
+                style={styles.image}
+              />}
+            </View>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  setIsVisible(true);
+                }}
+              >
+                {data && <Text style={styles.buttonText}>
+                  {data.circularLetterDetails.circularLetter.files.length === 1 ? 'مشاهده فایل' : 'مشاهده فایل‌ها'}
+                </Text>}
+              </TouchableOpacity>
+            </View>
+          </KeyboardAwareScrollView>
+        </View>
+      </ImageBackground>
+    );
+  }
 };
 
 export default Letter;

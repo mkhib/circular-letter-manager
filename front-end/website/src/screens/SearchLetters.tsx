@@ -283,6 +283,7 @@ const SearchLetters = (props: any) => {
                 labelId="label"
                 onChange={(event: any) => {
                   setOrder(event.target.value);
+                  doSearch();
                 }}
               >
                 {orderList.map((order: { name: string, value: string }, index: number) => (
@@ -311,6 +312,7 @@ const SearchLetters = (props: any) => {
                 labelId="label"
                 onChange={(event: any) => {
                   setSort(event.target.value);
+                  doSearch();
                 }}
               >
                 {sortList.map((sort: { name: string, value: string }, index: number) => (
@@ -368,6 +370,7 @@ const SearchLetters = (props: any) => {
                       theThing: 'toDate',
                       data: date,
                     });
+                    doSearch();
                   }}
                 />
               </Box>

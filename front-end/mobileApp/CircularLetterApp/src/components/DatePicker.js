@@ -4,6 +4,7 @@ import {
   View,
   Text,
   TouchableWithoutFeedback,
+  TouchableHighlight,
   TouchableOpacity,
   StyleSheet,
   Image,
@@ -159,21 +160,26 @@ export default class DatePicker extends Component {
   render() {
     const { error, label, pickerRef } = this.props;
     return (
-      <React.Fragment>
-        {this.picker()}
-        <BaseInput
-          error={error}
-          focused={!!this.date}
-          icon={<Image source={chevronBottom} style={styles.icon} />}
-          label={label}
-        >
-          <TouchableWithoutFeedback ref={pickerRef} onPress={this.toggleModal}>
-            <View style={styles.root}>
-              <Text style={styles.placeholder}>{this.date}</Text>
-            </View>
-          </TouchableWithoutFeedback>
-        </BaseInput>
-      </React.Fragment>
+      <TouchableHighlight
+        activeOpacity={0}
+        underlayColor="rgba(255,255,255,0)"
+        onPress={this.toggleModal}>
+        <React.Fragment>
+          {this.picker()}
+          <BaseInput
+            error={error}
+            focused={!!this.date}
+            icon={<Image source={chevronBottom} style={styles.icon} />}
+            label={label}
+          >
+            <TouchableWithoutFeedback ref={pickerRef} onPress={this.toggleModal}>
+              <View style={styles.root}>
+                <Text style={styles.placeholder}>{this.date}</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          </BaseInput>
+        </React.Fragment>
+      </TouchableHighlight>
     );
   }
 }
