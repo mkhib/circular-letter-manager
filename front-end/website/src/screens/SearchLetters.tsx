@@ -9,11 +9,13 @@ import Backdrop from '@material-ui/core/Backdrop';
 import LetterThumbnailInfo from '../components/LetterThumbnailInfo';
 import { makeStyles } from '@material-ui/core/styles';
 import TextInput from '../components/TextInput';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import SearchOutlinedIcon from '@material-ui/icons/SearchOutlined';
 import { useQuery } from '@apollo/react-hooks';
 import DatePickerFarsi from '../components/DatePickerFarsi';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
+import Tooltip from '@material-ui/core/Tooltip';
 import { MenuItem, InputLabel } from '@material-ui/core';
 import {
   Redirect,
@@ -103,6 +105,17 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 15,
     marginBottom: 10,
   },
+  tipTool: {
+    // marginBottom: 15,
+    marginLeft: 15,
+    fontFamily: 'FontNormalFD'
+  },
+  tipToolText: {
+    fontFamily: 'FontNormalFD',
+    textAlign: 'left',
+    fontSize: 13,
+    padding: 5,
+  },
 }));
 
 const pageUrl = window.location.href;
@@ -187,6 +200,9 @@ const SearchLetters = (props: any) => {
       return 'desc';
     }
   }
+  const toolTipText = `
+  پس از انتخاب تاریخ بر روی علامت جست و جو کلیک کنید
+`;
   const { loading, error, data } = useQuery(SEARCH_QUERY, {
     variables: { information: handleSearch(), startDate: start, endDate: end, page: handlePageNumber(), limit: 15, sortBy: handleSort(), order: handleOrder() },
   });
@@ -363,6 +379,18 @@ const SearchLetters = (props: any) => {
           </Box>
           {props.searchInDate && (
             <Box className={classes.selectDateBox}>
+              <Tooltip
+                arrow
+                className={classes.tipTool}
+                leaveDelay={400}
+                title={
+                  <div className={classes.tipToolText}>
+                    {toolTipText}
+                  </div>
+                }
+              >
+                <InfoOutlinedIcon />
+              </Tooltip>
               <Box style={{ marginRight: 10, width: 120 }}>
                 <DatePickerFarsi
                   getSelectedDate={(date: string) => {
@@ -370,7 +398,6 @@ const SearchLetters = (props: any) => {
                       theThing: 'toDate',
                       data: date,
                     });
-                    doSearch();
                   }}
                 />
               </Box>
@@ -387,6 +414,7 @@ const SearchLetters = (props: any) => {
               </Box>
             :از تاریخ
             </Box>
+
           )}
           {(!!props.fromDateFull && !!props.toDateFull) && (
             <Box className={classes.searchResultBox}>

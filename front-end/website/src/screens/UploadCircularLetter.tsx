@@ -576,6 +576,7 @@ const UploadCircularLetter = (props: any) => {
                               display: 'flex',
                               flexDirection: 'row',
                               alignItems: 'center',
+                              alignSelf: width <= RESPONSIVE_WIDTH ? 'center' : '',
                             }}>
                               <Tooltip
                                 arrow
@@ -633,6 +634,7 @@ const UploadCircularLetter = (props: any) => {
                               <TextInput
                                 id="tags"
                                 label="تگ‌ها"
+                                style={{ width: 213 }}
                                 value={tempTag}
                                 onChange={(event: any) => {
                                   setTempTag(event.target.value);
