@@ -224,10 +224,19 @@ const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
         client.resetStore();
       }}
       onError={(error: any) => {
-        setSnackOption({
-          message: 'مشکلی در حذف کردن کابر به وجود آمده است، لطفا دوباره تلاش کنید',
-          severity: 'error',
-        })
+        console.log(error.message);
+        if (error.message === 'GraphQL error: Unauthorized action!!!') {
+          setSnackOption({
+            message: 'نمیوانید خودتان را حذف کنید!',
+            severity: 'error',
+          });
+        }
+        else {
+          setSnackOption({
+            message: 'مشکلی در حذف کردن کابر به وجود آمده است، لطفا دوباره تلاش کنید',
+            severity: 'error',
+          });
+        }
         openSnackbar();
       }}
     >
