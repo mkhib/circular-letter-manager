@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, useImperativeHandle } from 'react';
+import React from 'react';
 import gql from 'graphql-tag';
 import * as yup from 'yup';
 import { useMutation } from '@apollo/react-hooks';
@@ -8,7 +8,7 @@ import Button from '@material-ui/core/Button';
 import TextInput from '../components/TextInput';
 import { Mutation } from '@apollo/react-components';
 import { makeStyles, withStyles, Theme, } from '@material-ui/core/styles';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Redirect } from 'react-router-dom';
 import { login, setPersonelNumber, setPassword, setErrors } from '../redux/slices/user';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Alert, AlertTitle } from '@material-ui/lab';
@@ -63,13 +63,6 @@ interface SnackState {
   message: string;
   severity: 'success' | 'error';
 }
-
-const CHANGE_THAT_PASSWORD = gql`
-mutation ChangePassword($data: PasswordInput!){
-  changePassword(data: $data)
-}
-`;
-
 
 
 const CREATE_USER = gql`
@@ -171,10 +164,13 @@ const ChangePassword: React.FunctionComponent<AddNewUserProps> = (props) => {
   }
 
   const handleErrorMessage = (message: string) => {
+    console.log('ine', message);
     if (message === 'Network error: Failed to fetch') {
       return '.لطفا اتصال خود به اینترنت را بررسی کنید'
-    } if (message === 'GraphQL error: Wrong password!') {
-      return '.رمزعبور قبلی نادرست است'
+    } else if (message === 'GraphQL error: Duplicate personelNumber!') {
+      return '.کاربری با این شماره پرسنلی قبلا ثبت‌نام کرده است'
+    }else if (message === 'GraphQL error: Duplicate IdentificationNumber!') {
+      return '.کاربری با این کدملی قبلا ثبت‌نام کرده است'
     }
     else {
       return '.مشکلی پیش آمده است'
@@ -207,16 +203,16 @@ const ChangePassword: React.FunctionComponent<AddNewUserProps> = (props) => {
     }
   }
   var
-  persianNumbers = [/۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g],
-  arabicNumbers = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g],
-  fixNumbers = function (str: any) {
-    if (typeof str === 'string') {
-      for (var i = 0; i < 10; i++) {
-        str = str.replace(persianNumbers[i], i).replace(arabicNumbers[i], i);
+    persianNumbers = [/۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g],
+    arabicNumbers = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g],
+    fixNumbers = function (str: any) {
+      if (typeof str === 'string') {
+        for (var i = 0; i < 10; i++) {
+          str = str.replace(persianNumbers[i], i).replace(arabicNumbers[i], i);
+        }
       }
-    }
-    return str;
-  };
+      return str;
+    };
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsUserAdmin((event.target as HTMLInputElement).value);
   };
@@ -252,6 +248,11 @@ const ChangePassword: React.FunctionComponent<AddNewUserProps> = (props) => {
       openSnackbar();
     }}
     onError={(err: any) => {
+      if (err.message === 'GraphQL error: Authentication required') {
+        return (<Redirect to={{
+          pathname: '/login',
+        }} />)
+      }
       setSnackOption({
         message: 'ایجاد کاربر جدید با مشکل مواجه شد',
         severity: 'error',
