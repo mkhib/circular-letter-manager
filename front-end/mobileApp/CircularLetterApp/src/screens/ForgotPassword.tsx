@@ -65,6 +65,11 @@ const ForgotPassword = () => {
           message: 'شماره پرسنلی نادرست است.',
           state: true,
         });
+      } else if (error.message === 'GraphQL error: Unauthorized user!') {
+        setErrorState({
+          message: 'حساب کاربری شما هنوز تایید نشده است.',
+          state: true,
+        });
       } else {
         setErrorState({
           message: 'اتصال خود را به اینترنت بررسی کنید.',

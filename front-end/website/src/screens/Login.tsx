@@ -265,6 +265,21 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
               </Box>
             </Link>
             <SubmitButton />
+            <Link
+              href="download-app"
+              style={{
+                marginBottom: 10,
+              }}
+            >
+              <Box style={{
+                display: 'flex',
+                flexDirection: 'row',
+                fontFamily: 'FontNormal',
+                fontSize: 14,
+              }}>
+                دانلود اپلیکیشن اندروید
+              </Box>
+            </Link>
           </Box>
         </Box>
       )

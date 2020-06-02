@@ -22,6 +22,7 @@ import ChangePasswordLock from '../screens/ChangePasswordLock';
 import AddNewUser from '../screens/AddNewUser';
 import ManageAllUsers from '../screens/ManageAllUsers';
 import ForgotPassword from '../screens/ForgotPassword';
+import DownloadApp from '../screens/DownloadApp';
 
 const PrivateRoute = ({ component, exact = false, path, authenticated }: any) => {
   return (
@@ -100,6 +101,7 @@ const AuthRouter = ({ authenticated, checked, user }: any) => {
           <Switch>
             <Route path="/login" component={Login} />
             <Route path="/forgot-password" component={ForgotPassword} />
+            <Route path="/download-app" component={DownloadApp} />
             <ChangePasswordLockRoute exact path="/change-pass-lock"
               component={ChangePasswordLock}
               authenticated={authenticated}

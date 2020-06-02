@@ -115,6 +115,11 @@ const Signup = () => {
             message: 'کاربری با این شماره پرسنلی قبلا ثبت نام کرده‌است.',
             state: true,
           });
+        } if (err.message === 'GraphQL error: Duplicate IdentificationNumber!') {
+          setErrorState({
+            message: 'کاربری با این کدملی قبلا ثبت‌نام کرده است.',
+            state: true,
+          });
         } else {
           setErrorState({
             message: 'مشکلی پیش‌آمده است، لطفا دوباره تلاش کنید.',

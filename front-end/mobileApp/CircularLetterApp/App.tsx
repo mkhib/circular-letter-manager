@@ -107,7 +107,7 @@ const App = () => {
               key="login"
               component={Login}
               title="ورود"
-              // initial
+              initial
               hideNavBar
             />
             <Scene
@@ -132,7 +132,7 @@ const App = () => {
           <Scene
             key="main"
             type="reset"
-            initial
+            // initial
             hideNavBar
           >
             <Tabs

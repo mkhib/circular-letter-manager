@@ -109,6 +109,8 @@ const ForgotPassword: React.FunctionComponent<LoginProps> = (props) => {
       return '.شماره پرسنلی وارد شده نادرست است';
     } if (message === 'GraphQL error: User is not authorized!') {
       return '.حساب کاربری شما هنوز تایید نشده است';
+    } if(message==='GraphQL error: Wait 1 minute!'){
+      return '.در هر دقیقه فقط یک بار می‌توانید درخواست پیامک فراموشی رمز عبور بدهید';
     } else {
       return '.مشکلی پیش‌آمده است'
     }

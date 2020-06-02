@@ -98,7 +98,7 @@ const Search = () => {
     sort: 'dateOfCreation',
   });
   const [hasMore, setHasMore] = useState(true);
-  const { loading, error, data, fetchMore, refetch, networkStatus } = useQuery(SEARCH_QUERY, {
+  const { loading, error, data, fetchMore, refetch } = useQuery(SEARCH_QUERY, {
     fetchPolicy: 'network-only',
     variables: {
       information: searchObject.searchText,
@@ -110,7 +110,6 @@ const Search = () => {
       order: searchObject.order,
     },
   });
-  console.log('nono', networkStatus);
   React.useEffect(() => {
     if (error) {
       if (error.message === 'GraphQL error: Authentication required') {
@@ -286,7 +285,7 @@ const Search = () => {
                       func={(label: string, value: string) => {
                         setHasMore(true);
                         setOrder(value);
-                        doSearch();
+                        setTimeout(() => doSearch(), 0);
                       }}
                       placeholder="نوع مرتب سازی"
                       errors={err}
@@ -325,11 +324,6 @@ const Search = () => {
                       }
                     />
                   </View>
-                  {/* <View>
-                    <Text style={styles.tillText}>
-                     تا
-                    </Text>
-                  </View> */}
                   <View style={styles.dateView}>
                     <DatePicker
                       label="تا تاریخ"
