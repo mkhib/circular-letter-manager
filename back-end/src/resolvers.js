@@ -425,11 +425,11 @@ export const resolvers = {
     Mutation: {
         adminSignUp: async (parent, args, context, info) => {
             isAuthenticated(context.req);
-            const dupPersonel = await Users.find({ personelNumber: args.personelNumber });
+            const dupPersonel = await Users.findOne({ personelNumber: args.personelNumber });
             if (dupPersonel) {
                 throw new Error("Duplicate personelNumber!");
             }
-            const dupId = await Users.find({ identificationNumber: args.identificationNumber });
+            const dupId = await Users.findOne({ identificationNumber: args.identificationNumber });
             if (dupId) {
                 throw new Error("Duplicate IdentificationNumber!");
             }
