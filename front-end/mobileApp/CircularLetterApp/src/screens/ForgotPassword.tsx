@@ -70,6 +70,11 @@ const ForgotPassword = () => {
           message: 'حساب کاربری شما هنوز تایید نشده است.',
           state: true,
         });
+      } else if(error.message === 'GraphQL error: Wait 1 minute!'){
+        setErrorState({
+          message: 'در هر دقیقه فقط یک بار می‌توانید درخواست پیامک فراموشی رمز عبور بدهید.',
+          state: true,
+        });
       } else {
         setErrorState({
           message: 'اتصال خود را به اینترنت بررسی کنید.',
