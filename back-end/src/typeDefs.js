@@ -17,6 +17,7 @@ export const typeDefs = gql`
         categoriesQuery: CategoriesResult!
         toCategories: [ToCategoryType!]!
         subjectedTos: [SubjectedToType!]!
+        appDetails: AppOutput!
     }
 
     type Mutation {
@@ -58,6 +59,7 @@ export const typeDefs = gql`
         authorized: Boolean!
         changedPassword: Boolean!
         isAdmin: Boolean!
+        timeLimit: String!
     }
     
     type AuthPayLoad {
@@ -134,6 +136,11 @@ export const typeDefs = gql`
     type UserSearch {
         users: [UserOutput!]!
         quantity: Int
+    }
+
+    type AppOutput {
+        version: String!
+        link: String!
     }
 
     input LoginUserInput {

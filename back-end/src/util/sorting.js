@@ -1,4 +1,4 @@
-export default function dynamicsort(property,order = 'asc') {
+export default function dynamicsort(property = 'dateOfCreation',order = 'desc') {
     var sort_order = 1;
     if(order === "desc"){
         sort_order = -1;

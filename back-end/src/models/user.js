@@ -25,7 +25,8 @@ const userSchema = new Schema({
     },
     identificationNumber: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     phoneNumber: {
         type: String,
@@ -41,6 +42,10 @@ const userSchema = new Schema({
     },
     isAdmin: {
         type: Boolean,
+        required: true
+    },
+    timeLimit: {
+        type: String,
         required: true
     }
 });
