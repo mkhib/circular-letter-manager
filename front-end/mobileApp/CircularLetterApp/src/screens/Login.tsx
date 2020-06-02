@@ -84,17 +84,19 @@ const Login = () => {
       storeTok();
     }
     if (error) {
-      if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0') {
+      console.log(error.message);
+      if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0' || error.message === 'Network error: Timeout exceeded') {
         setErrorState({
           message: 'اتصال خود را به اینترنت بررسی کنید.',
           state: true,
         });
-      } if (error.message === 'GraphQL error: Unauthorized user!') {
+      } else if (error.message === 'GraphQL error: Unauthorized user!') {
         setErrorState({
           message: 'حساب کاربری شما هنوز تایید نشده است.',
           state: true,
         });
-      } else {
+      }
+      else {
         setErrorState({
           message: 'نام‌کاربری یا رمز عبور نادرست است.',
           state: true,
