@@ -1,5 +1,6 @@
 import Kavenegar from 'kavenegar';
 import randomstring from 'randomstring';
+import moment from 'moment';
 import Users from '../models/user';
 import { hashPassword } from './hashPassword';
 
@@ -8,7 +9,7 @@ export const sendSMS = async (id, phoneNumber) => {
     const rndPassword = randomstring.generate(8);
     console.log(rndPassword);
     const password = await hashPassword(rndPassword);
-    await Users.findByIdAndUpdate(id, { authorized: true, password, changedPassword: false }, { upsert: true, new: true });
+    await Users.findByIdAndUpdate(id, { authorized: true, password, changedPassword: false, timeLimit: moment().unix().toString() }, { upsert: true, new: true });
     api.Send({
         message: `رمزعبور موقت شما برای ورود به سامانه جستجوی بخشنامه ها: ${rndPassword}`,
         sender: "1000596446",

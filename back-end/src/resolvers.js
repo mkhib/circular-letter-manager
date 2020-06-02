@@ -19,7 +19,7 @@ import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
 import { sendSMS } from './util/sendSMS';
 
-const uri = 'https://b0da96bb8e0f.ngrok.io/';
+const uri = 'https://e78363362831.ngrok.io/';
 const imagePath = `${uri}images/`;
 const thumbPath = `${uri}thumbnails/`;
 String.prototype.allTrim = String.prototype.allTrim || function () {
@@ -414,14 +414,24 @@ export const resolvers = {
         subjectedTos: async (parent, args, context, info) => {
             isAuthenticated(context.req);
             return SubjectedToType.find();
+        },
+        appDetails: async (parent, args, context, info) => {
+            return {
+                version: '1.0.4',
+                link: 'http://194.5.178.254/CircularLetterSearch-1.0.3.apk'
+            }
         }
     },
     Mutation: {
         adminSignUp: async (parent, args, context, info) => {
             isAuthenticated(context.req);
-            const exist = await Users.findOne({ personelNumber: args.personelNumber });
-            if (exist) {
+            const dupPersonel = await Users.find({ personelNumber: args.personelNumber });
+            if (dupPersonel) {
                 throw new Error("Duplicate personelNumber!");
+            }
+            const dupId = await Users.find({ identificationNumber: args.identificationNumber });
+            if (dupId) {
+                throw new Error("Duplicate IdentificationNumber!");
             }
             const rndPassword = randomstring.generate(8);
             const password = await hashPassword(rndPassword);
@@ -430,7 +440,8 @@ export const resolvers = {
                 _id: ObjectId().toString(),
                 password,
                 authorized: true,
-                changedPassword: false
+                changedPassword: false,
+                timeLimit: moment().unix().toString()
             });
             await user.save();
             sendSMS(user.id, user.phoneNumber);
@@ -438,9 +449,13 @@ export const resolvers = {
             return true;
         },
         userSignUp: async (parent, args, context, info) => {
-            const exist = await Users.findOne({ personelNumber: args.personelNumber });
-            if (exist) {
+            const dupPersonel = await Users.findOne({ personelNumber: args.personelNumber });
+            const dupId = await Users.findOne({ identificationNumber: args.identificationNumber });
+            if (dupPersonel) {
                 throw new Error("Duplicate personelNumber!");
+            }
+            if (dupId) {
+                throw new Error("Duplicate IdentificationNumber!");
             }
             const rndPassword = randomstring.generate(8);
             const password = await hashPassword(rndPassword);
@@ -450,7 +465,8 @@ export const resolvers = {
                 password,
                 authorized: false,
                 changedPassword: false,
-                isAdmin: false
+                isAdmin: false,
+                timeLimit: moment().unix().toString()
             });
             await user.save();
             context.session.newUsers = null;
@@ -466,10 +482,13 @@ export const resolvers = {
             return user;
         },
         deleteUser: async (parent, args, context, info) => {
-            isAuthenticated(context.req);
+            const userId = isAuthenticated(context.req);
             const user = await Users.findById(args.id);
             if (!user) {
                 throw new Error("User not found!")
+            }
+            if (args.id === userId) {
+                throw new Error("Unauthorized action!!!");
             }
             await user.deleteOne();
             context.session.userSearch = null;
@@ -563,6 +582,9 @@ export const resolvers = {
             }
             if (!user.authorized) {
                 throw new Error("User is not authorized!");
+            }
+            if (parseInt(moment().unix().toString(), 10) < (parseInt(user.timeLimit, 10) + 60)) {
+                throw new Error("Wait 1 minute!");
             }
             sendSMS(user.id, user.phoneNumber);
             return true;
