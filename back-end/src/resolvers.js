@@ -264,6 +264,13 @@ export const resolvers = {
         appSearch: async (parent, { information, startDate, endDate, page, limit, sortBy, order }, context, info) => {
             isAuthenticated(context.req);
 
+            if (sortBy === '') {
+                sortBy = 'dateOfCreation';
+            }
+            if (order === '') {
+                order = 'desc';
+            }
+
             let letters = [];
             if (context.session.searchResult && context.session.searchParam === information
                 && context.session.searchSortBy === sortBy && context.session.searchOrder === order
