@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
 import Button from '@material-ui/core/Button';
-import { useQuery } from "@apollo/react-hooks";
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
-import DoneRounded from '@material-ui/icons/DoneRounded';
 import DeleteForeverRounded from '@material-ui/icons/DeleteForeverRounded';
 import Snackbar from '@material-ui/core/Snackbar';
-import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import MuiAlert from '@material-ui/lab/Alert';
 const useStyles = makeStyles(theme => ({
   snackStyle: {
     fontFamily: 'FontNormal',
