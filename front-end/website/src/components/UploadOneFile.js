@@ -43,7 +43,6 @@ const UploadOneFile = (props) => {
   function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
   }
-  const [error, setError] = useState(null);
   const [openError, setOpenError] = useState(false);
   const classes = useStyles();
   const openEditFileFailure = () => {
