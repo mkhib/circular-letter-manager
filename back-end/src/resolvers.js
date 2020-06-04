@@ -19,7 +19,7 @@ import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
 import { sendSMS } from './util/sendSMS';
 
-const uri = 'https://e78363362831.ngrok.io/';
+const uri = 'https://fd15c95877a2.ngrok.io/';
 const imagePath = `${uri}images/`;
 const thumbPath = `${uri}thumbnails/`;
 String.prototype.allTrim = String.prototype.allTrim || function () {
@@ -264,6 +264,13 @@ export const resolvers = {
         appSearch: async (parent, { information, startDate, endDate, page, limit, sortBy, order }, context, info) => {
             isAuthenticated(context.req);
 
+            if (sortBy === '') {
+                sortBy = 'dateOfCreation';
+            }
+            if (order === '') {
+                order = 'desc';
+            }
+
             let letters = [];
             if (context.session.searchResult && context.session.searchParam === information
                 && context.session.searchSortBy === sortBy && context.session.searchOrder === order
@@ -425,11 +432,11 @@ export const resolvers = {
     Mutation: {
         adminSignUp: async (parent, args, context, info) => {
             isAuthenticated(context.req);
-            const dupPersonel = await Users.find({ personelNumber: args.personelNumber });
+            const dupPersonel = await Users.findOne({ personelNumber: args.personelNumber });
+            const dupId = await Users.findOne({ identificationNumber: args.identificationNumber });
             if (dupPersonel) {
                 throw new Error("Duplicate personelNumber!");
             }
-            const dupId = await Users.find({ identificationNumber: args.identificationNumber });
             if (dupId) {
                 throw new Error("Duplicate IdentificationNumber!");
             }
