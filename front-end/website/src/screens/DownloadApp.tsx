@@ -1,16 +1,14 @@
-import React, { useState, useEffect, forwardRef } from 'react';
+import React from 'react';
 import gql from 'graphql-tag';
-import { connect } from 'react-redux';
 import {
   Redirect,
-  useLocation,
   Link,
 } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Backdrop from '@material-ui/core/Backdrop';
-import { makeStyles, withStyles, Theme, createStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { useQuery } from '@apollo/react-hooks';
 import usersBack from '../assets/images/usersBack.png';
 

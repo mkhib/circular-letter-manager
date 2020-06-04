@@ -1,9 +1,8 @@
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import gql from 'graphql-tag';
 import { connect } from 'react-redux';
 import {
   Redirect,
-  useLocation,
 } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -11,11 +10,7 @@ import Check from '@material-ui/icons/Check';
 import Clear from '@material-ui/icons/ClearRounded';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Backdrop from '@material-ui/core/Backdrop';
-import Modal from '@material-ui/core/Modal';
-import Fade from '@material-ui/core/Fade';
-import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
-import { makeStyles, withStyles, Theme, createStyles } from '@material-ui/core/styles';
-import MaterialTable, { Column } from 'material-table';
+import { makeStyles } from '@material-ui/core/styles';
 import { useQuery } from '@apollo/react-hooks';
 import { Mutation } from '@apollo/react-components';
 import Table from '@material-ui/core/Table';

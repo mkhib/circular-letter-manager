@@ -13,7 +13,6 @@ import { useQuery } from '@apollo/react-hooks';
 import { Mutation } from '@apollo/react-components';
 import Backdrop from '@material-ui/core/Backdrop';
 import EditIcon from '@material-ui/icons/Edit';
-import Typography from '@material-ui/core/Typography';
 import Modal from '@material-ui/core/Modal';
 import Link from '@material-ui/core/Link';
 import Fade from '@material-ui/core/Fade';
