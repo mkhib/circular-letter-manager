@@ -132,7 +132,7 @@ const ForgotPassword: React.FunctionComponent<LoginProps> = (props) => {
     mutation={FORGOT_PASSWORD}
     onCompleted={() => {
       setSnackOption({
-        message: 'رمزعبور برای شماره همراه شما پیامک شد پس از ورود از صفحه حساب کاربری اقدام به تغییر رمزعبور خود نمایید',
+        message: 'رمزعبور برای شماره همراه شما پیامک شد',
         severity: 'success',
       });
       openSnackbar();
