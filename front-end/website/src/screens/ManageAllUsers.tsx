@@ -123,6 +123,7 @@ query GetUsers(
       personelNumber,
       identificationNumber,
       phoneNumber,
+      isAdmin
     }
     quantity
   }
@@ -150,6 +151,11 @@ const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
     if (search !== null) {
       return search;
     } return '';
+  }
+  const handleUserType = (type: boolean) => {
+    if (type) {
+      return 'مدیر سیستم';
+    } return 'کاربر عادی';
   }
   const { loading, error, data } = useQuery(GET_ALL_USERS, {
     variables: {
@@ -390,6 +396,7 @@ const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
                         <TableCell className={classes.tableHeader} align="center">شماره پرسنلی</TableCell>
                         <TableCell className={classes.tableHeader} align="center">کدملی</TableCell>
                         <TableCell className={classes.tableHeader} align="center">شماره تلفن</TableCell>
+                        <TableCell className={classes.tableHeader} align="center">نوع کاربر</TableCell>
                         <TableCell className={classes.tableHeader} align="center">حذف کاربران</TableCell>
                       </TableRow>
                     </TableHead>
@@ -403,6 +410,7 @@ const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
                           <TableCell className={classes.tableCells} align="center">{row.personelNumber}</TableCell>
                           <TableCell className={classes.tableCells} align="center">{row.identificationNumber}</TableCell>
                           <TableCell className={classes.tableCells} align="center">{row.phoneNumber}</TableCell>
+                          <TableCell className={classes.tableCells} align="center">{handleUserType(row.isAdmin)}</TableCell>
                           <TableCell className={classes.tableCells} align="center">
                             <Button
                               variant="contained"

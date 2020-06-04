@@ -7,6 +7,7 @@ export type userType = {
   personelNumber: string;
   identificationNumber: string;
   phoneNumber: string;
+  isAdmin: boolean;
 };
 
 export type fileStatusType = {
