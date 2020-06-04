@@ -65,6 +65,12 @@ const ForgotPassword = () => {
           message: 'شماره پرسنلی نادرست است.',
           state: true,
         });
+      }
+      else if (error.message === 'GraphQL error: User not found!') {
+        setErrorState({
+          message: 'شماره پرسنلی نادرست است.',
+          state: true,
+        });
       } else if (error.message === 'GraphQL error: Unauthorized user!') {
         setErrorState({
           message: 'حساب کاربری شما هنوز تایید نشده است.',
@@ -73,11 +79,6 @@ const ForgotPassword = () => {
       } else if (error.message === 'GraphQL error: Wait 1 minute!') {
         setErrorState({
           message: 'در هر دقیقه فقط یک بار می‌توانید درخواست پیامک فراموشی رمز عبور بدهید.',
-          state: true,
-        });
-      } else {
-        setErrorState({
-          message: 'اتصال خود را به اینترنت بررسی کنید.',
           state: true,
         });
       }
@@ -143,7 +144,7 @@ const ForgotPassword = () => {
               title="شماره پرسنلی"
               helperText={handleHelperText('personelNumber')}
               value={username}
-              onSubmitEditing={() => { validateAndSendForgetPasswordRequest() }}
+              onSubmitEditing={() => { validateAndSendForgetPasswordRequest(); }}
               onChangeText={setUsername}
             />
           </View>

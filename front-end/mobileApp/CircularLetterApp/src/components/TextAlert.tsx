@@ -7,22 +7,17 @@ import LinearGradient from 'react-native-linear-gradient';
 interface TextAlertProps {
   text: string;
   state: boolean;
-  type?: 'success' | 'failure'
 }
 
-const handleAlertBackgroundColor = (type: TextAlertProps['type']) => {
-  switch (type) {
-    case 'success': return ['#388e3c', '#1b5e20'];
-    case 'failure': return ['#ffa726', '#e65100'];
-  }
-};
-
-const TextAlert: React.FC<TextAlertProps> = ({ text, state, type }) => {
+const TextAlert: React.FC<TextAlertProps> = ({ text, state }) => {
   if (state) {
     return (
-      <LinearGradient colors={handleAlertBackgroundColor(type) || ['#ffa726', '#e65100']} style={styles.container}>
+      <LinearGradient colors={['#ffa726', '#e65100']} style={styles.container}>
         <View style={styles.container}>
-          <MaterialCommunityIcons name="alert-outline" size={shape.iconSize - 5} style={{ marginBottom: 0, marginRight: 10, color: '#263238' }} />
+          <MaterialCommunityIcons
+            name="alert-outline"
+            size={shape.iconSize - 5}
+            style={styles.iconStyle} />
           <View>
             <Text style={styles.text}>
               {text}
@@ -40,9 +35,14 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: colors.redAlert,
+    width:'100%',
     marginBottom: shape.spacing(),
     paddingHorizontal: shape.spacing(2),
+  },
+  iconStyle: {
+    marginBottom: 0,
+    marginRight: 10,
+    color: '#263238',
   },
   text: {
     ...gStyles.normalText,

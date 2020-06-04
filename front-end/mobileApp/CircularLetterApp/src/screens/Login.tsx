@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import AsyncStorage from '@react-native-community/async-storage';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Actions } from 'react-native-router-flux';
-import { useMutation } from '@apollo/react-hooks';
+import { useMutation, useQuery } from '@apollo/react-hooks';
 import LinearGradient from 'react-native-linear-gradient';
 import { FloatingTitleTextInputField } from '../components/floating_title_text_input_field';
 import { gStyles, shape } from '../assets/styles/Styles';
@@ -13,6 +13,17 @@ import TextAlert from '../components/TextAlert';
 import Loading from '../components/Loading';
 var CryptoJS = require('react-native-crypto-js');
 const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
+
+const APPVERSION = '1.0.5';
+
+const GET_APP_DETAILS = gql`
+query GetAppDetails{
+  appDetails{
+    version
+    link
+  }
+}
+`;
 
 const LOGIN = gql`
 mutation Login(
@@ -65,6 +76,12 @@ const storeData = async (value: string) => {
 const Login = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const { data: appVersionData } = useQuery(GET_APP_DETAILS);
+  if (appVersionData) {
+    if (appVersionData.appDetails.version !== APPVERSION) {
+      Actions.lock({ link: appVersionData.appDetails.link });
+    }
+  }
   const [login, { data, loading, error }] = useMutation(LOGIN);
   const [errorState, setErrorState] = useState<AlertProps>({ state: false, message: '' });
   const [errors, setErrors] = useState<yup.ValidationError | null>(null);
@@ -84,7 +101,6 @@ const Login = () => {
       storeTok();
     }
     if (error) {
-      console.log(error.message);
       if (error.message === 'Network error: Failed to fetch' || error.message === 'Network error: Unexpected token T in JSON at position 0' || error.message === 'Network error: Timeout exceeded') {
         setErrorState({
           message: 'اتصال خود را به اینترنت بررسی کنید.',

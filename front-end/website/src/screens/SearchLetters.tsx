@@ -166,10 +166,12 @@ const SearchLetters = (props: any) => {
   const updateWidth = () => {
     setWidth(window.innerWidth);
   };
+  const { history } = props;
   useEffect(() => {
     window.addEventListener("resize", updateWidth);
+    history.push(`${window.location.pathname}?page=1&search=${searchValue}&sort=${sort}&order=${order}`)
     return () => window.removeEventListener("resize", updateWidth);
-  });
+  }, [searchValue, sort, order, history]);
   const RESPONSIVE_WIDTH2 = 618;
   const RESPONSIVE_WIDTH = 800;
   const handleSearch = () => {
@@ -204,7 +206,7 @@ const SearchLetters = (props: any) => {
   پس از انتخاب تاریخ بر روی علامت جست و جو کلیک کنید
 `;
   const { loading, error, data } = useQuery(SEARCH_QUERY, {
-    variables: { information: handleSearch(), startDate: start, endDate: end, page: handlePageNumber(), limit: 15, sortBy: handleSort(), order: handleOrder() },
+    variables: { information: handleSearch(), startDate: start, endDate: end, page: handlePageNumber(), limit: 15, sortBy: sort, order: order },
   });
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     props.changeSearchInDate(event.target.checked);
@@ -214,7 +216,7 @@ const SearchLetters = (props: any) => {
     setEnd(props.toDate);
     props.changeFromDateFull(props.fromDate);
     props.changeToDateFull(props.toDate);
-    props.history.push(`${window.location.pathname}?page=1&search=${searchValue}&sort=${sort}&order=${order}`)
+    // props.history.push(`${window.location.pathname}?page=1&search=${searchValue}&sort=${sort}&order=${order}`)
   }
   if (loading) return (
     <Box style={{
@@ -299,7 +301,9 @@ const SearchLetters = (props: any) => {
                 labelId="label"
                 onChange={(event: any) => {
                   setOrder(event.target.value);
+                  console.log(event.target.value)
                   doSearch();
+
                 }}
               >
                 {orderList.map((order: { name: string, value: string }, index: number) => (
@@ -328,6 +332,7 @@ const SearchLetters = (props: any) => {
                 labelId="label"
                 onChange={(event: any) => {
                   setSort(event.target.value);
+                  console.log(event.target.value)
                   doSearch();
                 }}
               >

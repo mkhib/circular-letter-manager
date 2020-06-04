@@ -26,6 +26,7 @@ import { createHttpLink } from 'apollo-link-http';
 import ChangePassword from './src/screens/ChangePassword';
 import Letter from './src/screens/Letter';
 import Signup from './src/screens/Signup';
+import LockTheApp from './src/screens/LockTheApp';
 
 const httpLink = createHttpLink({
   uri: 'http://194.5.178.254:3600/graphql',
@@ -88,7 +89,7 @@ const App = () => {
   });
   const backAction = () => {
     const scene = Actions.currentScene;
-    if (scene === '_search' || scene === 'login') {
+    if (scene === '_search' || scene === 'login' || scene === 'lock') {
       BackHandler.exitApp();
       return true;
     } else {
@@ -130,15 +131,25 @@ const App = () => {
             />
           </Scene>
           <Scene
+            key="lock"
+            type="reset"
+          >
+            <Scene
+              key="lock"
+              type="reset"
+              component={LockTheApp}
+              title="نسخه قدیمی"
+              hideNavBar
+            />
+          </Scene>
+          <Scene
             key="main"
             type="reset"
-            // initial
             hideNavBar
           >
             <Tabs
               hideNavBar
               labelStyle={styles.tabLabel}
-            // showLabel={false}
             >
               <Scene
                 key="search"

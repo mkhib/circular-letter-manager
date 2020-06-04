@@ -60,10 +60,9 @@ const Line: React.FC<LineProps> = ({ style, title, value }) => (
 );
 
 const Profile = () => {
-  const { loading, error, data, refetch, networkStatus } = useQuery<IUser>(GET_PROFILE, {
+  const { loading, error, data, refetch } = useQuery<IUser>(GET_PROFILE, {
     notifyOnNetworkStatusChange: true,
   });
-  console.log('bashe', networkStatus);
   const client = useApolloClient();
   const [logout, { loading: logoutLoading }] = useMutation(LOGOUT, {
     onCompleted: () => {

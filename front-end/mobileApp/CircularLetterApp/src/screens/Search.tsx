@@ -70,13 +70,6 @@ var
     }
     return str;
   };
-interface SearchObj {
-  searchText: string;
-  sort: string;
-  order: string;
-  startDate: string;
-  endDate: string;
-}
 const LIMIT = 15;
 const Search = () => {
   const [searchValue, setSearchValue] = useState<string>('');
@@ -90,24 +83,17 @@ const Search = () => {
   const [page, setPage] = useState<number>(1);
   const [fetchMoreLoading, setFetchMoreLoading] = useState<boolean>(true);
   const [err, setErr] = useState(new Set());
-  const [searchObject, setSearchObject] = useState<SearchObj>({
-    searchText: '',
-    startDate: '',
-    endDate: '',
-    order: 'desc',
-    sort: 'dateOfCreation',
-  });
+  const [searchObject, setSearchObject] = useState<string>('');
   const [hasMore, setHasMore] = useState(true);
   const { loading, error, data, fetchMore, refetch } = useQuery(SEARCH_QUERY, {
-    fetchPolicy: 'network-only',
     variables: {
-      information: searchObject.searchText,
+      information: searchObject,
       page: 1,
-      startDate: searchObject.startDate,
-      endDate: searchObject.endDate,
+      startDate: fromDateToSend,
+      endDate: toDateToSend,
       limit: LIMIT,
-      sortBy: searchObject.sort,
-      order: searchObject.order,
+      sortBy: sort,
+      order: order,
     },
   });
   React.useEffect(() => {
@@ -116,7 +102,7 @@ const Search = () => {
         setTimeout(() => Actions.auth(), 0);
       }
     }
-  }, [error, fetchMoreLoading]);
+  }, [error]);
   if (error) {
     if (error.message === 'Network error: Unexpected token T in JSON at position 0' || error.message === 'Network error: Network request failed' || error.message === 'Network error: Timeout exceeded') {
       return (<View
@@ -148,26 +134,14 @@ const Search = () => {
     setPage(1);
     setHasMore(true);
   };
-  const doSearch = () => {
-    setSearchObject({
-      searchText: fixNumbers(searchValue),
-      endDate: toDateToSend,
-      startDate: fromDateToSend,
-      order: order,
-      sort: sort,
-    });
-  };
   return (
     <>
       <ImageBackground
-        style={{
-          flex: 1
-        }}
+        style={styles.imageBackground}
         source={require('../assets/images/searchBack.jpg')}
       >
         <FlatList
           style={styles.flatListStyle}
-          contentContainerStyle={styles.container}
           data={handleData()}
 
           onEndReachedThreshold={4}
@@ -193,11 +167,11 @@ const Search = () => {
                 variables: {
                   information: fixNumbers(searchValue),
                   page: page + 1,
-                  startDate: searchObject.startDate,
-                  endDate: searchObject.endDate,
+                  startDate: fromDateToSend,
+                  endDate: toDateToSend,
                   limit: LIMIT,
-                  sortBy: searchObject.sort,
-                  order: searchObject.order,
+                  sortBy: sort,
+                  order: order,
                 },
                 updateQuery: (prev: any, { fetchMoreResult }: any) => {
                   if (fetchMoreResult.appSearch.length === 0) {
@@ -244,7 +218,7 @@ const Search = () => {
                     onSubmitEditing={() => {
                       handleResetPage();
                       Keyboard.dismiss();
-                      doSearch();
+                      setSearchObject(fixNumbers(searchValue));
                     }}
                     style={styles.searchInput}
                   />
@@ -252,7 +226,7 @@ const Search = () => {
                     onPress={() => {
                       handleResetPage();
                       Keyboard.dismiss();
-                      doSearch();
+                      setSearchObject(fixNumbers(searchValue));
                     }}
                   >
                     <MaterialIcons
@@ -271,7 +245,6 @@ const Search = () => {
                       func={(label: string, value: string) => {
                         setHasMore(true);
                         setSort(value);
-                        doSearch();
                       }}
                       placeholder="مرتب سازی بر اساس"
                       errors={err}
@@ -285,7 +258,6 @@ const Search = () => {
                       func={(label: string, value: string) => {
                         setHasMore(true);
                         setOrder(value);
-                        setTimeout(() => doSearch(), 0);
                       }}
                       placeholder="نوع مرتب سازی"
                       errors={err}
@@ -294,7 +266,6 @@ const Search = () => {
                 </View>
                 <View style={styles.checkBoxContainer}>
                   <CheckBox
-                    // center
                     iconRight
                     checkedColor="black"
                     onPress={() => {
@@ -333,7 +304,6 @@ const Search = () => {
                         m.locale('fa');
                         setToDateToShow(date);
                         setToDateToSend(m.format('jYYYY/jMM/jDD'));
-                        doSearch();
                       }
                       }
                     />
@@ -360,21 +330,21 @@ const Search = () => {
 export default Search;
 
 const styles = StyleSheet.create({
+  imageBackground: {
+    flex: 1,
+  },
   lottieView: {
     flex: 1,
     paddingBottom: shape.spacing(),
-    // backgroundColor: colors.indigo,
   },
   footerLoading: {
     width: 100,
     height: 100,
     alignSelf: 'center',
     alignItems: 'center',
-    // backgroundColor: 'red',
   },
   flatListStyle: {
     flex: 1,
-    // backgroundColor: colors.indigo,
   },
   checkBoxContainer: {
     flexDirection: 'row',
@@ -396,7 +366,6 @@ const styles = StyleSheet.create({
   },
   searchInDateText: {
     ...gStyles.normalText,
-    // color: 'white',
     marginBottom: shape.spacing(),
   },
   alertView: {
@@ -405,14 +374,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.indigo,
   },
-  container: {
-    // ...gStyles.container,
-    // paddingTop: shape.spacing(),
-    // backgroundColor: colors.indigo,
-    // backgroundColor: 'red',
-  },
   searchIcon: {
-    // color: 'white',
     marginBottom: shape.spacing(),
     marginLeft: shape.spacing(0.5),
   },
@@ -432,7 +394,6 @@ const styles = StyleSheet.create({
   dateContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    // marginLeft: shape.spacing(),
     justifyContent: 'space-between',
     width: '100%',
   },
@@ -450,7 +411,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     ...gStyles.normalText,
-    // color: 'white',
     fontSize: 20,
   },
   tryAgainText: {

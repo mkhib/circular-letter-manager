@@ -81,7 +81,7 @@ const schema = yup.object().shape({
         sum %= 11;
         return (sum < 2 && check === sum) || (sum >= 2 && check + sum === 11);
       }
-    }).required('کدملی وارد شده است.'),
+    }).required('کدملی وارد نشده است.'),
 });
 
 
@@ -91,6 +91,18 @@ const Signup = () => {
   const [identificationNumber, setIdentificationNumber] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [username, setUsername] = useState<string>('');
+  const [errorState, setErrorState] = useState<AlertProps>({ state: false, message: '' });
+  const [errors, setErrors] = useState<yup.ValidationError | null>(null);
+  const lastNameRef = useRef<TextInput>(null);
+  const personelNumberRef = useRef<TextInput>(null);
+  const phoneNumberRef = useRef<TextInput>(null);
+  const [successState, setSuccessState] = useState<AlertProps>({ state: false, message: '' });
+  const identificationNumberRef = useRef<TextInput>(null);
+  const handleDisabled = () => {
+    if (name && lastName && identificationNumber && phoneNumber && username) {
+      return false;
+    } return true;
+  }
   const [userSignUp, { data, loading, error }] = useMutation(SIGNUP, {
     onCompleted: () => {
       setSuccessState({
@@ -110,12 +122,12 @@ const Signup = () => {
             message: 'اتصال خود را به اینترنت بررسی کنید.',
             state: true,
           });
-        } if (err.message === 'GraphQL error: Duplicate personelNumber!') {
+        } else if (err.message === 'GraphQL error: Duplicate personelNumber!') {
           setErrorState({
             message: 'کاربری با این شماره پرسنلی قبلا ثبت نام کرده‌است.',
             state: true,
           });
-        } if (err.message === 'GraphQL error: Duplicate IdentificationNumber!') {
+        } else if (err.message === 'GraphQL error: Duplicate IdentificationNumber!') {
           setErrorState({
             message: 'کاربری با این کدملی قبلا ثبت‌نام کرده است.',
             state: true,
@@ -129,15 +141,6 @@ const Signup = () => {
       }
     },
   });
-
-  const [errorState, setErrorState] = useState<AlertProps>({ state: false, message: '' });
-  const [errors, setErrors] = useState<yup.ValidationError | null>(null);
-  const lastNameRef = useRef<TextInput>(null);
-  const personelNumberRef = useRef<TextInput>(null);
-  const phoneNumberRef = useRef<TextInput>(null);
-  const [successState, setSuccessState] = useState<AlertProps>({ state: false, message: '' });
-  const identificationNumberRef = useRef<TextInput>(null);
-
   const clearErrors = () => {
     setErrorState({ message: '', state: false });
     setSuccessState({ message: '', state: false });
@@ -265,7 +268,9 @@ const Signup = () => {
               returnKeyLabel="go"
               returnKeyType="go"
               onSubmitEditing={() => {
-                validateAndSignup();
+                if (!handleDisabled()) {
+                  validateAndSignup();
+                }
               }}
               onChangeText={setPhoneNumber}
             />
@@ -273,7 +278,8 @@ const Signup = () => {
         </View>
         <View>
           <TouchableOpacity
-            style={[StyleSheet.flatten([gStyles.button, styles.button])]}
+            disabled={handleDisabled()}
+            style={[StyleSheet.flatten([gStyles.button, styles.button, handleDisabled() && styles.disabledButton])]}
             onPress={() => {
               Keyboard.dismiss();
               validateAndSignup();
@@ -310,6 +316,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: shape.spacing(),
+  },
+  disabledButton: {
+    backgroundColor: colors.grey,
   },
   lottieContainer: {
     ...StyleSheet.absoluteFillObject,

@@ -122,7 +122,7 @@ interface CustomImageHeaderProps {
   allSize: number | undefined;
 }
 
-const CustomImageHeader: React.FC<CustomImageHeaderProps> = ({ allSize, currentIndex }) => (
+const CustomImageHeader: React.FC<CustomImageHeaderProps> = ({ allSize, currentIndex = 0 }) => (
   <View style={styles.imageHeaderView}>
     <Text style={styles.imageHeaderText}>
       / {allSize}
@@ -422,7 +422,7 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
         </View>
       </ImageBackground>
     );
-  }
+  } return null;
 };
 
 export default Letter;
