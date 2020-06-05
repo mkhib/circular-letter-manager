@@ -226,7 +226,7 @@ const toolTipText = `
 const numberToolTip = `
 اگر شماره بخشنامه شامل حروف فارسی همراه با ممیز است، شماره به صورت عکس مشاهده می‌شود، اما در ثبت شماره به صورت صحیح خللی وارد نمی‌کند
 `;
-const RESPONSIVE_WIDTH = 800;
+const RESPONSIVE_WIDTH = 950;
 const UPLOAD_CIRCULAR_LETTER = gql`
 mutation UploadCircular(
  $title:String!,
