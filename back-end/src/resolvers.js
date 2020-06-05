@@ -424,8 +424,8 @@ export const resolvers = {
         },
         appDetails: async (parent, args, context, info) => {
             return {
-                version: '1.0.4',
-                link: 'http://194.5.178.254/CircularLetterSearch-1.0.3.apk'
+                version: '1.0.x',
+                link: 'http://194.5.178.254/CircularLetterSearch-1.0.x.apk'
             }
         }
     },
