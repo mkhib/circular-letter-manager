@@ -6,12 +6,11 @@ import Drawer from '@material-ui/core/Drawer';
 import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
-import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ListItem from '@material-ui/core/ListItem';
 import Box from '@material-ui/core/Box';
-import { makeStyles } from '@material-ui/core/styles';
-import { useApolloClient } from '@apollo/react-hooks';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { useApolloClient, useQuery } from '@apollo/react-hooks';
 import PersonOutlinedIcon from '@material-ui/icons/PersonOutlined';
 import { handleLogout } from '../redux/slices/user';
 import { withRouter } from 'react-router-dom';
@@ -30,6 +29,7 @@ import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import RecentActorsRoundedIcon from '@material-ui/icons/RecentActorsRounded';
 import SupervisorAccountRoundedIcon from '@material-ui/icons/SupervisorAccountRounded';
 import PublishRoundedIcon from '@material-ui/icons/PublishRounded';
+import Badge from '@material-ui/core/Badge';
 
 const useStyles = makeStyles(theme => ({
   containerView: {
@@ -84,9 +84,29 @@ mutation Logout{
 }
 `;
 
+const GET_PENDING_USERS_NUMBER = gql`
+  query GetPendingUsersNumber{
+    numberOfUnauthorized
+  }
+`;
+
+const StyledBadge = withStyles((theme) => ({
+  badge: {
+    right: 5,
+    bottom: 2,
+    // top: 13,
+    // border: `2px solid ${theme.palette.background.paper}`,
+    backgroundColor: '#ff9800',
+    color: '#212121',
+    fontFamily: 'FontNormalFD',
+    padding: '0 4px',
+  },
+}))(Badge);
+
 const Header = (props) => {
   const [open, setOpen] = useState(false);
   const [drawerState, setDrawerState] = useState(false);
+  const { data: queryData, error, loading } = useQuery(GET_PENDING_USERS_NUMBER);
   const anchorRef = React.useRef(null);
   const handleToggle = () => {
     setOpen(true);
@@ -132,7 +152,6 @@ const Header = (props) => {
   const classes = useStyles();
   const {
     user,
-    checked,
     authenticated,
     handleLogout,
   } = props;
@@ -242,9 +261,17 @@ const Header = (props) => {
                   <Button className={classes.link} href="/uploadNewCircularLetter" color="primary">
                     بارگذاری یک بخشنامه جدید
                   </Button>
-                  <Button className={classes.link} href="/authorise-users" color="primary">
+                  {queryData && <StyledBadge
+                    badgeContent={queryData.numberOfUnauthorized}
+                    color="secondary"
+                  >
+                    <Button className={classes.link} href="/authorise-users" color="primary">
+                      بررسی کاربران جدید
+                    </Button>
+                  </StyledBadge>}
+                  {!queryData && <Button className={classes.link} href="/authorise-users" color="primary">
                     بررسی کاربران جدید
-                  </Button>
+                    </Button>}
                   <Button className={classes.link} href="/add-new-user" color="primary">
                     افزودن کاربر جدید
                   </Button>

@@ -169,9 +169,9 @@ const SearchLetters = (props: any) => {
   const { history } = props;
   useEffect(() => {
     window.addEventListener("resize", updateWidth);
-    history.push(`${window.location.pathname}?page=1&search=${searchValue}&sort=${sort}&order=${order}`)
+    history.push(`${window.location.pathname}?page=1&search=${search}&sort=${sort}&order=${order}`)
     return () => window.removeEventListener("resize", updateWidth);
-  }, [searchValue, sort, order, history]);
+  }, [search, sort, order, history]);
   const RESPONSIVE_WIDTH2 = 618;
   const RESPONSIVE_WIDTH = 800;
   const handleSearch = () => {
@@ -216,6 +216,7 @@ const SearchLetters = (props: any) => {
     setEnd(props.toDate);
     props.changeFromDateFull(props.fromDate);
     props.changeToDateFull(props.toDate);
+    setSearch(searchValue);
     // props.history.push(`${window.location.pathname}?page=1&search=${searchValue}&sort=${sort}&order=${order}`)
   }
   if (loading) return (
@@ -303,7 +304,6 @@ const SearchLetters = (props: any) => {
                   setOrder(event.target.value);
                   console.log(event.target.value)
                   doSearch();
-
                 }}
               >
                 {orderList.map((order: { name: string, value: string }, index: number) => (
