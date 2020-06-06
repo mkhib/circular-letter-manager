@@ -18,6 +18,7 @@ export const typeDefs = gql`
         toCategories: [ToCategoryType!]!
         subjectedTos: [SubjectedToType!]!
         appDetails: AppOutput!
+        numberOfUnauthorized: Int!
     }
 
     type Mutation {

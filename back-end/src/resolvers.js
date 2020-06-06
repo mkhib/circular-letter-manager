@@ -427,6 +427,10 @@ export const resolvers = {
                 version: '1.0.x',
                 link: 'http://194.5.178.254/CircularLetterSearch-1.0.x.apk'
             }
+        },
+        numberOfUnauthorized: async (parent, args, contex, info) => {
+            const users = await Users.find({ authorized: false });
+            return users.length;
         }
     },
     Mutation: {
