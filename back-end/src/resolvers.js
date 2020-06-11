@@ -18,8 +18,9 @@ import dynamicSort from './util/sorting';
 import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
 import { sendSMS } from './util/sendSMS';
+import { clearAllSessions } from './util/clearAllSessions';
 
-const uri = 'https://fd15c95877a2.ngrok.io/';
+const uri = 'http://localhost:3600/';
 const imagePath = `${uri}images/`;
 const thumbPath = `${uri}thumbnails/`;
 String.prototype.allTrim = String.prototype.allTrim || function () {
@@ -721,8 +722,8 @@ export const resolvers = {
                 })
                 .catch(err => {
                     console.error(err);
-                })
-            context.session.searchResult = null;
+                });
+            clearAllSessions();
             return true;
         },
         deleteCircularLetter: async (parent, args, context, info) => {
@@ -748,7 +749,7 @@ export const resolvers = {
             });
 
             await letter.deleteOne();
-            context.session.searchResult = null;
+            clearAllSessions();
             return true;
         },
         updateCircularLetter: async (parent, args, context, info) => {
@@ -769,7 +770,6 @@ export const resolvers = {
                 delete args.data.number;
             }
 
-            context.session.searchResult = null;
             await CircularLetters.findByIdAndUpdate(args.id, args.data, { upsert: true, new: true });
 
             if (context.session.oldFile !== args.data.files[0]) {
@@ -793,7 +793,7 @@ export const resolvers = {
                         console.error(err);
                     })
             }
-            context.session.searchResult = null;
+            clearAllSessions();
             return true;
         },
         createToCategoryType: async (parent, args, context, info) => {
