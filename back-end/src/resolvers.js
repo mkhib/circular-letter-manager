@@ -19,7 +19,7 @@ import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
 import { sendSMS } from './util/sendSMS';
 
-const uri = 'https://fd15c95877a2.ngrok.io/';
+const uri = 'http://localhost:3600/';
 const imagePath = `${uri}images/`;
 const thumbPath = `${uri}thumbnails/`;
 String.prototype.allTrim = String.prototype.allTrim || function () {
@@ -36,6 +36,7 @@ export const resolvers = {
     Query: {
         users: async (parent, { information, page, limit }, context, info) => {
             isAuthenticated(context.req);
+
             let users = [];
             if (context.session.userSearch
                 && context.session.userSearchParam === information
@@ -140,6 +141,7 @@ export const resolvers = {
                 throw new Error('Letter not found!');
             }
 
+            context.session.deletedFiles = null;
             context.session.oldFile = circularLetter.files[0];
 
             const filesName = circularLetter.files;
@@ -642,22 +644,32 @@ export const resolvers = {
             return true;
         },
         deleteFileWhileUpdate: async (parent, { id, filename }, context, info) => {
-            const letter = await CircularLetters.findById(id);
-            let oldFiles = letter.files;
-            await Files.deleteOne({ filename });
-            fs.unlinkSync(`./images/${filename}`, (err) => {
-                if (err) {
-                    throw err;
-                }
-            });
-            console.log(`File ${filename} has been removed!`);
-            let newFiles = [];
-            for (let item of oldFiles) {
-                if (item !== filename) {
-                    newFiles.push(item);
-                }
+            isAuthenticated(context.req);
+
+            if (context.session.deletedFiles === null) {
+                context.session.deletedFiles = [filename];
             }
-            await CircularLetters.findByIdAndUpdate(id, { files: newFiles }, { upsert: true, new: true });
+            else {
+                const deletedFiles = context.session.deletedFiles;
+                deletedFiles.push(filename);
+                context.session.deletedFiles = deletedFiles;
+            }
+            // const letter = await CircularLetters.findById(id);
+            // let oldFiles = letter.files;
+            // await Files.deleteOne({ filename });
+            // fs.unlinkSync(`./images/${filename}`, (err) => {
+            //     if (err) {
+            //         throw err;
+            //     }
+            // });
+            // console.log(`File ${filename} has been removed!`);
+            // let newFiles = [];
+            // for (let item of oldFiles) {
+            //     if (item !== filename) {
+            //         newFiles.push(item);
+            //     }
+            // }
+            // await CircularLetters.findByIdAndUpdate(id, { files: newFiles }, { upsert: true, new: true });
             return true;
         },
         deleteMultiFiles: async (parent, { filenames }, context, info) => {
@@ -771,6 +783,23 @@ export const resolvers = {
 
             context.session.searchResult = null;
             await CircularLetters.findByIdAndUpdate(args.id, args.data, { upsert: true, new: true });
+
+            if (context.session.deletedFiles) {
+                const filenames = context.session.deletedFiles;
+                filenames.forEach(async (filename) => {
+                    await Files.deleteOne({ filename }, (err) => {
+                        if (err) {
+                            throw new Error("File not found!");
+                        }
+                    });
+                    fs.unlinkSync(`./images/${filename}`, (err) => {
+                        if (err) {
+                            throw new Error("File not found!");
+                        }
+                        console.log(`File ${filename} has been removed!`);
+                    });
+                });
+            }
 
             if (context.session.oldFile !== args.data.files[0]) {
                 let fileName = context.session.oldFile;
