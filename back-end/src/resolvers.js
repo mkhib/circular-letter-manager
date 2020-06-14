@@ -18,6 +18,7 @@ import dynamicSort from './util/sorting';
 import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
 import { sendSMS } from './util/sendSMS';
+import { clearAllSessions } from './util/clearAllSessions';
 
 const uri = 'http://localhost:3600/';
 const imagePath = `${uri}images/`;
@@ -733,8 +734,8 @@ export const resolvers = {
                 })
                 .catch(err => {
                     console.error(err);
-                })
-            context.session.searchResult = null;
+                });
+            clearAllSessions();
             return true;
         },
         deleteCircularLetter: async (parent, args, context, info) => {
@@ -760,7 +761,7 @@ export const resolvers = {
             });
 
             await letter.deleteOne();
-            context.session.searchResult = null;
+            clearAllSessions();
             return true;
         },
         updateCircularLetter: async (parent, args, context, info) => {
@@ -781,7 +782,6 @@ export const resolvers = {
                 delete args.data.number;
             }
 
-            context.session.searchResult = null;
             await CircularLetters.findByIdAndUpdate(args.id, args.data, { upsert: true, new: true });
 
             if (context.session.deletedFiles) {
@@ -822,7 +822,7 @@ export const resolvers = {
                         console.error(err);
                     })
             }
-            context.session.searchResult = null;
+            clearAllSessions();
             return true;
         },
         createToCategoryType: async (parent, args, context, info) => {
