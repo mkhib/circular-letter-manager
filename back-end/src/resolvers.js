@@ -18,7 +18,6 @@ import dynamicSort from './util/sorting';
 import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
 import { sendSMS } from './util/sendSMS';
-import { clearAllSessions } from './util/clearAllSessions';
 
 const uri = 'http://localhost:3600/';
 const imagePath = `${uri}images/`;
@@ -735,7 +734,7 @@ export const resolvers = {
                 .catch(err => {
                     console.error(err);
                 });
-            clearAllSessions();
+            context.session.searchResult = null;
             return true;
         },
         deleteCircularLetter: async (parent, args, context, info) => {
@@ -761,7 +760,7 @@ export const resolvers = {
             });
 
             await letter.deleteOne();
-            clearAllSessions();
+            context.session.searchResult = null;
             return true;
         },
         updateCircularLetter: async (parent, args, context, info) => {
@@ -822,7 +821,7 @@ export const resolvers = {
                         console.error(err);
                     })
             }
-            clearAllSessions();
+            context.session.searchResult = null;
             return true;
         },
         createToCategoryType: async (parent, args, context, info) => {
