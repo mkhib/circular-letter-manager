@@ -54,6 +54,11 @@ const circularLetterSchema = new Schema({
     files: {
         type: Array,
         required: true
+    },
+    searchingFields: {
+        type: String,
+        required: true,
+        index: true
     }
 });
 

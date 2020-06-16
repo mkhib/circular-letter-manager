@@ -94,6 +94,7 @@ export const typeDefs = gql`
         toCategory: String!
         tags: [String!]!
         files: [String]!
+        searchingFields: String!
     }
 
     type UserOutput {

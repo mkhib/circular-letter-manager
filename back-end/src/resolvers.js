@@ -173,18 +173,19 @@ export const resolvers = {
 
                 if (paste.length <= 1) {
                     const newLetter = await CircularLetters.find({
-                        $or: [
-                            { number: { $regex: `${information}` } },
-                            { title: { $regex: `${information}` } },
-                            { tags: { $regex: `${information}` } },
-                            { from: { $regex: `${information}` } },
-                            { referTo: { $regex: `${information}` } },
-                            { importNumber: { $regex: `${information}` } },
-                            { exportNumber: { $regex: `${information}` } },
-                            { subjectedTo: { $regex: `${information}` } },
-                            { toCategory: { $regex: `${information}` } },
-                            { date: { $regex: `${information}` } }
-                        ]
+                        // $or: [
+                        //     { number: { $regex: `${information}` } },
+                        //     { title: { $regex: `${information}` } },
+                        //     { tags: { $regex: `${information}` } },
+                        //     { from: { $regex: `${information}` } },
+                        //     { referTo: { $regex: `${information}` } },
+                        //     { importNumber: { $regex: `${information}` } },
+                        //     { exportNumber: { $regex: `${information}` } },
+                        //     { subjectedTo: { $regex: `${information}` } },
+                        //     { toCategory: { $regex: `${information}` } },
+                        //     { date: { $regex: `${information}` } }
+                        // ]
+                        searchingFields: { $regex: `${information}` }
                     });
 
                     if (startDate && endDate) {
@@ -203,18 +204,19 @@ export const resolvers = {
                     let lettersId = [];
                     for (let item of paste) {
                         const letter = await CircularLetters.find({
-                            $or: [
-                                { number: { $regex: `${item}` } },
-                                { title: { $regex: `${item}` } },
-                                { tags: { $regex: `${item}` } },
-                                { from: { $regex: `${item}` } },
-                                { referTo: { $regex: `${item}` } },
-                                { importNumber: { $regex: `${item}` } },
-                                { exportNumber: { $regex: `${item}` } },
-                                { subjectedTo: { $regex: `${item}` } },
-                                { toCategory: { $regex: `${item}` } },
-                                { date: { $regex: `${item}` } }
-                            ]
+                            // $or: [
+                            //     { number: { $regex: `${item}` } },
+                            //     { title: { $regex: `${item}` } },
+                            //     { tags: { $regex: `${item}` } },
+                            //     { from: { $regex: `${item}` } },
+                            //     { referTo: { $regex: `${item}` } },
+                            //     { importNumber: { $regex: `${item}` } },
+                            //     { exportNumber: { $regex: `${item}` } },
+                            //     { subjectedTo: { $regex: `${item}` } },
+                            //     { toCategory: { $regex: `${item}` } },
+                            //     { date: { $regex: `${item}` } }
+                            // ]
+                            searchingFields: { $regex: `${item}` }
                         });
                         lettersId = [...lettersId, ...letter];
                     }
@@ -286,18 +288,19 @@ export const resolvers = {
 
                 if (paste.length === 1) {
                     const newLetter = await CircularLetters.find({
-                        $or: [
-                            { number: { $regex: `${information}` } },
-                            { title: { $regex: `${information}` } },
-                            { tags: { $regex: `${information}` } },
-                            { from: { $regex: `${information}` } },
-                            { referTo: { $regex: `${information}` } },
-                            { importNumber: { $regex: `${information}` } },
-                            { exportNumber: { $regex: `${information}` } },
-                            { subjectedTo: { $regex: `${information}` } },
-                            { toCategory: { $regex: `${information}` } },
-                            { date: { $regex: `${information}` } }
-                        ]
+                        // $or: [
+                        //     { number: { $regex: `${information}` } },
+                        //     { title: { $regex: `${information}` } },
+                        //     { tags: { $regex: `${information}` } },
+                        //     { from: { $regex: `${information}` } },
+                        //     { referTo: { $regex: `${information}` } },
+                        //     { importNumber: { $regex: `${information}` } },
+                        //     { exportNumber: { $regex: `${information}` } },
+                        //     { subjectedTo: { $regex: `${information}` } },
+                        //     { toCategory: { $regex: `${information}` } },
+                        //     { date: { $regex: `${information}` } }
+                        // ]
+                        searchingFields: { $regex: `${information}` }
                     });
 
                     if (startDate && endDate) {
@@ -330,18 +333,19 @@ export const resolvers = {
                     let lettersId = [];
                     for (let item of paste) {
                         const letter = await CircularLetters.find({
-                            $or: [
-                                { number: { $regex: `${item}` } },
-                                { title: { $regex: `${item}` } },
-                                { tags: { $regex: `${item}` } },
-                                { from: { $regex: `${item}` } },
-                                { referTo: { $regex: `${item}` } },
-                                { importNumber: { $regex: `${item}` } },
-                                { exportNumber: { $regex: `${item}` } },
-                                { subjectedTo: { $regex: `${item}` } },
-                                { toCategory: { $regex: `${item}` } },
-                                { date: { $regex: `${item}` } }
-                            ]
+                            // $or: [
+                            //     { number: { $regex: `${item}` } },
+                            //     { title: { $regex: `${item}` } },
+                            //     { tags: { $regex: `${item}` } },
+                            //     { from: { $regex: `${item}` } },
+                            //     { referTo: { $regex: `${item}` } },
+                            //     { importNumber: { $regex: `${item}` } },
+                            //     { exportNumber: { $regex: `${item}` } },
+                            //     { subjectedTo: { $regex: `${item}` } },
+                            //     { toCategory: { $regex: `${item}` } },
+                            //     { date: { $regex: `${item}` } }
+                            // ]
+                            searchingFields: { $regex: `${item}` }
                         });
                         lettersId = [...lettersId, ...letter];
                     }
@@ -427,7 +431,7 @@ export const resolvers = {
         appDetails: async (parent, args, context, info) => {
             return {
                 version: '1.0.x',
-                link: 'http://194.5.178.254/CircularLetterSearch-1.0.x.apk'
+                link: 'http://194.5.178.254/downloads/CircularLetterSearch-1.0.x.apk'
             }
         },
         numberOfUnauthorized: async (parent, args, contex, info) => {
@@ -720,7 +724,35 @@ export const resolvers = {
                 i++;
             }, 1000)*/
 
-            const circularLetter = new CircularLetters({ ...args, _id: ObjectId().toString(), dateOfCreation: moment().unix().toString() });
+            // for (let i = 0; i < 5000; i++) {
+            //     const title = `بخشنامه${i}`;
+            //     const number = `۳۴/۱۲۳۴${i}`;
+            //     const importNumber = `۲۱۳۴${i}`;
+            //     const date = '1385/05/22';
+            //     const dateOfCreation = `1590950646${i}`;
+            //     const from = `دانشگاه`;
+            //     const subjectedTo = 'همه';
+            //     const toCategory = 'همه';
+            //     const tags = [`کلاس${i}`, `سال${i}`];
+            //     const files = ['MDFnUeNCYmayqrOp8044284_232.jpg'];
+            //     const circularLetter = new CircularLetters({
+            //         _id: ObjectId().toString(),
+            //         title,
+            //         number,
+            //         importNumber,
+            //         date,
+            //         dateOfCreation,
+            //         from,
+            //         subjectedTo,
+            //         toCategory,
+            //         tags,
+            //         files,
+            //         searchingFields: `${title} ${number} ${importNumber} ${date} ${from} ${subjectedTo} ${toCategory} ${tags}`
+            //     });
+            //     await circularLetter.save();
+            // }
+
+            const circularLetter = new CircularLetters({ ...args, _id: ObjectId().toString(), dateOfCreation: moment().unix().toString(), searchingFields: `${args.title} ${args.number} ${args.importNumber} ${args.exportNumber} ${args.date} ${args.from} ${args.subjectedTo} ${args.toCategory} ${args.tags}` });
             await circularLetter.save();
             const fileName = circularLetter.files[0];
             const index = fileName.lastIndexOf(".");
@@ -781,7 +813,7 @@ export const resolvers = {
                 delete args.data.number;
             }
 
-            await CircularLetters.findByIdAndUpdate(args.id, args.data, { upsert: true, new: true });
+            await CircularLetters.findByIdAndUpdate(args.id, { ...args.data, searchingFields: `${args.data.title} ${args.data.number} ${args.data.importNumber} ${args.data.exportNumber} ${args.data.date} ${args.data.from} ${args.data.subjectedTo} ${args.data.toCategory} ${args.data.tags}` }, { upsert: true, new: true });
 
             if (context.session.deletedFiles) {
                 const filenames = context.session.deletedFiles;
