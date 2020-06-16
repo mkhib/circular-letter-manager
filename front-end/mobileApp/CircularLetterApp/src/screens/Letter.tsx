@@ -258,7 +258,7 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
                   style={styles.alertModalText}
                 >
                   لطفا دسترسی لازم را برای ذخیره تصویر، در تنظیمات تلفن همراه خود برای برنامه فراهم کنید.
-            </Text>
+                </Text>
                 <View
                   style={styles.modalButtonsView}
                 >
@@ -271,7 +271,7 @@ const Letter: React.FC<LetterProps> = ({ id }) => {
                   >
                     <Text style={gStyles.normalText}>
                       ورود به تنظیمات
-                  </Text>
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {
