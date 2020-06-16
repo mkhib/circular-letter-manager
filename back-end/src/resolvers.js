@@ -707,18 +707,29 @@ export const resolvers = {
 
             /*var i = 1;
             setInterval(async () => {
+                const title = `بخشنامه${i}`;
+                const number = `۳۴/۱۲۳۴${i}`;
+                const importNumber = `۲۱۳۴${i}`;
+                const date = '1385/05/22';
+                const dateOfCreation = `1590950646${i}`;
+                const from = `دانشگاه`;
+                const subjectedTo = 'همه';
+                const toCategory = 'همه';
+                const tags = [`کلاس${i}`, `سال${i}`];
+                const files = ['MDFnUeNCYmayqrOp8044284_232.jpg'];
                 const circularLetter = new CircularLetters({
                     _id: ObjectId().toString(),
-                    title: `بخشنامه${i}`,
-                    number: `۴۲۵/ص/۲۳${i}`,
-                    importNumber: `۲۱۳۴${i}`,
-                    date: '1385/05/22',
-                    dateOfCreation: moment().unix().toString(),
-                    from: `دانشگاه`,
-                    subjectedTo: 'همه',
-                    toCategory: 'همه',
-                    tags: [`کلاس${i}`, `سال${i}`],
-                    files: ['MDFnUeNCYmayqrOp8044284_232.jpg']
+                    title,
+                    number,
+                    importNumber,
+                    date,
+                    dateOfCreation,
+                    from,
+                    subjectedTo,
+                    toCategory,
+                    tags,
+                    files,
+                    searchingFields: `${title} ${number} ${importNumber} ${date} ${from} ${subjectedTo} ${toCategory} ${tags}`
                 });
                 await circularLetter.save();
                 i++;
