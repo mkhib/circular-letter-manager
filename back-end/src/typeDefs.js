@@ -18,6 +18,7 @@ export const typeDefs = gql`
         toCategories: [ToCategoryType!]!
         subjectedTos: [SubjectedToType!]!
         appDetails: AppOutput!
+        numberOfUnauthorized: Int!
     }
 
     type Mutation {
@@ -93,6 +94,7 @@ export const typeDefs = gql`
         toCategory: String!
         tags: [String!]!
         files: [String]!
+        searchingFields: String!
     }
 
     type UserOutput {

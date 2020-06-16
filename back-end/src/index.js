@@ -90,14 +90,14 @@ app.use("/thumbnails", express.static(path.join(__dirname, "../thumbnails")));
 
 app.use(cors({
     credentials: true,
-    origin: true
+    origin: "http://localhost:3000"
 }));
 
-/*app.use(function (req, res, next) {
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
-});*/
+});
 
 app.use(cookieParser());
 app.use(helmet());
@@ -139,10 +139,10 @@ app.use((req, res, next) => {
     next();
 });
 
-/*app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, 'build')));
 app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
-});*/
+});
 
 SERVER.applyMiddleware({
     app,
