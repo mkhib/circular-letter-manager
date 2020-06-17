@@ -27,6 +27,8 @@ const defaultMaterialTheme = createMuiTheme({
 const MyDatePicker = withStyles((theme: Theme) => ({
   root: {
     fontFamily: 'FontNormalFD',
+    backgroundColor: '#fcfcfc',
+    borderRadius: 7,
   },
 }))(DatePicker);
 

@@ -276,12 +276,12 @@ const Letter = (props: any) => {
           <Box
             className={classes.container}
             style={{
-              flexDirection: width < RESPONSIVE_WIDTH ? 'column-reverse' : 'row-reverse',
+              flexDirection: width < RESPONSIVE_WIDTH ? 'column' : 'row-reverse',
               alignItems: width < RESPONSIVE_WIDTH ? 'center' : 'flex-start',
             }}
           >
             <Box
-              border={1}
+              // border={1}
               borderColor="#00bcd4"
               borderRadius={7}
               className={classes.detailWholeBox}

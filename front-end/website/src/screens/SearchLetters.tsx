@@ -96,6 +96,7 @@ const useStyles = makeStyles((theme) => ({
   },
   select: {
     width: '100%',
+    backgroundColor:'white',
     fontFamily: 'FontNormal',
     // fontSize: '2.1vmin',
     marginBottom: 10,
@@ -206,7 +207,7 @@ const SearchLetters = (props: any) => {
   پس از انتخاب تاریخ بر روی علامت جست و جو کلیک کنید
 `;
   const { loading, error, data } = useQuery(SEARCH_QUERY, {
-    variables: { information: handleSearch(), startDate: start, endDate: end, page: handlePageNumber(), limit: 15, sortBy: sort, order: order },
+    variables: { information: handleSearch(), startDate: start, endDate: end, page: handlePageNumber(), limit: 12, sortBy: sort, order: order },
   });
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     props.changeSearchInDate(event.target.checked);

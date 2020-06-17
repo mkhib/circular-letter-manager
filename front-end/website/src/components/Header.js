@@ -293,8 +293,16 @@ const Header = (props) => {
                 onMouseLeave={() => {
                   handleClose();
                 }}
+                // onClick={() => {
+                //   if (open) {
+                //     handleClose();
+                //   } else {
+                //     handleToggle();
+                //   }
+                // }}
                 style={{
                   marginLeft: 20,
+                  width: 30,
                   borderRadius: 180,
                   paddingTop: 14,
                   paddingBottom: 14,

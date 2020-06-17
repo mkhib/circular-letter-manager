@@ -7,11 +7,20 @@ const useStyles = makeStyles(theme => ({
   root: {
     marginBottom: 10,
     // width: '20vmax',
-    // backgroundColor: 'blue',
+    // backgroundColor: 'white',
   },
   innerTxtFields: {
     fontFamily: 'FontNormalFD',
     direction: 'ltr',
+    // backgroundColor: 'white',
+    // paddingRight: 90,
+    // fontSize: '2.1vmin'
+  },
+  innerText: {
+    fontFamily: 'FontNormalFD',
+    direction: 'ltr',
+    borderRadius: 7,
+    backgroundColor: '#fcfcfc',
     // paddingRight: 90,
     // fontSize: '2.1vmin'
   },
@@ -53,7 +62,7 @@ const TextInput = (props: any) => {
         defaultValue={props.defaultValue}
         type={props.type}
         value={props.value}
-        variant="outlined"
+        variant={"outlined" || props.variant}
         lang={props.lang}
         onChange={props.onChange}
         InputLabelProps={{
@@ -63,7 +72,7 @@ const TextInput = (props: any) => {
         }}
         InputProps={props.inputStyle ? props.inputStyle : {
           classes: {
-            input: classes.innerTxtFields,
+            input: classes.innerText,
           },
         }}
       />
