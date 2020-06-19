@@ -171,7 +171,21 @@ export const resolvers = {
                 const trimmed = information.allTrim();
                 const paste = trimmed.split(" ");
 
-                if (paste.length <= 1) {
+                if (information = '') {
+                    const newLetter = await CircularLetters.find();
+                    if (startDate && endDate) {
+                        newLetter.forEach((letter) => {
+                            if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))
+                                && parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
+                                letters.push(letter);
+                            }
+                        });
+                    }
+                    else {
+                        letters = newLetter;
+                    }
+                }
+                else if (paste.length <= 1) {
                     const newLetter = await CircularLetters.find({
                         // $or: [
                         //     { number: { $regex: `${information}` } },
@@ -705,13 +719,12 @@ export const resolvers = {
                 throw new Error("Unauthorized action!")
             }
 
-            /*var i = 1;
-            setInterval(async () => {
+            for (let i = 0; i < 10000; i++) {
                 const title = `بخشنامه${i}`;
                 const number = `۳۴/۱۲۳۴${i}`;
                 const importNumber = `۲۱۳۴${i}`;
                 const date = '1385/05/22';
-                const dateOfCreation = `1590950646${i}`;
+                const dateOfCreation = 1590950646 + i;
                 const from = `دانشگاه`;
                 const subjectedTo = 'همه';
                 const toCategory = 'همه';
@@ -723,7 +736,7 @@ export const resolvers = {
                     number,
                     importNumber,
                     date,
-                    dateOfCreation,
+                    dateOfCreation: `${dateOfCreation}`,
                     from,
                     subjectedTo,
                     toCategory,
@@ -732,38 +745,9 @@ export const resolvers = {
                     searchingFields: `${title} ${number} ${importNumber} ${date} ${from} ${subjectedTo} ${toCategory} ${tags}`
                 });
                 await circularLetter.save();
-                i++;
-            }, 1000)*/
+            }
 
-            // for (let i = 0; i < 5000; i++) {
-            //     const title = `بخشنامه${i}`;
-            //     const number = `۳۴/۱۲۳۴${i}`;
-            //     const importNumber = `۲۱۳۴${i}`;
-            //     const date = '1385/05/22';
-            //     const dateOfCreation = `1590950646${i}`;
-            //     const from = `دانشگاه`;
-            //     const subjectedTo = 'همه';
-            //     const toCategory = 'همه';
-            //     const tags = [`کلاس${i}`, `سال${i}`];
-            //     const files = ['MDFnUeNCYmayqrOp8044284_232.jpg'];
-            //     const circularLetter = new CircularLetters({
-            //         _id: ObjectId().toString(),
-            //         title,
-            //         number,
-            //         importNumber,
-            //         date,
-            //         dateOfCreation,
-            //         from,
-            //         subjectedTo,
-            //         toCategory,
-            //         tags,
-            //         files,
-            //         searchingFields: `${title} ${number} ${importNumber} ${date} ${from} ${subjectedTo} ${toCategory} ${tags}`
-            //     });
-            //     await circularLetter.save();
-            // }
-
-            const circularLetter = new CircularLetters({ ...args, _id: ObjectId().toString(), dateOfCreation: moment().unix().toString(), searchingFields: `${args.title} ${args.number} ${args.importNumber} ${args.exportNumber} ${args.date} ${args.from} ${args.subjectedTo} ${args.toCategory} ${args.tags}` });
+            /*const circularLetter = new CircularLetters({ ...args, _id: ObjectId().toString(), dateOfCreation: moment().unix().toString(), searchingFields: `${args.title} ${args.number} ${args.importNumber} ${args.exportNumber} ${args.date} ${args.from} ${args.subjectedTo} ${args.toCategory} ${args.tags}` });
             await circularLetter.save();
             const fileName = circularLetter.files[0];
             const index = fileName.lastIndexOf(".");
@@ -776,7 +760,7 @@ export const resolvers = {
                 })
                 .catch(err => {
                     console.error(err);
-                });
+                });*/
             context.session.searchResult = null;
             return true;
         },
