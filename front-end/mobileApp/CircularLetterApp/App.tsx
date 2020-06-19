@@ -29,7 +29,7 @@ import Signup from './src/screens/Signup';
 import LockTheApp from './src/screens/LockTheApp';
 
 const httpLink = createHttpLink({
-  uri: 'http://194.5.178.254:3600/graphql',
+  uri: 'https://bakhshnameyab.ir/graphql',
 });
 const timeoutLink = new ApolloLinkTimeout(15000);
 const getData = async () => {

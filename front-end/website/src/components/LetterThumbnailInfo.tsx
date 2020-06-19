@@ -63,18 +63,19 @@ const LetterThumbnailInfo = ({ title, date, files, from, id, number }: any) => {
           flexDirection: 'row',
           justifyContent: 'center',
         }}>
-          {title}
-          <Box style={{
-            marginLeft: 2.5
-          }}>
-            :
-          </Box>
-          <Box>
+          <Box
+            style={{
+              width: 300,
+              overflow: 'hidden',
+            }}
+          >
             عنوان
+            :
+          {' '}{title}
           </Box>
         </Box>
         <Box>
-          تاریخ: {date}
+          تاریخ : {date}
         </Box>
         <Box style={{
           display: 'flex',
@@ -83,39 +84,25 @@ const LetterThumbnailInfo = ({ title, date, files, from, id, number }: any) => {
         }}>
           {handleNumber(number)}
           <Box style={{ marginLeft: 2.5 }}>
-            :شماره
+            : شماره
           </Box>
         </Box>
         <Box style={{
           display: 'flex',
-          // flexWrap: 'wrap-reverse',
           flexDirection: 'row',
           justifyContent: 'center',
         }}>
           <Box
             style={{
-              flexWrap: 'wrap',
-              // alignSelf: 'flex-start',
-              justifyContent:'flex-end'
-            }}
-          >
-            {from}
-          </Box>
-          <Box
-            style={{
-              flexWrap: 'nowrap',
               display: 'flex',
               flexDirection: 'row',
             }}
           >
-            <Box style={{
-              marginLeft: 2.5,
-            }}>
-              :
-          </Box>
             <Box>
               صادرکننده
-          </Box>
+              :
+              {' '}{from}
+            </Box>
           </Box>
         </Box>
       </Box>

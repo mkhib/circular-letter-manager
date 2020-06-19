@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Pagination from '@material-ui/lab/Pagination';
+import Typography from '@material-ui/core/Typography';
 import { makeStyles, withStyles, Theme } from '@material-ui/core/styles';
 import { useQuery } from '@apollo/react-hooks';
 import { Mutation } from '@apollo/react-components';
@@ -295,11 +296,12 @@ const Letter = (props: any) => {
                   flexDirection: 'row',
                 }}
               >
-                <Box style={{
+                <Typography style={{
                   marginRight: 5,
+                  fontFamily: 'FontNormal'
                 }}>
                   {queryData.title}
-                </Box>
+                </Typography>
               :عنوان
               </Box>
               <Box className={classes.line}>
