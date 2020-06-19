@@ -292,7 +292,7 @@ const SearchLetters = (props: any) => {
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            width: 400
+            // width: 400
           }}>
             <Box className={classes.selectBox} style={{ minWidth: 110, width: 110 }}>
               <InputLabel className={classes.selectTopInputLabel} id="sortBy">
