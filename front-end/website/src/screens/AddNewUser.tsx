@@ -169,7 +169,7 @@ const ChangePassword: React.FunctionComponent<AddNewUserProps> = (props) => {
       return '.لطفا اتصال خود به اینترنت را بررسی کنید'
     } else if (message === 'GraphQL error: Duplicate personelNumber!') {
       return '.کاربری با این شماره پرسنلی قبلا ثبت‌نام کرده است'
-    }else if (message === 'GraphQL error: Duplicate IdentificationNumber!') {
+    } else if (message === 'GraphQL error: Duplicate IdentificationNumber!') {
       return '.کاربری با این کدملی قبلا ثبت‌نام کرده است'
     }
     else {
@@ -279,9 +279,9 @@ const ChangePassword: React.FunctionComponent<AddNewUserProps> = (props) => {
         schema.validate({
           newUsername,
           newUserLastName,
-          newUserIdentificationCode,
-          newUserPersonelNumber,
-          newUserPhoneNumber,
+          newUserIdentificationCode: fixNumbers(newUserIdentificationCode),
+          newUserPersonelNumber: fixNumbers(newUserPersonelNumber),
+          newUserPhoneNumber: fixNumbers(newUserPhoneNumber),
         }, {
           abortEarly: false
         }).then(() => {
