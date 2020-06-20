@@ -163,6 +163,7 @@ const SearchLetters = (props: any) => {
   const [sort, setSort] = useState('dateOfCreation');
   const [order, setOrder] = useState('desc');
   const [width, setWidth] = useState(window.innerWidth);
+  const didMountRef = React.useRef(false);
   let queryParam = useQueryParam();
   const updateWidth = () => {
     setWidth(window.innerWidth);
@@ -170,7 +171,9 @@ const SearchLetters = (props: any) => {
   const { history } = props;
   useEffect(() => {
     window.addEventListener("resize", updateWidth);
-    history.push(`${window.location.pathname}?page=1&search=${search}&sort=${sort}&order=${order}`)
+    if (didMountRef.current) {
+      history.push(`${window.location.pathname}?page=1&search=${search}&sort=${sort}&order=${order}`)
+    } else didMountRef.current = true
     return () => window.removeEventListener("resize", updateWidth);
   }, [search, sort, order, history]);
   const RESPONSIVE_WIDTH2 = 618;
@@ -289,7 +292,7 @@ const SearchLetters = (props: any) => {
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            width: 400
+            // width: 400
           }}>
             <Box className={classes.selectBox} style={{ minWidth: 110, width: 110 }}>
               <InputLabel className={classes.selectTopInputLabel} id="sortBy">

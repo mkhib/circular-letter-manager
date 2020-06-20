@@ -518,6 +518,7 @@ const UploadCircularLetter = (props: any) => {
                   backgroundImage: `url(${circularBack})`,
                   backgroundRepeat: 'no-repeat',
                   backgroundSize: '100vmax',
+                  backgroundAttachment: 'fixed',
                 }}>
                   <Stepper
                     disabled={handleDisabled()}
@@ -867,32 +868,36 @@ const UploadCircularLetter = (props: any) => {
                           justifyContent: 'center',
                         }}>
                           <Box
-                            border={1}
+                            // border={1}
                             borderRadius={7}
-                            borderColor="#00bcd4"
+                            borderColor="#ff9800"
+                            // borderColor="#00bcd4"
                             style={{
                               display: 'flex',
-                              minWidth: 500,
+                              minWidth: 250,
+                              // maxWidth: 400,
+                              padding: 20,
+                              paddingLeft: 40,
+                              paddingRight: 40,
                               flexDirection: 'column',
                               alignItems: 'flex-end',
                               justifyContent: 'center',
-                              padding: 30,
                               marginBottom: 10,
                             }}>
                             <Box className={classes.checkInfoBox}>
                               <Box style={{
                                 display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
+                                flexDirection: 'row-reverse',
+                                alignItems: 'flex-start',
+                                justifyContent: 'flex-start',
                               }}>
-                                {title}
-                                <Box style={{
-                                  marginLeft: 5
-                                }}>
-                                  :
-                                </Box>
-                                <Box>
-                                  عنوان
+                                :عنوان
+                                <Box
+                                  style={{
+                                    marginRight: 5,
+                                  }}
+                                >
+                                  {title}{' '}
                                 </Box>
                               </Box>
                             </Box>

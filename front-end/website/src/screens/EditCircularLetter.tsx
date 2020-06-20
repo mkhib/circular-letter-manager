@@ -29,6 +29,8 @@ import {
   setErrors,
   setListOfCategories,
   setListOfSubjects,
+  fileStatusType,
+  setFileLoading,
 } from '../redux/slices/data';
 import * as yup from 'yup';
 import jMoment from 'moment-jalaali';
@@ -52,6 +54,8 @@ import Fade from '@material-ui/core/Fade';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
+import circularBack from '../assets/images/circularBack.jpg';
+
 
 const useStyles = makeStyles(theme => ({
   titleDiv: {
@@ -284,22 +288,6 @@ mutation UploadCircular(
 }
 `;
 
-
-const schema = yup.object().shape({
-  title: yup.string().required(),
-  date: yup.string().required(),
-  number: yup.string().required(),
-  type: yup.string().required(),
-  sender: yup.string().required(),
-  toCategory: yup.string().required(),
-  subjectedTo: yup.string().required(),
-  exportNumber: yup.string(),
-  tags: yup.array().required(),
-  importNumber: yup.string(),
-  numberOfFiles: yup.number().required(),
-  refrenceCircularID: yup.string(),
-});
-
 const UPDATE_CIRCULAR_LETTER = gql`
 mutation UpdateCircularLetter($id: ID!, $data: updateCircularLetter){
   updateCircularLetter(id: $id, data: $data)
@@ -389,6 +377,7 @@ const EditCircularLetter = (props: any) => {
     importNumber,
     numberOfFiles,
     refrenceCircularID,
+    setFileLoading,
     setAnyThing,
     clearAnyThing,
     setListOfSubjects,
@@ -403,7 +392,6 @@ const EditCircularLetter = (props: any) => {
   const [width, setWidth] = useState(window.innerWidth);
   const [tempDate, setTempDate] = useState(jMoment());
   const [height, setHeight] = useState(window.innerHeight);
-  const [disabledButton, setDisabledButton] = useState(true);
   const [deleteFileSuccess, setDeleteFileSuccess] = useState(false);
   const [deleteFileFailure, setDeleteFileFailure] = useState(false);
   const [deleteCircularFailure, setDeleteCircularFailure] = useState(false);
@@ -585,6 +573,12 @@ const EditCircularLetter = (props: any) => {
           <UploadOneFile
             index={i}
             hasRemove
+            getLoading={(loading: boolean) => {
+              setFileLoading({
+                index: i,
+                loading: loading,
+              });
+            }}
             removeFromRedux={(name: string) => {
               setAnyThing({
                 theThing: 'numberOfFiles',
@@ -604,15 +598,11 @@ const EditCircularLetter = (props: any) => {
                 name,
                 index: i
               });
-              // setFileUpload({
-              //   index: i,
-              //   status: false,
-              //   link: '',
-              // });
             }}
             onCompleted={(data: any) => {
               setFileUpload({
                 index: i,
+                loading: false,
                 status: true,
                 link: data.uploadFile.filePath,
                 name: data.uploadFile.filename,
@@ -636,31 +626,6 @@ const EditCircularLetter = (props: any) => {
       }
     });
     return hasError;
-  }
-
-  const validateDetails = () => {
-    schema.validate({
-      title,
-      date,
-      number,
-      type,
-      sender,
-      toCategory,
-      subjectedTo,
-      exportNumber,
-      tags,
-      importNumber,
-      numberOfFiles,
-      refrenceCircularID,
-    }, {
-      abortEarly: false,
-    }).then(() => {
-      props.setErrors([]);
-      setDisabledButton(false);
-    }).catch(e => {
-      props.setErrors(e.inner);
-      setDisabledButton(true);
-    });
   }
 
   const handleDisabled = () => {
@@ -691,6 +656,15 @@ const EditCircularLetter = (props: any) => {
     setOpenFileDelete(false);
   };
 
+  const handleBackDisable = () => {
+    let disabled = false;
+    uploadFilesStatus.forEach((fileStatus: fileStatusType) => {
+      if (fileStatus.loading) {
+        disabled = true;
+      }
+    });
+    return disabled;
+  }
 
   if (props.data.loading) {
     return (<Box style={{
@@ -709,7 +683,6 @@ const EditCircularLetter = (props: any) => {
       onCompleted={() => {
         client.resetStore();
         setLastStepMessage('تغییرات با موفقیت اعمال شد');
-        // props.history.push(`/letter?id=${queryParam.get('id')}`);
       }}
       onError={(error: any) => {
         if (error.message === 'GraphQL error: Number is taken!') {
@@ -740,7 +713,8 @@ const EditCircularLetter = (props: any) => {
             props.removeFilesName(fileToDelete.name);
             props.removeFileUploadStatus(fileToDelete.index);
           }}
-          onError={() => {
+          onError={(e:any) => {
+            console.log(e);
             openDeleteFileFailure();
           }}
         >
@@ -777,10 +751,14 @@ const EditCircularLetter = (props: any) => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
+                            backgroundImage: `url(${circularBack})`,
+                            backgroundAttachment: 'fixed',
+                            backgroundSize: '100vmax',
                           }}>
                             <Stepper
                               disabled={handleDisabled()}
                               returnDisabled={disableReturnStep()}
+                              backDisabled={handleBackDisable()}
                               returnHref={`/letter?id=${queryParam.get('id')}`}
                               customLastStep={lastStepMessage}
                               customLabels={['ویرایش مشخصات بخشنامه', 'ویرایش  فایل‌های بخشنامه', 'کنترل اطلاعات ویرایش شده']}
@@ -1260,7 +1238,7 @@ const EditCircularLetter = (props: any) => {
                                       borderColor="#00bcd4"
                                       style={{
                                         display: 'flex',
-                                        minWidth: 500,
+                                        minWidth: 400,
                                         flexDirection: 'column',
                                         alignItems: 'flex-end',
                                         justifyContent: 'center',
@@ -1461,6 +1439,7 @@ export default compose(
     clearAnyThing,
     addFileUpload,
     setFileUpload,
+    setFileLoading,
     removeFileUploadStatus,
     removeFile,
     setListOfCategories,

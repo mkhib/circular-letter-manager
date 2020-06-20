@@ -6,7 +6,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { useQuery } from '@apollo/react-hooks';
 import { makeStyles } from '@material-ui/core/styles';
 import Backdrop from '@material-ui/core/Backdrop';
-import profile from '../assets/images/profile.jpg';
+import profile from '../assets/images/profile2.jpg';
 
 const useStyles = makeStyles(theme => ({
   wholePage: {
@@ -22,12 +22,13 @@ const useStyles = makeStyles(theme => ({
   line: {
     display: 'flex',
     fontFamily: 'FontNormalFD',
+    backgroundColor: '#fcfcfc',
     paddingLeft: 20,
-    fontSize: 18,
     paddingRight: 20,
     paddingTop: 10,
     paddingBottom: 10,
     marginBottom: 10,
+    fontSize: 18,
     flexDirection: 'row-reverse',
     alignItems: 'center',
   },
@@ -46,11 +47,14 @@ const Line: React.FC<EachLineProps> = (props) => {
   } = props;
   return (
     <Box
-      border={1}
-      borderRadius={15}
+      // border={1}
+      boxShadow={1}
+      borderRadius={7}
       borderColor="#3f51b5"
       className={classes.line}>
-      <Box>
+      <Box style={{
+        color: '#424242'
+      }}>
         {title}
       </Box>
       <Box style={{ marginLeft: 5 }}>
@@ -104,22 +108,14 @@ const Profile = () => {
     <Box
       className={classes.wholePage}
       style={{
-        // width: width,
-        backgroundImage: `url(${profile})`,
-        backgroundRepeat: 'no-repeat',
         flex: 1,
-        // backgroundColor: 'red',
+        backgroundImage: `url(${profile})`,
+        backgroundPosition: 'center',
         backgroundSize: 'cover',
-        // backgroundSize: height + 500,
       }}
     >
       <Box
-        border={1}
-        borderRadius={50}
         borderColor="#2196f3"
-        style={{
-          padding: 100,
-        }}
       >
         <Line title="نام و  نام‌خانوادگی" value={`${data.user.firstName} ${data.user.lastName}`} />
         <Line title="شماره پرسنلی" value={data.user.personelNumber} />
@@ -129,7 +125,7 @@ const Profile = () => {
           fontFamily: 'FontNormal',
           marginTop: 10,
           paddingLeft: 50,
-          backgroundColor: '#2196f3',
+          backgroundColor: '#f44336',
           color: 'white',
           paddingRight: 50,
         }}

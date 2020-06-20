@@ -211,9 +211,17 @@ const ChangePassword: React.FunctionComponent<ChangePasswordProps> = (props) => 
         return (
           <Button
             className={classes.button}
-            variant="outlined"
-            color="primary"
+            variant="contained"
+            // color="primary"
             onClick={validateAndLogin}
+            style={{
+              fontFamily: 'FontNormal',
+              marginTop: 10,
+              paddingLeft: 50,
+              backgroundColor: '#f44336',
+              color: 'white',
+              paddingRight: 50,
+            }}
           >
             {loading ? <CircularProgress style={{ height: 24, width: 24 }} /> : 'تغییر رمزعبور'}
           </Button>
