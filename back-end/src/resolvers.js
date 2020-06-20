@@ -160,6 +160,10 @@ export const resolvers = {
         search: async (parent, { information, startDate, endDate, page, limit, sortBy, order }, context, info) => {
             isAuthenticated(context.req);
 
+            if (information == '' && page == 1) {
+                context.session.searchResult = null;
+            }
+
             let letters = [];
             if (context.session.searchResult && context.session.searchParam === information
                 && context.session.searchSortBy === sortBy && context.session.searchOrder === order
@@ -171,7 +175,7 @@ export const resolvers = {
                 const trimmed = information.allTrim();
                 const paste = trimmed.split(" ");
 
-                if (information = '') {
+                if (information == '') {
                     const newLetter = await CircularLetters.find();
                     if (startDate && endDate) {
                         newLetter.forEach((letter) => {
@@ -289,6 +293,10 @@ export const resolvers = {
                 order = 'desc';
             }
 
+            if (information == '' && page == 1) {
+                context.session.searchResult = null;
+            }
+
             let letters = [];
             if (context.session.searchResult && context.session.searchParam === information
                 && context.session.searchSortBy === sortBy && context.session.searchOrder === order
@@ -300,7 +308,21 @@ export const resolvers = {
                 const trimmed = information.allTrim();
                 const paste = trimmed.split(" ");
 
-                if (paste.length === 1) {
+                if (information == '') {
+                    const newLetter = await CircularLetters.find();
+                    if (startDate && endDate) {
+                        newLetter.forEach((letter) => {
+                            if (parseInt(letter.date.replace(regExp, "$1$2$3")) >= parseInt(startDate.replace(regExp, "$1$2$3"))
+                                && parseInt(endDate.replace(regExp, "$1$2$3")) >= parseInt(letter.date.replace(regExp, "$1$2$3"))) {
+                                letters.push(letter);
+                            }
+                        });
+                    }
+                    else {
+                        letters = newLetter;
+                    }
+                }
+                else if (paste.length === 1) {
                     const newLetter = await CircularLetters.find({
                         // $or: [
                         //     { number: { $regex: `${information}` } },
@@ -444,8 +466,8 @@ export const resolvers = {
         },
         appDetails: async (parent, args, context, info) => {
             return {
-                version: '1.0.x',
-                link: 'http://194.5.178.254/downloads/CircularLetterSearch-1.0.x.apk'
+                version: '1.1.0',
+                link: 'https://bakhshnameyab.ir/downloads/CircularLetterSearch-1.1.0.apk'
             }
         },
         numberOfUnauthorized: async (parent, args, contex, info) => {
@@ -719,7 +741,7 @@ export const resolvers = {
                 throw new Error("Unauthorized action!")
             }
 
-            for (let i = 0; i < 10000; i++) {
+            /*for (let i = 0; i < 10000; i++) {
                 const title = `بخشنامه${i}`;
                 const number = `۳۴/۱۲۳۴${i}`;
                 const importNumber = `۲۱۳۴${i}`;
@@ -745,9 +767,9 @@ export const resolvers = {
                     searchingFields: `${title} ${number} ${importNumber} ${date} ${from} ${subjectedTo} ${toCategory} ${tags}`
                 });
                 await circularLetter.save();
-            }
+            }*/
 
-            /*const circularLetter = new CircularLetters({ ...args, _id: ObjectId().toString(), dateOfCreation: moment().unix().toString(), searchingFields: `${args.title} ${args.number} ${args.importNumber} ${args.exportNumber} ${args.date} ${args.from} ${args.subjectedTo} ${args.toCategory} ${args.tags}` });
+            const circularLetter = new CircularLetters({ ...args, _id: ObjectId().toString(), dateOfCreation: moment().unix().toString(), searchingFields: `${args.title} ${args.number} ${args.importNumber} ${args.exportNumber} ${args.date} ${args.from} ${args.subjectedTo} ${args.toCategory} ${args.tags}` });
             await circularLetter.save();
             const fileName = circularLetter.files[0];
             const index = fileName.lastIndexOf(".");
@@ -760,7 +782,7 @@ export const resolvers = {
                 })
                 .catch(err => {
                     console.error(err);
-                });*/
+                });
             context.session.searchResult = null;
             return true;
         },

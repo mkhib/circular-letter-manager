@@ -28,7 +28,7 @@ const app = express();
 
 const endpoint = `http://localhost:3600/graphql`;
 
-let dbUrl = 'mongodb://localhost:27017/test';
+let dbUrl = 'mongodb://bakhshna_Javadeb:PageNum7515@localhost:27017/bakhshna_letters';
 mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
 mongoose.Promise = global.Promise;
 let db = mongoose.connection;
@@ -121,7 +121,7 @@ app.use(
         cookie: {
             maxAge: 7200000,
             httpOnly: true,
-            // sameSite: true,
+            sameSite: true,
             secure: process.env.NODE_ENV === "production"
         }
     })
@@ -139,10 +139,10 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.static(path.join(__dirname, 'build')));
-app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
-});
+// app.use(express.static(path.join(__dirname, 'build')));
+// app.get('*', (req, res) => {
+//     res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
+// });
 
 SERVER.applyMiddleware({
     app,
