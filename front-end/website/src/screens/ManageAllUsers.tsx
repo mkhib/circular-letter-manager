@@ -225,7 +225,6 @@ const ManageAllUsers: React.FC<ManageUsersProps> = (props) => {
         client.resetStore();
       }}
       onError={(error: any) => {
-        console.log(error.message);
         if (error.message === 'GraphQL error: Unauthorized action!!!') {
           setSnackOption({
             message: 'نمی‌توانید خودتان را حذف کنید!',

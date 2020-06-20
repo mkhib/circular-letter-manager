@@ -714,7 +714,6 @@ const EditCircularLetter = (props: any) => {
             props.removeFileUploadStatus(fileToDelete.index);
           }}
           onError={(e:any) => {
-            console.log(e);
             openDeleteFileFailure();
           }}
         >

@@ -164,7 +164,6 @@ const ChangePassword: React.FunctionComponent<AddNewUserProps> = (props) => {
   }
 
   const handleErrorMessage = (message: string) => {
-    console.log('ine', message);
     if (message === 'Network error: Failed to fetch') {
       return '.لطفا اتصال خود به اینترنت را بررسی کنید'
     } else if (message === 'GraphQL error: Duplicate personelNumber!') {

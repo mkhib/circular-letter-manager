@@ -136,7 +136,6 @@ const ForgotPassword: React.FunctionComponent<LoginProps> = (props) => {
       openSnackbar();
     }}
     onError={(err: any) => {
-      console.log(err.message);
       props.setGraphqlError(err);
     }}
   >
