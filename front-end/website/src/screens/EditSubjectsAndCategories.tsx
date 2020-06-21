@@ -170,7 +170,6 @@ const EditSubjectsAndCategories: React.FunctionComponent<IEditProps> = (props) =
   const { setListOfSubjects, setListOfCategories } = props;
   useEffect(() => {
     if (data) {
-      console.log(data);
       setListOfCategories(data.categoriesQuery.toCategories);
       setListOfSubjects(data.categoriesQuery.subjectedTos);
     }

@@ -178,7 +178,6 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
       }
       const SubmitButton = withRouter(({ history }) => {
         if (data) {
-          console.log(data);
           onSubmit(history, data.login.user.firstName, data.login.user.lastName, data.login.user.isAdmin, data.login.user._id, data.login.user.changedPassword);
         }
         return (

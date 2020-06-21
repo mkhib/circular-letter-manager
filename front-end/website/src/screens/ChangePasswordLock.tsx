@@ -162,7 +162,6 @@ const ChangePasswordLock: React.FunctionComponent<ChangePasswordLockProps> = (pr
       });
       openSnackbar();
       sessionService.loadUser().then((user: any) => {
-        console.log('mokh', user);
         sessionService.saveUser({ ...user, changedPassword: true })
           .then(() => {
             props.history.push('/search-letter');
@@ -170,7 +169,6 @@ const ChangePasswordLock: React.FunctionComponent<ChangePasswordLockProps> = (pr
       })
     }}
     onError={(err: any) => {
-      console.log(err.message);
       setSnackOption({
         message: 'تغییر رمز عبور شما با مشکل مواجه شد',
         severity: 'error',

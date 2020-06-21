@@ -306,7 +306,6 @@ const SearchLetters = (props: any) => {
                 labelId="label"
                 onChange={(event: any) => {
                   setOrder(event.target.value);
-                  console.log(event.target.value)
                   doSearch();
                 }}
               >
@@ -336,7 +335,6 @@ const SearchLetters = (props: any) => {
                 labelId="label"
                 onChange={(event: any) => {
                   setSort(event.target.value);
-                  console.log(event.target.value)
                   doSearch();
                 }}
               >
