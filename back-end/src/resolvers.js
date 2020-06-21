@@ -37,6 +37,10 @@ export const resolvers = {
         users: async (parent, { information, page, limit }, context, info) => {
             isAuthenticated(context.req);
 
+            if (information == '' && page == 1) {
+                context.session.userSearch = null;
+            }
+
             let users = [];
             if (context.session.userSearch
                 && context.session.userSearchParam === information
