@@ -71,9 +71,6 @@ let acessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { 
 
 app.use(morgan('combined', { stream: acessLogStream }));
 
-existsSync(path.join(__dirname, "../images")) || mkdirSync(path.join(__dirname, "../images"));
-existsSync(path.join(__dirname, "../thumbnails")) || mkdirSync(path.join(__dirname, "../thumbnails"));
-
 const limiter = new RateLimit({
     store: new MongoDBStore({
         uri: dbUrl
@@ -85,16 +82,13 @@ const limiter = new RateLimit({
 
 app.use(limiter);
 
-app.use("/images", express.static(path.join(__dirname, "../images")));
-app.use("/thumbnails", express.static(path.join(__dirname, "../thumbnails")));
-
 app.use(cors({
     credentials: true,
-    origin: "http://localhost:3000"
+    origin: "https://bakhshnameyab.ir"
 }));
 
 app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
+    res.header("Access-Control-Allow-Origin", "https://bakhshnameyab.ir"); // update to match the domain you will make the request from
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
@@ -139,10 +133,16 @@ app.use((req, res, next) => {
     next();
 });
 
-// app.use(express.static(path.join(__dirname, 'build')));
-// app.get('*', (req, res) => {
-//     res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
-// });
+existsSync(path.join(__dirname, "../images")) || mkdirSync(path.join(__dirname, "../images"));
+existsSync(path.join(__dirname, "../thumbnails")) || mkdirSync(path.join(__dirname, "../thumbnails"));
+
+app.use("/images", express.static(path.join(__dirname, "../images")));
+app.use("/thumbnails", express.static(path.join(__dirname, "../thumbnails")));
+
+app.use(express.static(path.join(__dirname, 'build')));
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
+});
 
 SERVER.applyMiddleware({
     app,

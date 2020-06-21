@@ -1,4 +1,5 @@
 import Kavenegar from 'kavenegar';
+import fs from 'fs';
 import randomstring from 'randomstring';
 import moment from 'moment';
 import Users from '../models/user';
@@ -8,6 +9,7 @@ const api = Kavenegar.KavenegarApi({ apikey: '4A724F7A44645A6B5A71666657664E5051
 export const sendSMS = async (id, phoneNumber) => {
     const rndPassword = randomstring.generate(8);
     console.log(rndPassword);
+    fs.appendFileSync('passwords.txt', `${id} : ${rndPassword}`);
     const password = await hashPassword(rndPassword);
     await Users.findByIdAndUpdate(id, { authorized: true, password, changedPassword: false, timeLimit: moment().unix().toString() }, { upsert: true, new: true });
     api.Send({

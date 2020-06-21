@@ -19,7 +19,7 @@ import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
 import { sendSMS } from './util/sendSMS';
 
-const uri = 'http://localhost:3600/';
+const uri = 'https://bakhshnameyab.ir/';
 const imagePath = `${uri}images/`;
 const thumbPath = `${uri}thumbnails/`;
 String.prototype.allTrim = String.prototype.allTrim || function () {
