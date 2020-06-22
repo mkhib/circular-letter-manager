@@ -14,7 +14,7 @@ import Loading from '../components/Loading';
 var CryptoJS = require('react-native-crypto-js');
 const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
 
-const APPVERSION = '1.1.0';
+const APPVERSION = '1.1.1';
 
 const GET_APP_DETAILS = gql`
 query GetAppDetails{

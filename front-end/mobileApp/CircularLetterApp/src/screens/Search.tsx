@@ -85,7 +85,8 @@ const Search = () => {
   const [err, setErr] = useState(new Set());
   const [searchObject, setSearchObject] = useState<string>('');
   const [hasMore, setHasMore] = useState(true);
-  const { loading, error, data, fetchMore, refetch } = useQuery(SEARCH_QUERY, {
+  const { loading, error, data, fetchMore, refetch, networkStatus } = useQuery(SEARCH_QUERY, {
+    notifyOnNetworkStatusChange: true,
     variables: {
       information: searchObject,
       page: 1,
@@ -123,7 +124,7 @@ const Search = () => {
     }
   }
   const handleData = () => {
-    if (loading) {
+    if (loading && networkStatus !== 3) {
       return [];
     }
     if (data) {
@@ -134,6 +135,7 @@ const Search = () => {
     setPage(1);
     setHasMore(true);
   };
+  console.log('status', networkStatus);
   return (
     <>
       <ImageBackground
@@ -143,7 +145,10 @@ const Search = () => {
         <FlatList
           style={styles.flatListStyle}
           data={handleData()}
-
+          refreshing={networkStatus === 4}
+          onRefresh={() => {
+            refetch();
+          }}
           onEndReachedThreshold={4}
           keyboardShouldPersistTaps={'handled'}
           showsVerticalScrollIndicator={false}
@@ -313,7 +318,7 @@ const Search = () => {
             </View>
           }
         />
-        {loading && <View
+        {((loading && networkStatus === 1) || (loading && networkStatus === 4) || (loading && networkStatus === 2)) && <View
           style={styles.lottieView}
         >
           <LottieView
