@@ -318,7 +318,7 @@ const Search = () => {
             </View>
           }
         />
-        {((loading && networkStatus === 1) || (loading && networkStatus === 4)) && <View
+        {((loading && networkStatus === 1) || (loading && networkStatus === 4) || (loading && networkStatus === 2)) && <View
           style={styles.lottieView}
         >
           <LottieView

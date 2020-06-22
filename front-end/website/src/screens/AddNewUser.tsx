@@ -285,6 +285,7 @@ const ChangePassword: React.FunctionComponent<AddNewUserProps> = (props) => {
           abortEarly: false
         }).then(() => {
           props.setErrors([]);
+          setErrs([]);
           onCreateNewUser();
         }).catch((e: any) => {
           setErrs(e.inner);
