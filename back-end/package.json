@@ -1,7 +1,7 @@
 {
   "name": "express-test",
   "version": "1.0.0",
-  "main": "start.js",
+  "main": "src/start.js",
   "scripts": {
     "start": "nodemon ./src/start.js"
   },

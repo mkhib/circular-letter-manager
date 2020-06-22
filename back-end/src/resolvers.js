@@ -19,7 +19,7 @@ import SubjectedToType from './models/subjectedToType';
 import { isAuthenticated } from './util/isAuthenticated';
 import { sendSMS } from './util/sendSMS';
 
-const uri = 'http://localhost:3600/';
+const uri = 'https://bakhshnameyab.ir/';
 const imagePath = `${uri}images/`;
 const thumbPath = `${uri}thumbnails/`;
 String.prototype.allTrim = String.prototype.allTrim || function () {
@@ -36,6 +36,10 @@ export const resolvers = {
     Query: {
         users: async (parent, { information, page, limit }, context, info) => {
             isAuthenticated(context.req);
+
+            if (information == '' && page == 1) {
+                context.session.userSearch = null;
+            }
 
             let users = [];
             if (context.session.userSearch
