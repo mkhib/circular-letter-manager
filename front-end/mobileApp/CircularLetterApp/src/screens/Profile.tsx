@@ -114,28 +114,26 @@ const Profile = () => {
       style={styles.imageBackground}
     >
       <View style={styles.mainContainer}>
-        <View style={styles.container}>
-          <Line title="نام: " style={styles.lineFlex} value={data?.user.firstName} />
-          <Line title="نام‌خانوادگی: " style={styles.lineFlex} value={data?.user.lastName} />
-          <Line title="شماره پرسنلی: " value={data?.user.personelNumber} />
-          <Line title="کدملی: " value={data?.user.identificationNumber} />
-          <Line title="شماره تلفن: " value={data?.user.phoneNumber} />
-          <TouchableOpacity
-            onPress={() => {
-              Actions.changePassword();
-            }}
-            style={styles.buttonStyle}>
-            <Text style={styles.textStyle}>تغییر رمزعبور</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.logoutButtonStyle}
-            onPress={() => {
-              logout();
-            }}
-          >
-            <Text style={styles.textStyle}>خروج از حساب کاربری</Text>
-          </TouchableOpacity>
-        </View>
+        <Line title="نام: " style={styles.lineFlex} value={data?.user.firstName} />
+        <Line title="نام‌خانوادگی: " style={styles.lineFlex} value={data?.user.lastName} />
+        <Line title="شماره پرسنلی: " value={data?.user.personelNumber} />
+        <Line title="کدملی: " value={data?.user.identificationNumber} />
+        <Line title="شماره تلفن: " value={data?.user.phoneNumber} />
+        <TouchableOpacity
+          onPress={() => {
+            Actions.changePassword();
+          }}
+          style={styles.buttonStyle}>
+          <Text style={styles.textStyle}>تغییر رمزعبور</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.logoutButtonStyle}
+          onPress={() => {
+            logout();
+          }}
+        >
+          <Text style={styles.textStyle}>خروج از حساب کاربری</Text>
+        </TouchableOpacity>
       </View>
       {logoutLoading &&
         <Loading />}
@@ -151,14 +149,13 @@ const styles = StyleSheet.create({
   },
   lineContainer: {
     flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: colors.indigo,
-    borderRadius: 10,
+    backgroundColor: 'white',
+    borderRadius: 7,
     justifyContent: 'flex-start',
     alignContent: 'center',
     padding: shape.spacing(),
     marginBottom: shape.spacing(),
-    width: 230,
+    width: 250,
   },
   tryAgainText: {
     ...gStyles.normalText,
@@ -181,15 +178,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: shape.spacing(),
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 30,
-    borderWidth: 1,
-    width: '100%',
-    borderColor: colors.blue,
-    paddingVertical: shape.spacing(5),
   },
   textStyle: {
     ...gStyles.normalText,

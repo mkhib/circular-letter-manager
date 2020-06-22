@@ -4,6 +4,7 @@ import {
   View,
   StyleSheet,
   BackHandler,
+  StatusBar,
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -99,6 +100,7 @@ const App = () => {
   };
   return (
     <ApolloProvider client={client}>
+      <StatusBar hidden />
       <Router
         backAndroidHandler={() => { return Actions.pop(); }}
       >

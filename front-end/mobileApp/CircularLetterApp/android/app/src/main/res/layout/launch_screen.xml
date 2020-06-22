@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <ImageView 
-      android:layout_width="match_parent"
-      android:layout_height="match_parent" 
-      android:src="@drawable/launch_screen"
-      android:scaleType="centerCrop" />
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#2196F3"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="381dp"
+        android:layout_height="87dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="58dp"
+        android:text="سامانه جست و جو بخشنامه ها"
+        android:textSize="30sp" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="353dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="182dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/fore2" />
+
 </RelativeLayout>

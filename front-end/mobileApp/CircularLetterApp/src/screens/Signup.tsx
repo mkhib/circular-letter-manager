@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Keyboard } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Keyboard, StatusBar } from 'react-native';
 import { gql } from 'apollo-boost';
 import * as yup from 'yup';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -101,8 +101,8 @@ const Signup = () => {
     if (name && lastName && identificationNumber && phoneNumber && username) {
       return false;
     } return true;
-  }
-  const [userSignUp, { data, loading, error }] = useMutation(SIGNUP, {
+  };
+  const [userSignUp, { loading }] = useMutation(SIGNUP, {
     onCompleted: () => {
       setSuccessState({
         message: 'مشخصات شما با موفقیت ثبت شد و پس از تایید آن توسط مدیر سیستم رمزعبور برای شما پیامک خواهد شد.',
