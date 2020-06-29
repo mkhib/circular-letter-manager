@@ -62,6 +62,7 @@ const useStyles = makeStyles(theme => ({
 const GET_APP_DETAILS = gql`
 query GetAppDetails{
   appDetails{
+    versionToShow
     version
     link
   }
@@ -136,7 +137,7 @@ const DownloadApp: React.FC<ManageUsersProps> = (props) => {
               fontFamily: 'FontNormalFD',
               fontSize: 20,
             }}>
-            دانلود نسخه {data.appDetails.version}
+            دانلود نسخه {data.appDetails.versionToShow}
           </Box>
         </Button>
       </Box>
