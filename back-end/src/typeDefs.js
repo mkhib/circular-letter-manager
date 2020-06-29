@@ -142,6 +142,7 @@ export const typeDefs = gql`
 
     type AppOutput {
         version: Int!
+        versionToShow: String!
         link: String!
     }
 
