@@ -150,6 +150,7 @@ const Search = () => {
           refreshing={networkStatus === 4}
           onRefresh={() => {
             refetch();
+            handleResetPage();
           }}
           onEndReachedThreshold={4}
           keyboardShouldPersistTaps={'handled'}

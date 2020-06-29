@@ -83,7 +83,9 @@ const ProfileIcon = ({ focused }: any) => {
 
 const App = () => {
   useEffect(() => {
-    SplashScreen.hide();
+    setTimeout(() => {
+      SplashScreen.hide();
+    }, 1500);
     BackHandler.addEventListener('hardwareBackPress', backAction);
     return () =>
       BackHandler.removeEventListener('hardwareBackPress', backAction);
