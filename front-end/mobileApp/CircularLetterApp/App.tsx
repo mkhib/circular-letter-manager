@@ -40,7 +40,7 @@ const getData = async () => {
       return value;
     }
   } catch (e) {
-    // error reading value
+    throw e;
   }
 };
 

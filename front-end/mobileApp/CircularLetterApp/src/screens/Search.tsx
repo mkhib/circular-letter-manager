@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, FlatList, ImageBackground, Keyboard } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { CheckBox } from 'react-native-elements';
 import { Actions } from 'react-native-router-flux';
 import LottieView from 'lottie-react-native';
@@ -81,6 +82,7 @@ const Search = () => {
   const [sort, setSort] = useState<string>('');
   const [order, setOrder] = useState<string>('');
   const [page, setPage] = useState<number>(1);
+  const flatListRef = useRef<FlatList>(null);
   const [fetchMoreLoading, setFetchMoreLoading] = useState<boolean>(true);
   const [err, setErr] = useState(new Set());
   const [searchObject, setSearchObject] = useState<string>('');
@@ -135,7 +137,6 @@ const Search = () => {
     setPage(1);
     setHasMore(true);
   };
-  console.log('status', networkStatus);
   return (
     <>
       <ImageBackground
@@ -145,6 +146,7 @@ const Search = () => {
         <FlatList
           style={styles.flatListStyle}
           data={handleData()}
+          ref={flatListRef}
           refreshing={networkStatus === 4}
           onRefresh={() => {
             refetch();
@@ -208,117 +210,115 @@ const Search = () => {
             );
           }}
           ListHeaderComponent={
-            <View>
-              <View style={styles.cardStyle}>
-                <View style={styles.serachView}>
-                  <TextInput
-                    value={searchValue}
-                    placeholder="جست و جو در بخشنامه‌ها"
-                    onChangeText={(text) => {
-                      handleResetPage();
-                      setSearchValue(text);
-                    }}
-                    returnKeyType="go"
-                    returnKeyLabel="go"
-                    onSubmitEditing={() => {
-                      handleResetPage();
-                      Keyboard.dismiss();
-                      setSearchObject(fixNumbers(searchValue));
-                    }}
-                    style={styles.searchInput}
+            <View style={styles.cardStyle}>
+              <View style={styles.serachView}>
+                <TextInput
+                  value={searchValue}
+                  placeholder="جست و جو در بخشنامه‌ها"
+                  onChangeText={(text) => {
+                    handleResetPage();
+                    setSearchValue(text);
+                  }}
+                  returnKeyType="go"
+                  returnKeyLabel="go"
+                  onSubmitEditing={() => {
+                    handleResetPage();
+                    Keyboard.dismiss();
+                    setSearchObject(fixNumbers(searchValue));
+                  }}
+                  style={styles.searchInput}
+                />
+                <TouchableOpacity
+                  onPress={() => {
+                    handleResetPage();
+                    Keyboard.dismiss();
+                    setSearchObject(fixNumbers(searchValue));
+                  }}
+                >
+                  <MaterialIcons
+                    name="search"
+                    size={shape.iconSize}
+                    style={styles.searchIcon}
                   />
-                  <TouchableOpacity
-                    onPress={() => {
-                      handleResetPage();
-                      Keyboard.dismiss();
-                      setSearchObject(fixNumbers(searchValue));
-                    }}
-                  >
-                    <MaterialIcons
-                      name="search"
-                      size={shape.iconSize}
-                      style={styles.searchIcon}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.pickersView}>
-                  <View style={StyleSheet.flatten([styles.gpickerFieldStyle, { marginRight: shape.spacing(0.25) }])}>
-                    <GPicker
-                      items={SORTS}
-                      withoutHelp
-                      selectedValue={sort}
-                      func={(label: string, value: string) => {
-                        setHasMore(true);
-                        setSort(value);
-                      }}
-                      placeholder="مرتب سازی بر اساس"
-                      errors={err}
-                    />
-                  </View>
-                  <View style={StyleSheet.flatten([styles.gpickerFieldStyle, { marginLeft: shape.spacing(0.25) }])}>
-                    <GPicker
-                      items={ORDERS}
-                      withoutHelp
-                      selectedValue={order}
-                      func={(label: string, value: string) => {
-                        setHasMore(true);
-                        setOrder(value);
-                      }}
-                      placeholder="نوع مرتب سازی"
-                      errors={err}
-                    />
-                  </View>
-                </View>
-                <View style={styles.checkBoxContainer}>
-                  <CheckBox
-                    iconRight
-                    checkedColor="black"
-                    onPress={() => {
-                      setDateCheck(!dateCheck);
-                      setToDateToSend('');
-                      setToDateToShow('');
-                      setFromDateToSend('');
-                      setFromDateToShow('');
-                    }}
-                    checked={dateCheck}
-                  />
-                  <Text style={styles.searchInDateText}>
-                    جست و جو در بازه تاریخ
-                  </Text>
-                </View>
-                {dateCheck && <View style={styles.dateContainer}>
-                  <View style={styles.dateView}>
-                    <DatePicker
-                      label="از تاریخ"
-                      selectedValue={fromDateToShow}
-                      onSelect={(date: any) => {
-                        let m = moment(date);
-                        m.locale('fa');
-                        setFromDateToShow(date);
-                        setFromDateToSend(m.format('jYYYY/jMM/jDD'));
-                      }
-                      }
-                    />
-                  </View>
-                  <View style={styles.dateView}>
-                    <DatePicker
-                      label="تا تاریخ"
-                      selectedValue={toDateToShow}
-                      onSelect={(date: any) => {
-                        let m = moment(date);
-                        m.locale('fa');
-                        setToDateToShow(date);
-                        setToDateToSend(m.format('jYYYY/jMM/jDD'));
-                      }
-                      }
-                    />
-                  </View>
-                </View>}
+                </TouchableOpacity>
               </View>
+              <View style={styles.pickersView}>
+                <View style={StyleSheet.flatten([styles.gpickerFieldStyle, { marginRight: shape.spacing(0.25) }])}>
+                  <GPicker
+                    items={SORTS}
+                    withoutHelp
+                    selectedValue={sort}
+                    func={(label: string, value: string) => {
+                      setHasMore(true);
+                      setSort(value);
+                    }}
+                    placeholder="مرتب سازی بر اساس"
+                    errors={err}
+                  />
+                </View>
+                <View style={StyleSheet.flatten([styles.gpickerFieldStyle, { marginLeft: shape.spacing(0.25) }])}>
+                  <GPicker
+                    items={ORDERS}
+                    withoutHelp
+                    selectedValue={order}
+                    func={(label: string, value: string) => {
+                      setHasMore(true);
+                      setOrder(value);
+                    }}
+                    placeholder="نوع مرتب سازی"
+                    errors={err}
+                  />
+                </View>
+              </View>
+              <View style={styles.checkBoxContainer}>
+                <CheckBox
+                  iconRight
+                  checkedColor="black"
+                  onPress={() => {
+                    setDateCheck(!dateCheck);
+                    setToDateToSend('');
+                    setToDateToShow('');
+                    setFromDateToSend('');
+                    setFromDateToShow('');
+                  }}
+                  checked={dateCheck}
+                />
+                <Text style={styles.searchInDateText}>
+                  جست و جو در بازه تاریخ
+                  </Text>
+              </View>
+              {dateCheck && <View style={styles.dateContainer}>
+                <View style={styles.dateView}>
+                  <DatePicker
+                    label="از تاریخ"
+                    selectedValue={fromDateToShow}
+                    onSelect={(date: any) => {
+                      let m = moment(date);
+                      m.locale('fa');
+                      setFromDateToShow(date);
+                      setFromDateToSend(m.format('jYYYY/jMM/jDD'));
+                    }
+                    }
+                  />
+                </View>
+                <View style={styles.dateView}>
+                  <DatePicker
+                    label="تا تاریخ"
+                    selectedValue={toDateToShow}
+                    onSelect={(date: any) => {
+                      let m = moment(date);
+                      m.locale('fa');
+                      setToDateToShow(date);
+                      setToDateToSend(m.format('jYYYY/jMM/jDD'));
+                    }
+                    }
+                  />
+                </View>
+              </View>}
             </View>
           }
         />
-        {((loading && networkStatus === 1) || (loading && networkStatus === 4) || (loading && networkStatus === 2)) && <View
+        {((loading && networkStatus === 1) || (loading && networkStatus === 4) || (loading && networkStatus === 2)) ? <View
           style={styles.lottieView}
         >
           <LottieView
@@ -326,7 +326,17 @@ const Search = () => {
             autoPlay
             loop
           />
-        </View>}
+        </View> : <TouchableOpacity
+          onPress={() => {
+            flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+          }}
+          style={styles.goTopView}>
+            <MaterialCommunityIcons
+              color="#303030"
+              name="arrow-up-bold"
+              size={shape.iconSize}
+            />
+          </TouchableOpacity>}
       </ImageBackground>
     </>
   );
@@ -337,6 +347,15 @@ export default Search;
 const styles = StyleSheet.create({
   imageBackground: {
     flex: 1,
+  },
+  goTopView: {
+    position: 'absolute',
+    bottom: 15,
+    right: 15,
+    borderWidth: 1,
+    borderColor: '#454545',
+    borderRadius: shape.borderRadius,
+    backgroundColor: 'rgba(207, 207, 207, 0.6)',
   },
   lottieView: {
     flex: 1,

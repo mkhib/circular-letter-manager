@@ -438,9 +438,6 @@ const UploadCircularLetter = (props: any) => {
     }
   }
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
   const handleNumber = (numberToProcess: string) => {
     if (numberToProcess) {
       const numberToShow: Array<any> = [];

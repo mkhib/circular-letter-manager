@@ -713,7 +713,7 @@ const EditCircularLetter = (props: any) => {
             props.removeFilesName(fileToDelete.name);
             props.removeFileUploadStatus(fileToDelete.index);
           }}
-          onError={(e:any) => {
+          onError={(e: any) => {
             openDeleteFileFailure();
           }}
         >
@@ -1232,16 +1232,19 @@ const EditCircularLetter = (props: any) => {
                                       </Alert>
                                     </Snackbar>
                                     <Box
-                                      border={1}
+                                      // border={1}
                                       borderRadius={7}
-                                      borderColor="#00bcd4"
+                                      // borderColor="#00bcd4"
                                       style={{
                                         display: 'flex',
-                                        minWidth: 400,
+                                        minWidth: 250,
+                                        // maxWidth: 400,
+                                        padding: 20,
+                                        paddingLeft: 40,
+                                        paddingRight: 40,
                                         flexDirection: 'column',
                                         alignItems: 'flex-end',
                                         justifyContent: 'center',
-                                        padding: 30,
                                         marginBottom: 10,
                                       }}>
                                       <Box className={classes.checkInfoBox}>

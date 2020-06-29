@@ -14,7 +14,7 @@ import Loading from '../components/Loading';
 var CryptoJS = require('react-native-crypto-js');
 const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
 
-const APPVERSION = '1.1.1';
+const APPVERSION = 1;
 
 const GET_APP_DETAILS = gql`
 query GetAppDetails{
@@ -69,7 +69,7 @@ const storeData = async (value: string) => {
   try {
     await AsyncStorage.setItem('tok', value);
   } catch (e) {
-    // saving error
+    throw e;
   }
 };
 
@@ -78,8 +78,9 @@ const Login = () => {
   const [password, setPassword] = useState<string>('');
   const { data: appVersionData } = useQuery(GET_APP_DETAILS);
   if (appVersionData) {
-    if (appVersionData.appDetails.version !== APPVERSION) {
-      Actions.lock({ link: appVersionData.appDetails.link });
+    console.log(appVersionData);
+    if (appVersionData.appDetails.version > APPVERSION) {
+      setTimeout(() => Actions.lock({ link: appVersionData.appDetails.link }), 0);
     }
   }
   const [login, { data, loading, error }] = useMutation(LOGIN);
