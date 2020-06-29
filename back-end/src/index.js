@@ -1,7 +1,6 @@
 import '@babel/polyfill/noConflict';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
-import moesif from 'moesif-express';
 import mongoose from 'mongoose';
 import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
@@ -14,7 +13,6 @@ import { verify } from 'jsonwebtoken';
 import uuid from 'uuid';
 import helmet from 'helmet';
 import RateLimit from 'express-rate-limit';
-import MongoDBStore from 'rate-limit-mongo';
 import morgan from 'morgan';
 import fs from 'fs';
 import { typeDefs } from './typeDefs';
@@ -28,7 +26,7 @@ const app = express();
 
 const endpoint = `http://localhost:3600/graphql`;
 
-let dbUrl = 'mongodb://bakhshna_Javadeb:PageNum7515@localhost:27017/bakhshna_letters';
+let dbUrl = 'mongodb://localhost:27017/letters';
 mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
 mongoose.Promise = global.Promise;
 let db = mongoose.connection;
@@ -55,26 +53,11 @@ const SERVER = new ApolloServer({
         })
 });
 
-/*let moesifMiddleware = moesif({
-    applicationId: 'eyJhcHAiOiIzNDU6NjUzIiwidmVyIjoiMi4wIiwib3JnIjoiODc6MjM0IiwiaWF0IjoxNTkwNTM3NjAwfQ.LJfUFN2RtgjCMcnznKf6Mn6dep0JNq3yMZj-l_WOm7M',
-
-    // Set to false if you don't want to capture req/resp body
-    logBody: true,
-
-    // Optional hook to link API calls to users
-    identifyUser: function (req, res) {
-        return req.user ? req.user.id : undefined;
-    },
-});*/
-
 let acessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 
 app.use(morgan('combined', { stream: acessLogStream }));
 
 const limiter = new RateLimit({
-    store: new MongoDBStore({
-        uri: dbUrl
-    }),
     windowMs: 10 * 60 * 1000, // 10 minutes
     max: 1000, // limit each IP to 1000 requests per windowMs
     message: "Too many requests"
@@ -84,11 +67,11 @@ app.use(limiter);
 
 app.use(cors({
     credentials: true,
-    origin: "https://bakhshnameyab.ir"
+    origin: "http://localhost:3000"
 }));
 
 app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "https://bakhshnameyab.ir"); // update to match the domain you will make the request from
+    res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
@@ -121,8 +104,6 @@ app.use(
     })
 );
 
-// app.use(moesifMiddleware);
-
 app.use((req, res, next) => {
     const token = req.cookies["prpss"];
     try {
@@ -139,10 +120,10 @@ existsSync(path.join(__dirname, "../thumbnails")) || mkdirSync(path.join(__dirna
 app.use("/images", express.static(path.join(__dirname, "../images")));
 app.use("/thumbnails", express.static(path.join(__dirname, "../thumbnails")));
 
-app.use(express.static(path.join(__dirname, 'build')));
-app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
-});
+// app.use(express.static(path.join(__dirname, 'build')));
+// app.get('*', (req, res) => {
+//     res.sendFile(path.resolve(__dirname, 'build', 'index.html'))
+// });
 
 SERVER.applyMiddleware({
     app,
