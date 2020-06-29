@@ -17,7 +17,7 @@ import App from './App';
 
 
 const uploadLink = createUploadLink({
-  uri: "https://94dbd736a030.ngrok.io/graphql",
+  uri: "https://bakhshnameyab.ir/graphql",
   credentials: 'include'
 });
 
