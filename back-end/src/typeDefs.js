@@ -141,7 +141,7 @@ export const typeDefs = gql`
     }
 
     type AppOutput {
-        version: String!
+        version: Int!
         link: String!
     }
 
