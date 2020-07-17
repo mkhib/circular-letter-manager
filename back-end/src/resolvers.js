@@ -423,6 +423,7 @@ export const resolvers = {
         appDetails: async (parent, args, context, info) => {
             return {
                 version: 1,
+                versionToShow: '1.1.1',
                 link: 'https://example.com/downloads/CircularLetterSearch-1.1.1.apk'
             }
         },
