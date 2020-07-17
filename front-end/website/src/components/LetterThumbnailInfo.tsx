@@ -48,7 +48,10 @@ const handleNumber = (numberToProcess: string) => {
     });
   }
 }
-
+const handleDate = (date: string) => {
+  const dateAsArray = date.split('-');
+  return `${dateAsArray[0]}/${dateAsArray[1]}/${dateAsArray[2]}`;
+}
 const LetterThumbnailInfo = ({ title, date, files, from, id, number }: any) => {
   const classes = useStyles();
   return (
@@ -75,7 +78,7 @@ const LetterThumbnailInfo = ({ title, date, files, from, id, number }: any) => {
           </Box>
         </Box>
         <Box>
-          تاریخ : {date}
+          تاریخ : {handleDate(date)}
         </Box>
         <Box style={{
           display: 'flex',

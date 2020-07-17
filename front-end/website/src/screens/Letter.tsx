@@ -130,6 +130,11 @@ const MyPaginator = withStyles((theme: Theme) => ({
 function useQueryParam() {
   return new URLSearchParams(useLocation().search);
 }
+const handleDate = (date: string) => {
+  const dateAsArray = date.split('-');
+  return `${dateAsArray[0]}/${dateAsArray[1]}/${dateAsArray[2]}`;
+}
+
 const RESPONSIVE_WIDTH = 950;
 const Letter = (props: any) => {
   const classes = useStyles();
@@ -302,7 +307,7 @@ const Letter = (props: any) => {
                 }}>
                   {queryData.title}
                 </Typography>
-              :عنوان
+                  :عنوان
               </Box>
               <Box className={classes.line}>
                 <Box style={{ marginRight: 5, display: 'flex', flexDirection: 'row' }}>
@@ -311,7 +316,7 @@ const Letter = (props: any) => {
                   :شماره
                 </Box>
               <Box className={classes.detailBox}>
-                {queryData.date} :تاریخ
+                {handleDate(queryData.date)} :تاریخ
                 </Box>
               <Box className={classes.detailBox}
                 style={{
