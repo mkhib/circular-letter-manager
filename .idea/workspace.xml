@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="64963004-335a-4f70-9b7d-d9718e3900c6" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/front-end/mobileApp/CircularLetterApp/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/mobileApp/CircularLetterApp/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/mobileApp/CircularLetterApp/src/assets/images/profile.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/mobileApp/CircularLetterApp/src/assets/images/profile.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/mobileApp/CircularLetterApp/src/screens/Profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/mobileApp/CircularLetterApp/src/screens/Profile.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/mobileApp/CircularLetterApp/src/screens/Search.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/mobileApp/CircularLetterApp/src/screens/Search.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/mobileApp/CircularLetterApp/src/screens/Signup.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/mobileApp/CircularLetterApp/src/screens/Signup.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front-end/website/src/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/front-end/website/src/index.tsx" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1dfXOYmk3m2OnEaV0B2oDq2B7oi" />
+  <component name="PropertiesComponent">
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/front-end/mobileApp/CircularLetterApp/android" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="64963004-335a-4f70-9b7d-d9718e3900c6" name="Default Changelist" comment="" />
+      <created>1592817089673</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1592817089673</updated>
+    </task>
+    <servers />
+  </component>
+</project>

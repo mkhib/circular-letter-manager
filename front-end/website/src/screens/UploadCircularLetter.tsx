@@ -14,8 +14,10 @@ import {
   addFileUpload,
   setFileUpload,
   setErrors,
+  setFileLoading,
   setListOfCategories,
   setListOfSubjects,
+  fileStatusType,
 } from '../redux/slices/data';
 import * as yup from 'yup';
 import Box from '@material-ui/core/Box';
@@ -33,15 +35,13 @@ import { MenuItem, InputLabel } from '@material-ui/core';
 import Stepper from '../components/Stepper';
 import DatePickerFarsi from '../components/DatePickerFarsi';
 import Backdrop from '@material-ui/core/Backdrop';
-import Modal from '@material-ui/core/Modal';
-import Fade from '@material-ui/core/Fade';
 import { GET_ALL } from './EditSubjectsAndCategories';
 import { useQuery } from '@apollo/react-hooks';
 import CircularProgress from '@material-ui/core/CircularProgress';
-
-// const clientWidth = () => {
-//   return Math.max(window.innerWidth, document.documentElement.clientWidth) < RESPONSIVE_WIDTH ? 'column' : 'row';
-// };
+import circularBack from '../assets/images/circularBack.jpg';
+import {
+  Redirect,
+} from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
   titleDiv: {
@@ -50,7 +50,6 @@ const useStyles = makeStyles(theme => ({
     fontFamily: 'FontNormalFD',
   },
   fieldTopBox: {
-    // flex: 1,
     display: 'flex',
     padding: 40,
     paddingRight: '10vmax',
@@ -101,14 +100,12 @@ const useStyles = makeStyles(theme => ({
   },
   menuItem: {
     fontFamily: 'FontNormal',
-    // fontSize: '2.1vmin',
     direction: 'ltr',
   },
   renderTagsBox: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    // alignSelf: 'center',
     width: '100%',
     flexWrap: 'wrap',
     marginRight: 103,
@@ -119,12 +116,10 @@ const useStyles = makeStyles(theme => ({
   select: {
     width: '100%',
     fontFamily: 'FontNormal',
-    // fontSize: '2.1vmin',
     marginBottom: 10,
   },
   leftSelect: {
     fontFamily: 'FontNormal',
-    // fontSize: '2vmin',
     width: '100%',
     marginBottom: 10,
   },
@@ -228,7 +223,10 @@ const handleTags = (tags: Array<string>) => {
 const toolTipText = `
 برای جست و جو در بخشنامه‌ها از این کلمات کلیدی استفاده خواهد شد بعد از وارد کردن هر کلمه بر روی افزودن کلیک کنید
 `;
-const RESPONSIVE_WIDTH = 800;
+const numberToolTip = `
+اگر شماره بخشنامه شامل حروف فارسی همراه با ممیز است، شماره به صورت عکس مشاهده می‌شود، اما در ثبت شماره به صورت صحیح خللی وارد نمی‌کند
+`;
+const RESPONSIVE_WIDTH = 950;
 const UPLOAD_CIRCULAR_LETTER = gql`
 mutation UploadCircular(
  $title:String!,
@@ -300,6 +298,7 @@ const UploadCircularLetter = (props: any) => {
     exportNumber,
     tags,
     importNumber,
+    setFileLoading,
     numberOfFiles,
     refrenceCircularID,
     setAnyThing,
@@ -313,25 +312,38 @@ const UploadCircularLetter = (props: any) => {
   const [open, setOpen] = React.useState(false);
   const [width, setWidth] = useState(window.innerWidth);
   const [height, setHeight] = useState(window.innerHeight);
-  const [disabledButton, setDisabledButton] = useState(true);
+  const [disabledButton, setDisabledButton] = useState(false);
+  const [lastStepMessage, setLastStepMessage] = useState('');
   const { loading, error, data } = useQuery(GET_ALL);
   useEffect(() => {
     if (data) {
-      console.log(data);
       setListOfCategories(data.categoriesQuery.toCategories);
       setListOfSubjects(data.categoriesQuery.subjectedTos);
-      setAnyThing({
-        theThing: 'subjectedTo',
-        data: data.categoriesQuery.subjectedTos[0].name,
-      });
-      setAnyThing({
-        theThing: 'toCategory',
-        data: data.categoriesQuery.toCategories[0].name,
-      });
+      if (data.categoriesQuery.subjectedTos.length > 0) {
+        setAnyThing({
+          theThing: 'subjectedTo',
+          data: data.categoriesQuery.subjectedTos[0].name,
+        });
+      }
+      if (data.categoriesQuery.toCategories.length > 0) {
+        setAnyThing({
+          theThing: 'toCategory',
+          data: data.categoriesQuery.toCategories[0].name,
+        });
+      }
     }
     window.addEventListener("resize", updateWidthAndHeight);
     return () => window.removeEventListener("resize", updateWidthAndHeight);
   }, [data, setListOfCategories, setListOfSubjects, setAnyThing]);
+
+  if (error) {
+    if (error.message === 'GraphQL error: Authentication required') {
+      return (<Redirect to={{
+        pathname: '/login',
+      }} />)
+    }
+    return `Error! ${error}`;
+  }
   const renderTags = (tags: Array<string>) => {
     return tags.map((tag, index) => {
       return (
@@ -347,6 +359,16 @@ const UploadCircularLetter = (props: any) => {
     })
   };
 
+  const handleBackDisable = () => {
+    let disabled = false;
+    uploadFilesStatus.forEach((fileStatus: fileStatusType) => {
+      if (fileStatus.loading) {
+        disabled = true;
+      }
+    });
+    return disabled;
+  }
+
   const handleUploadFiles = (no: number, addFile: any) => {
     const upload = [];
     for (let i = 0; i < no; i++) {
@@ -355,27 +377,35 @@ const UploadCircularLetter = (props: any) => {
           style={{ marginTop: 40 }}
           key={i.toString()}>
           <UploadOneFile
+            getLoading={(loading: boolean) => {
+              setFileLoading({
+                index: i,
+                loading: loading,
+              });
+            }}
             file={uploadFilesStatus[i]}
+            imageStyle={{
+              height: 256,
+              width: 192,
+            }}
             onDeleteFile={(name: string) => {
               removeFile(name);
               setFileUpload({
                 index: i,
                 status: false,
                 link: '',
+                loading: false,
               });
             }}
             onCompleted={(data: any) => {
-              console.log('linkam', data.uploadFile.filePath)
               setFileUpload({
                 index: i,
                 status: true,
+                loading: false,
                 link: data.uploadFile.filePath,
                 name: data.uploadFile.filename,
               });
               addFile(data.uploadFile.filename);
-            }}
-            getFileName={(name: string) => {
-              console.log(name);
             }}
           />
         </Box>
@@ -396,33 +426,7 @@ const UploadCircularLetter = (props: any) => {
     return hasError;
   }
 
-  const validateDetails = () => {
-    schema.validate({
-      title,
-      date,
-      number,
-      type,
-      sender,
-      toCategory,
-      subjectedTo,
-      exportNumber,
-      tags,
-      importNumber,
-      numberOfFiles,
-      refrenceCircularID,
-    }, {
-      abortEarly: false,
-    }).then(() => {
-      props.setErrors([]);
-      setDisabledButton(false);
-    }).catch(e => {
-      props.setErrors(e.inner);
-      setDisabledButton(true);
-    });
-  }
-
   const handleDisabled = () => {
-    console.log('actt', activeStep);
     if (activeStep === 0) {
       if (!(title && date && number && type && sender && toCategory && subjectedTo && tags.length > 0)) {
         return true;
@@ -434,10 +438,34 @@ const UploadCircularLetter = (props: any) => {
     }
   }
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
+  const handleNumber = (numberToProcess: string) => {
+    if (numberToProcess) {
+      const numberToShow: Array<any> = [];
+      const numberParts = numberToProcess.split('/');
+      numberParts.forEach((part: string, index: number) => {
+        numberToShow.push(
+          <Box
+            key={index.toString()}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
+            {index !== 0 && <Box>
+              /
+            </Box>}
+            <Box>
+              {part}
+            </Box>
+          </Box>
+        );
+      });
+      return numberToShow.map((number: any) => {
+        return number;
+      });
+    }
+  }
   const handleClose = () => {
     setOpen(false);
   };
@@ -462,27 +490,38 @@ const UploadCircularLetter = (props: any) => {
   return (
     <Mutation mutation={DELETE_MULTI_FILES}>
       {(deleteMultiFiles: any, { data, loading }: any) => {
-        let deleteData = data;
         return (
-          <Mutation mutation={UPLOAD_CIRCULAR_LETTER}>
+          <Mutation mutation={UPLOAD_CIRCULAR_LETTER}
+            onCompleted={() => {
+              setLastStepMessage('بخشنامه با موفقیت به ثبت رسید.');
+            }}
+            onError={(error: any) => {
+              if (error.message === 'GraphQL error: Number is taken!') {
+                setLastStepMessage('این شماره بخشنامه قبلا ثبت شده است');
+              } else {
+                setLastStepMessage('در ثبت بخشنامه خطایی رخ داده است لطفا دوباره تلاش کنید.');
+              }
+            }}
+          >
             {(circularLetterInit: any, { data, loading }: any) => {
-              console.log('joovab', data);
-              console.log('acttt', activeStep);
+              if (loading) {
+                setLastStepMessage('در حال ثبت بخشنامه...');
+              }
               return (
                 <Box style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  // backgroundColor:'blue',
-                  // maxWidth:'50vmax',
+                  backgroundImage: `url(${circularBack})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '100vmax',
+                  backgroundAttachment: 'fixed',
                 }}>
                   <Stepper
                     disabled={handleDisabled()}
+                    backDisabled={handleBackDisable()}
+                    customLastStep={lastStepMessage}
                     onNext={(e: any) => {
-                      console.log('eeee', e);
-                      // if (e === 0) {
-                      //   validateDetails();
-                      // }
                       if (e === 2) {
                         circularLetterInit({
                           variables: {
@@ -502,19 +541,12 @@ const UploadCircularLetter = (props: any) => {
                       }
                     }}
                     getNextStep={(activeStep: number) => {
-                      // if (activeStep - 1 === 0) {
-                      //   // validateDetails();
-                      // } else {
                       setActiveStep(activeStep);
-                      // }
                     }}
                     getPreviousStep={(activeStep: number) => {
                       setActiveStep(activeStep);
                     }}
                   >
-                    {/* <div className={classes.titleDiv}>
-          .مشخصات بخشنامه را وارد نمایید
-          </div> */}
                     {
                       activeStep === 0 && (
                         <Box className={classes.fieldTopBox}
@@ -526,7 +558,6 @@ const UploadCircularLetter = (props: any) => {
                           <Box className={classes.tagsTopBoxField}>
                             <Button
                               variant="contained"
-                              // onClick={handleOpen}
                               href="/editDropDowns"
                               style={{
                                 paddingRight: 50,
@@ -534,11 +565,41 @@ const UploadCircularLetter = (props: any) => {
                                 fontFamily: 'FontNormal',
                                 marginTop: 25,
                                 marginBottom: 20,
-                                alignSelf: 'center',
+                                alignSelf: width <= RESPONSIVE_WIDTH ? 'center' : '',
                               }}
                             >
                               مدیریت مقاطع و حوزه‌ها
                             </Button>
+                            <Box style={{
+                              display: 'flex',
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              alignSelf: width <= RESPONSIVE_WIDTH ? 'center' : '',
+                            }}>
+                              <Tooltip
+                                arrow
+                                className={classes.tipTool}
+                                leaveDelay={400}
+                                title={
+                                  <div className={classes.tipToolText}>
+                                    {numberToolTip}
+                                  </div>
+                                }
+                              >
+                                <InfoOutlinedIcon />
+                              </Tooltip>
+                              <TextInput
+                                id="number"
+                                error={errorCheck('number')}
+                                value={number}
+                                label="شماره بخشنامه"
+                                lang={'fa'}
+                                onChange={(event: any) => setAnyThing({
+                                  theThing: 'number',
+                                  data: event.target.value
+                                })}
+                              />
+                            </Box>
                             <InputLabel className={classes.selectTopInputLabel} id="to">
                               :کلمات کلیدی
                             </InputLabel>
@@ -571,6 +632,7 @@ const UploadCircularLetter = (props: any) => {
                               <TextInput
                                 id="tags"
                                 label="تگ‌ها"
+                                style={{ width: 213 }}
                                 value={tempTag}
                                 onChange={(event: any) => {
                                   setTempTag(event.target.value);
@@ -726,17 +788,6 @@ const UploadCircularLetter = (props: any) => {
                                 data: event.target.value
                               })}
                             />
-                            <TextInput
-                              id="number"
-                              error={errorCheck('number')}
-                              value={number}
-                              label="شماره"
-                              lang={'fa'}
-                              onChange={(event: any) => setAnyThing({
-                                theThing: 'number',
-                                data: event.target.value
-                              })}
-                            />
                             <InputLabel className={classes.selectTopInputLabel} id="to">
                               :تاریخ
                             </InputLabel>
@@ -797,11 +848,10 @@ const UploadCircularLetter = (props: any) => {
                         <Box style={{
                           display: 'flex',
                           flexDirection: 'row',
-                          // width: '100%',
                           flexWrap: 'wrap',
+                          marginBottom: 150,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          // backgroundColor: 'yellow',
                         }}>
                           {handleUploadFiles(numberOfFiles, addFile)}
                         </Box>
@@ -809,35 +859,139 @@ const UploadCircularLetter = (props: any) => {
                     }
                     {
                       activeStep === 2 && (
-                        <React.Fragment>
-                          <Box className={classes.checkInfoBox}>
-                            عنوان: {title}
+                        <Box style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          justifyContent: 'center',
+                        }}>
+                          <Box
+                            // border={1}
+                            borderRadius={7}
+                            borderColor="#ff9800"
+                            // borderColor="#00bcd4"
+                            style={{
+                              display: 'flex',
+                              minWidth: 250,
+                              // maxWidth: 400,
+                              padding: 20,
+                              paddingLeft: 40,
+                              paddingRight: 40,
+                              flexDirection: 'column',
+                              alignItems: 'flex-end',
+                              justifyContent: 'center',
+                              marginBottom: 10,
+                            }}>
+                            <Box className={classes.checkInfoBox}>
+                              <Box style={{
+                                display: 'flex',
+                                flexDirection: 'row-reverse',
+                                alignItems: 'flex-start',
+                                justifyContent: 'flex-start',
+                              }}>
+                                :عنوان
+                                <Box
+                                  style={{
+                                    marginRight: 5,
+                                  }}
+                                >
+                                  {title}{' '}
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              <Box style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}>
+                                {handleNumber(number)}
+                                <Box style={{ marginLeft: 5, }}>
+                                  :
+                                </Box>
+                                <Box>
+                                  شماره
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              تاریخ: {date}
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              <Box style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}>
+                                {sender}
+                                <Box style={{
+                                  marginLeft: 5
+                                }}>
+                                  :
+                                </Box>
+                                <Box>
+                                  صادرکننده
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              مرتبط با مقطع: {toCategory}
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              <Box style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}>
+                                {type === 'imported' ? importNumber : exportNumber}
+                                {(!importNumber && !exportNumber) && 'ندارد'}
+                                <Box style={{
+                                  marginLeft: 5
+                                }}>
+                                  :
+                                </Box>
+                                <Box>
+                                  {type === 'imported' ? "شماره ثبت وارده" : "شماره ثبت صادره"}
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Box className={classes.checkInfoBox}>
+                              حوزه مربوطه: {subjectedTo}
+                            </Box>
+                            {refrenceCircularID && <Box className={classes.checkInfoBox}>
+                              <Box style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                              }}>
+                                {handleNumber(refrenceCircularID)}
+                                <Box style={{ marginLeft: 5, }}>
+                                  :
+                                </Box>
+                                <Box>
+                                  ارجاع به شماره
+                                </Box>
+                              </Box>
+                            </Box>}
+                            <Box className={classes.checkInfoBox}>
+                              {!refrenceCircularID && ".ارجاعی به بخشنامه دیگری ندارد"}
+                            </Box>
+                            <Box className={classes.checkInfoBox}
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                              }}
+                            >
+                              <Box
+                                style={{
+                                  marginRight: 5,
+                                }}
+                              >
+                                {handleTags(tags)}
+                              </Box>
+                              :تگ‌ها
+                            </Box>
                           </Box>
-                          <Box className={classes.checkInfoBox}>
-                            شماره: {number}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            تاریخ: {date}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            صادر کننده: {sender}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            مرتبط با مقطع: {toCategory}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            {type === 'imported' ? "شماره ثبت وارده" : "شماره ثبت صادره"}: {type === 'imported' ? importNumber : exportNumber}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            حوزه مربوطه: {subjectedTo}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            {!refrenceCircularID ? ".ارجاعی به بخشنامه دیگری ندارد" : `ارجاع به بخشنامه شماره ${refrenceCircularID}`}
-                          </Box>
-                          <Box className={classes.checkInfoBox}>
-                            تگ‌ها: {handleTags(tags)}
-                          </Box>
-                        </React.Fragment>
+                        </Box>
                       )
                     }
                   </Stepper>
@@ -910,6 +1064,7 @@ export default connect(mapStateToProps, {
   addFile,
   addTag,
   removeTag,
+  setFileLoading,
   clearGraphqlError,
   setErrors,
-})(UploadCircularLetter);
+})(UploadCircularLetter as any);

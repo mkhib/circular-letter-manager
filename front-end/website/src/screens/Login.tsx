@@ -1,6 +1,7 @@
-import React, { forwardRef, useRef, useImperativeHandle } from 'react';
+import React from 'react';
 import gql from 'graphql-tag';
 import * as yup from 'yup';
+import { useMutation } from '@apollo/react-hooks';
 import { connect } from 'react-redux';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -8,6 +9,8 @@ import TextInput from '../components/TextInput';
 import { Mutation } from '@apollo/react-components';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
+import { logoutWithoutChangeRoute } from '../redux/slices/user';
+import Link from '@material-ui/core/Link';
 import {
   setAnything,
   clearPersonelNumber,
@@ -17,12 +20,11 @@ import { login, setPersonelNumber, setPassword, setErrors } from '../redux/slice
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import {
-  setAnyThing,
   setGraphqlError,
   clearGraphqlError,
 } from '../redux/slices/data';
 import loginBack from '../assets/images/loginBack.jpg'
-var aes256 = require('aes256');
+var CryptoJS = require('react-native-crypto-js');
 
 const useStyles = makeStyles(theme => ({
   button: {
@@ -49,6 +51,7 @@ interface LoginProps {
   graphqlError: any;
   setErrors: any;
   clearGraphqlError: any;
+  logoutWithoutChangeRoute: any;
 }
 
 const LOGIN = gql`
@@ -58,11 +61,19 @@ mutation Login(
   data: $data,
   ){
     user{
+      _id
       firstName
       lastName
+      isAdmin
+      changedPassword
     }
-    token
   }
+}
+`;
+
+const LOGOUT = gql`
+mutation Logout{
+  logout
 }
 `;
 
@@ -72,29 +83,34 @@ let schema = yup.object().shape({
 });
 
 const Login: React.FunctionComponent<LoginProps> = (props) => {
+  const [
+    logout,
+    { loading: logoutLoading, error: logoutnError },
+  ] = useMutation(LOGOUT);
   const {
     personelNumber,
     password,
     setAnything,
-    location,
-    user,
+    logoutWithoutChangeRoute,
   } = props;
   const classes = useStyles();
 
-  const saveTokens = (token: any) => {
-    localStorage.setItem('token', token ? token : '');
-  }
+  React.useEffect(() => {
+    logout();
+    logoutWithoutChangeRoute();
+  }, [logout, logoutWithoutChangeRoute]);
 
-  const onSubmit = (history: any, token: string, firstName: string, lastName: string) => {
+
+  const onSubmit = (history: any, firstName: string, lastName: string, isAdmin: boolean, id: string, changedPassword: boolean) => {
     const { login } = props;
     login({
       personelNumber,
-      password,
-      token,
+      id,
+      isAdmin,
       firstName,
       lastName,
+      changedPassword,
     }, history);
-    saveTokens(token);
   }
 
   const errorCheck = (name: string) => {
@@ -128,7 +144,6 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
     }
   }
   const key = 'wopakeiowp@9403-092i4qwoskidCFAfdowkidrf[$%otp0[awos[dfaswoawrAWDW%&^&*^REWSR#$@^$TREbeqwaE';
-  const cipher = aes256.createCipher(key);
   return (<Mutation
     mutation={LOGIN}
     onError={(err: any) => {
@@ -137,12 +152,12 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
   >
     {(login: any, { data, error, loading }: any) => {
       const onRealLogin = () => {
+        let cipherPass = CryptoJS.AES.encrypt(password, key).toString();
         login({
           variables: {
             data: {
-              personelNumber: parseInt(personelNumber, 10),
-              // password: cipher.encrypt(password)
-              password: password
+              personelNumber: personelNumber,
+              password: cipherPass
             },
           },
         });
@@ -163,7 +178,7 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
       }
       const SubmitButton = withRouter(({ history }) => {
         if (data) {
-          onSubmit(history, data.login.token, data.login.user.firstName, data.login.user.lastName);
+          onSubmit(history, data.login.user.firstName, data.login.user.lastName, data.login.user.isAdmin, data.login.user._id, data.login.user.changedPassword);
         }
         return (
           <Button
@@ -233,7 +248,37 @@ const Login: React.FunctionComponent<LoginProps> = (props) => {
                 }
               }}
             />
+            <Link
+              href="forgot-password"
+              style={{
+                marginBottom: 10,
+              }}
+            >
+              <Box style={{
+                display: 'flex',
+                flexDirection: 'row',
+                fontFamily: 'FontNormal',
+                fontSize: 14,
+              }}>
+                رمزعبور خود را فراموش کرده‌اید؟
+              </Box>
+            </Link>
             <SubmitButton />
+            <Link
+              href="download-app"
+              style={{
+                marginBottom: 10,
+              }}
+            >
+              <Box style={{
+                display: 'flex',
+                flexDirection: 'row',
+                fontFamily: 'FontNormal',
+                fontSize: 14,
+              }}>
+                دانلود اپلیکیشن اندروید
+              </Box>
+            </Link>
           </Box>
         </Box>
       )
@@ -250,9 +295,15 @@ const mapStateToProps = (state: any) => {
     user,
   } = state.userData;
   const {
+    checked,
+    authenticated
+  } = state.session;
+  const {
     graphqlError,
   } = state.mainData;
   return {
+    checked,
+    authenticated,
     personelNumber,
     graphqlError,
     password,
@@ -264,6 +315,7 @@ const mapStateToProps = (state: any) => {
 export default connect(mapStateToProps, {
   login,
   setErrors,
+  logoutWithoutChangeRoute,
   clearGraphqlError,
   setPersonelNumber,
   setPassword,

@@ -10,6 +10,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       width: '100%',
+      height: '100%',
       direction: 'ltr',
     },
     label: {
@@ -46,7 +47,18 @@ const StepperLabelFD = withStyles((theme: Theme) => ({
 function getSteps() {
   return ['وارد کردن مشخصات بخشنامه', 'بارگذاری فایل‌ها', 'تایید اطلاعات'];
 }
-
+function customStepLabel(step: number, labels: Array<string>) {
+  switch (step) {
+    case 0:
+      return `${labels[0]}`;
+    case 1:
+      return `${labels[1]}`;
+    case 2:
+      return `${labels[2]}`;
+    default:
+      return 'Unknown step';
+  }
+}
 function getStepContent(step: number) {
   switch (step) {
     case 0:
@@ -64,7 +76,18 @@ export default function HorizontalLinearStepper(props: any) {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set<number>());
+  const [width, setWidth] = React.useState(window.innerWidth);
+  const [height, setHeight] = React.useState(window.innerHeight);
   const steps = getSteps();
+  React.useEffect(() => {
+    window.addEventListener("resize", updateWidthAndHeight);
+    return () => window.removeEventListener("resize", updateWidthAndHeight);
+  });
+
+  const updateWidthAndHeight = () => {
+    setWidth(window.innerWidth);
+    setHeight(window.innerHeight);
+  };
 
   const isStepOptional = (step: number) => {
     return step === 10;
@@ -107,7 +130,11 @@ export default function HorizontalLinearStepper(props: any) {
   };
 
   return (
-    <div className={classes.root}>
+    <div className={classes.root}
+      style={{
+        height: height
+      }}
+    >
       <StepperLabelFD activeStep={activeStep} alternativeLabel>
         {steps.map((label, index) => {
           const stepProps: { completed?: boolean } = {};
@@ -129,18 +156,19 @@ export default function HorizontalLinearStepper(props: any) {
         {activeStep === steps.length ? (
           <div>
             <Typography className={classes.instructions}>
-              بخشنامه با موفقیت به ثبت رسید.
+              {props.customLastStep ? props.customLastStep : 'بخشنامه با موفقیت به ثبت رسید.'}
             </Typography>
             <Button
+              disabled={props.returnDisabled ? props.returnDisabled : false}
               //  onClick={handleReset} 
-              href="/"
+              href={props.returnHref ? props.returnHref : '/'}
               className={classes.button}>
               بازگشت
             </Button>
           </div>
         ) : (
             <div className={classes.stepper}>
-              <Typography className={classes.instructions}>{getStepContent(activeStep)}</Typography>
+              <Typography className={classes.instructions}>{(props.customLabels && customStepLabel(activeStep, props.customLabels)) || getStepContent(activeStep)}</Typography>
               {props.children}
               <div style={{ marginBottom: 30, marginTop: 10 }}>
                 <Button disabled={props.backDisabled || activeStep === 0} onClick={() => {

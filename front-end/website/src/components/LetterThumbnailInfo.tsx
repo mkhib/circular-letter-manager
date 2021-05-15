@@ -1,9 +1,7 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
-import { setAnyThing } from '../redux/slices/data';
 
 const useStyles = makeStyles(theme => ({
   wholeButton: {
@@ -11,7 +9,10 @@ const useStyles = makeStyles(theme => ({
     marginBottom: 20,
   },
   container: {
-    fontFamily: 'FontNormalFD'
+    fontFamily: 'FontNormalFD',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   imageThumbnail: {
     height: 256,
@@ -47,41 +48,65 @@ const handleNumber = (numberToProcess: string) => {
     });
   }
 }
-
-const LetterThumbnailInfo = ({ title, date, files, from, id, setAnyThing, number }: any) => {
+const handleDate = (date: string) => {
+  const dateAsArray = date.split('-');
+  return `${dateAsArray[0]}/${dateAsArray[1]}/${dateAsArray[2]}`;
+}
+const LetterThumbnailInfo = ({ title, date, files, from, id, number }: any) => {
   const classes = useStyles();
   return (
     <Button
-      onClick={() => {
-        setAnyThing({
-          theThing: 'requestedLetter',
-          data: id
-        });
-      }}
       className={classes.wholeButton}
       href={`/letter?id=${id}`}
     >
       <Box className={classes.container}>
         <img className={classes.imageThumbnail} src={files[0]} alt="thumbnail" />
-        <Box>
-          عنوان: {title}
+        <Box style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+        }}>
+          <Box
+            style={{
+              width: 300,
+              overflow: 'hidden',
+            }}
+          >
+            عنوان
+            :
+          {' '}{title}
+          </Box>
         </Box>
         <Box>
-          تاریخ: {date}
+          تاریخ : {handleDate(date)}
         </Box>
         <Box style={{
           display: 'flex',
           flexDirection: 'row',
-          alignItems: 'center',
           justifyContent: 'center',
         }}>
           {handleNumber(number)}
-          <Box style={{ marginLeft: 5 }}>
-            :شماره
+          <Box style={{ marginLeft: 2.5 }}>
+            : شماره
           </Box>
         </Box>
-        <Box>
-          صادرکننده: {from}
+        <Box style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+        }}>
+          <Box
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+            }}
+          >
+            <Box>
+              صادرکننده
+              :
+              {' '}{from}
+            </Box>
+          </Box>
         </Box>
       </Box>
     </Button>
@@ -89,6 +114,4 @@ const LetterThumbnailInfo = ({ title, date, files, from, id, setAnyThing, number
 }
 
 
-export default connect(null, {
-  setAnyThing
-})(LetterThumbnailInfo);
+export default LetterThumbnailInfo;

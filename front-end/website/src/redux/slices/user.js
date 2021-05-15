@@ -10,10 +10,13 @@ import * as sessionApi from '../../api/sessionApi';
 // }
 
 let initialState = {
-  personelNumber: '4444',
-  password: 'Page7515',
+  personelNumber: '',
+  password: '',
   errors: [],
   graphqlError: '',
+  oldPassword: '',
+  newPassword: '',
+  againNewPassword: '',
 };
 
 const userSlice = createSlice({
@@ -30,19 +33,26 @@ const userSlice = createSlice({
       state[action.payload.theThing] = 0;
     },
     loginAction(_state, action) {
-      const { token } = action.payload.user;
-      sessionService.saveSession({ token }).then(() => {
-        sessionService.saveUser(action.payload.user.data)
+      sessionService.saveSession('true').then(() => {
+        sessionService.saveUser(action.payload.user)
           .then(() => {
             action.payload.history.push('/search-letter');
           }).catch(err => console.error(err));
-      })
+      });
     },
     logoutAction(_state, action) {
       sessionApi.logout().then(() => {
         sessionService.deleteSession();
         sessionService.deleteUser();
         action.payload.push('/login');
+      }).catch(err => {
+        throw (err);
+      });
+    },
+    logoutActionNoRoute(_state, action) {
+      sessionApi.logout().then(() => {
+        sessionService.deleteSession();
+        sessionService.deleteUser();
       }).catch(err => {
         throw (err);
       });
@@ -63,7 +73,7 @@ const userSlice = createSlice({
 });
 
 export const login = (user, history) => async (dispatch) => {
-  if (user.token) {
+  if (user.id) {
     dispatch(loginAction({
       user,
       history,
@@ -73,6 +83,10 @@ export const login = (user, history) => async (dispatch) => {
 
 export const handleLogout = (history) => async (dispatch) => {
   dispatch(logoutAction(history));
+};
+
+export const logoutWithoutChangeRoute = (history) => async (dispatch) => {
+  dispatch(logoutActionNoRoute(history));
 };
 
 const { reducer, actions } = userSlice;
@@ -85,6 +99,7 @@ export const {
   setPassword,
   clearPersonelNumber,
   loginAction,
+  logoutActionNoRoute,
   clearAnyThing,
 } = actions;
 

@@ -3,33 +3,46 @@ import { gql } from 'apollo-server-express';
 export const typeDefs = gql`
     
     type Query {
-        users: [User!]!
+        users(information: String, page: Int, limit: Int): UserSearch!
+        user: UserOutput!
+        unauthenticatedUsers: [UserOutput]!
         files: [String]
         circularLetters(page: Int, limit: Int): [CircularLetter!]!
         circularLetterDetails(id: ID!): CircularLetterDetail!
+        circularLetterDetailsEdit(id: ID!): CircularLetterDetail!
         search(information: String, startDate: String,
          endDate: String, page: Int, limit: Int, sortBy: String, order: String): SearchOutput!
+        appSearch(information: String, startDate: String,
+         endDate: String, page: Int, limit: Int, sortBy: String, order: String): [CircularLetter!]!
         categoriesQuery: CategoriesResult!
         toCategories: [ToCategoryType!]!
         subjectedTos: [SubjectedToType!]!
+        appDetails: AppOutput!
+        numberOfUnauthorized: Int!
     }
 
     type Mutation {
-        createUser(firstName: String!, lastName: String!,
-         personelNumber: Int!, identificationNumber: Int!): UserOutput!
+        adminSignUp(firstName: String!, lastName: String!,
+         personelNumber: String!, identificationNumber: String!, phoneNumber: String!, isAdmin: Boolean!): Boolean!
+        userSignUp(firstName: String!, lastName: String!,
+         personelNumber: String!, identificationNumber: String!, phoneNumber: String!): Boolean!
+        authenticateUser(id: ID!): UserOutput!
         login(data: LoginUserInput): AuthPayLoad!
         logout: Boolean!
-        deleteUser: UserOutput!
-        updateUser(name: String, email: String, password: String): UserOutput!
-        changePassword(data: passwordInput!): Boolean!
+        deleteUser(id: ID!): UserOutput!
+        updateUser(firstName: String, lastName: String): UserOutput!
+        changePassword(data: PasswordInput!): Boolean!
+        changePasswordOnApp(password: String!):Boolean!
+        forgotPassword(personelNumber: String!): Boolean!
         uploadFile(file: Upload!): ReturnFile!
         deleteFile(filename: String!): Boolean!
+        deleteFileWhileUpdate(id: ID! ,filename: String!): Boolean!
         deleteMultiFiles(filenames: [String]!): Boolean!
         circularLetterInit(title: String!, number: String!, importNumber: String,
          exportNumber: String, referTo: String, date: String!, from: String!,
          subjectedTo: String!, toCategory: String!, tags: [String]!, files: [String]! ): Boolean!
         deleteCircularLetter(id: ID!): Boolean!
-        updateCircularLetter(id: ID!, data: updateCircularletter): Boolean!
+        updateCircularLetter(id: ID!, data: updateCircularLetter): Boolean!
         createToCategoryType(name: String!): ToCategoryType!
         deleteToCategoryType(id: ID!): ToCategoryType!
         createSubjectedToType(name: String!): SubjectedToType!
@@ -37,24 +50,22 @@ export const typeDefs = gql`
     }
 
     type User {
-        id: ID!
+        _id: String!
         firstName: String!
         lastName: String!
         password: String!
-        personelNumber: Int!
-        identificationNumber: Int!
+        personelNumber: String!
+        identificationNumber: String!
+        phoneNumber: String!
         authorized: Boolean!
         changedPassword: Boolean!
+        isAdmin: Boolean!
+        timeLimit: String!
     }
     
     type AuthPayLoad {
-        user: User!
+        user: UserOutput!
         token: String!
-    }
-
-    type Response {
-        condition: Boolean!
-        filename: String!
     }
 
     type File {
@@ -83,16 +94,19 @@ export const typeDefs = gql`
         toCategory: String!
         tags: [String!]!
         files: [String]!
+        searchingFields: String!
     }
 
     type UserOutput {
-        id: ID!
+        _id: String!
         firstName: String!
         lastName: String!
-        personelNumber: Int!
-        identificationNumber: Int!
+        personelNumber: String!
+        identificationNumber: String!
+        phoneNumber: String!
         authorized: Boolean!
         changedPassword: Boolean!
+        isAdmin: Boolean!
     }
 
     type SearchOutput {
@@ -118,19 +132,31 @@ export const typeDefs = gql`
     type CircularLetterDetail {
         circularLetter: CircularLetter!
         refrenceId: String
+        filesName: [String]
+    }
+
+    type UserSearch {
+        users: [UserOutput!]!
+        quantity: Int
+    }
+
+    type AppOutput {
+        version: Int!
+        versionToShow: String!
+        link: String!
     }
 
     input LoginUserInput {
-        personelNumber: Int!
+        personelNumber: String!
         password: String!
     }
 
-    input passwordInput {
+    input PasswordInput {
         oldPassword: String!
         newPassword: String!
     }
 
-    input updateCircularletter {
+    input updateCircularLetter {
         title: String
         number: String
         importNumber: String
@@ -141,5 +167,6 @@ export const typeDefs = gql`
         subjectedTo: String
         toCategory: String
         tags: [String]
+        files: [String]
     }
 `

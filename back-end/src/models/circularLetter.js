@@ -1,6 +1,4 @@
 import mongoose from 'mongoose';
-import mongoosePaginate from 'mongoose-paginate-v2';
-import mongoose_fuzzy_searching from 'mongoose-fuzzy-searching-v2';
 const Schema = mongoose.Schema;
 
 const circularLetterSchema = new Schema({
@@ -56,13 +54,12 @@ const circularLetterSchema = new Schema({
     files: {
         type: Array,
         required: true
+    },
+    searchingFields: {
+        type: String,
+        required: true,
+        index: true
     }
-});
-
-circularLetterSchema.plugin(mongoosePaginate);
-circularLetterSchema.plugin(mongoose_fuzzy_searching, {
-    fields:
-        ["title", "tags", "from", "referTo", "importNumber", "exportNumber", "number", "toCategory", "subjectedTo", "date"]
 });
 
 export default mongoose.model('CircularLetter', circularLetterSchema);

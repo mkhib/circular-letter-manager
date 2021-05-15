@@ -1,30 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 import Box from '@material-ui/core/Box';
 import gql from 'graphql-tag';
 import {
-  Redirect,
   useLocation,
+  Redirect,
 } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Pagination from '@material-ui/lab/Pagination';
-import DeleteForeverOutlined from '@material-ui/icons/DeleteForeverOutlined';
+import Typography from '@material-ui/core/Typography';
 import { makeStyles, withStyles, Theme } from '@material-ui/core/styles';
 import { useQuery } from '@apollo/react-hooks';
 import { Mutation } from '@apollo/react-components';
 import Backdrop from '@material-ui/core/Backdrop';
-import Typography from '@material-ui/core/Typography';
+import EditIcon from '@material-ui/icons/Edit';
 import Modal from '@material-ui/core/Modal';
 import Link from '@material-ui/core/Link';
 import Fade from '@material-ui/core/Fade';
+import { withRouter } from 'react-router-dom';
+import searchBack from '../assets/images/searchBack.jpg';
 
 const useStyles = makeStyles(theme => ({
   container: {
     display: 'flex',
+    flex: 1,
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     padding: 40,
     paddingRight: '10vmax',
-    paddingLeft: '10vmax'
+    paddingLeft: '10vmax',
+    backgroundImage: `url(${searchBack})`,
+    backgroundAttachment: 'fixed',
+    // backgroundSize: 'auto',
+    // backgroundRepeat: 'round'
   },
   modal: {
     display: 'flex',
@@ -43,13 +51,13 @@ const useStyles = makeStyles(theme => ({
   },
   detailWholeBox: {
     display: 'flex',
-    borderWidth: 1,
-    borderRadius: 7,
-    borderColor: 'black',
     flexDirection: 'column',
     fontFamily: 'FontNormalFD',
-    fontSize: 19,
-    // width: '50vmax',
+    fontSize: 17,
+    paddingLeft: 30,
+    paddingRight: 30,
+    minWidth: 350,
+    paddingTop: 30,
     alignItems: 'flex-end',
   },
   detailBox: {
@@ -122,12 +130,24 @@ const MyPaginator = withStyles((theme: Theme) => ({
 function useQueryParam() {
   return new URLSearchParams(useLocation().search);
 }
+const handleDate = (date: string) => {
+  const dateAsArray = date.split('-');
+  return `${dateAsArray[0]}/${dateAsArray[1]}/${dateAsArray[2]}`;
+}
 
+const RESPONSIVE_WIDTH = 950;
 const Letter = (props: any) => {
   const classes = useStyles();
   const [numberOfFiles, setNumberOfFiles] = useState(0);
   const [open, setOpen] = React.useState(false);
   const [fileToShow, setFileToShow] = useState(0);
+  const [width, setWidth] = useState(window.innerWidth);
+  const [height, setHeight] = useState(window.innerHeight);
+  const updateWidthAndHeight = () => {
+    setWidth(window.innerWidth);
+    setHeight(window.innerHeight);
+  };
+
   let queryParam = useQueryParam();
   const handleID = () => {
     const id = queryParam.get('id');
@@ -137,16 +157,17 @@ const Letter = (props: any) => {
   }
   const { loading, error, data } = useQuery(LETTER_QUERY, { variables: { id: handleID() }, });
   if (data) {
-    console.log('sadad', data);
     var queryData = data.circularLetterDetails.circularLetter;
     if (data.circularLetterDetails.refrenceId) {
       var refrence = data.circularLetterDetails.refrenceId;
     }
   }
-  React.useEffect(() => {
+  useEffect(() => {
     if (data) {
       setNumberOfFiles(queryData.files.length);
     }
+    window.addEventListener("resize", updateWidthAndHeight);
+    return () => window.removeEventListener("resize", updateWidthAndHeight);
   }, [data, setNumberOfFiles, queryData]);
   // if (error) {
   //   return (
@@ -173,12 +194,18 @@ const Letter = (props: any) => {
     return tagsToShow;
   }
   if (loading) return null;
-  if (error) return `Error! ${error}`;
+  if (error) {
+    if (error.message === 'GraphQL error: Authentication required') {
+      return (<Redirect to={{
+        pathname: '/login',
+      }} />)
+    }
+    return `Error! ${error}`;
+  }
   return (
     <Mutation mutation={DELETE_CIRCULAR_LETTER}>
       {(deleteCircularLetter: any, { data, loading }: any) => {
         const deleteFunction = () => {
-          console.log('id', queryData._id);
           deleteCircularLetter({ variables: { id: queryData._id } });
         }
         if (data) {
@@ -252,10 +279,35 @@ const Letter = (props: any) => {
           }
         }
         return (
-          <Box className={classes.container}>
-            <Box className={classes.detailWholeBox}>
-              <Box className={classes.detailBox}>
-                عنوان: {queryData.title}
+          <Box
+            className={classes.container}
+            style={{
+              flexDirection: width < RESPONSIVE_WIDTH ? 'column' : 'row-reverse',
+              alignItems: width < RESPONSIVE_WIDTH ? 'center' : 'flex-start',
+            }}
+          >
+            <Box
+              // border={1}
+              borderColor="#00bcd4"
+              borderRadius={7}
+              className={classes.detailWholeBox}
+              style={{
+                marginTop: props.user.isAdmin ? 50 : 10,
+              }}
+            >
+              <Box className={classes.detailBox}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                }}
+              >
+                <Typography style={{
+                  marginRight: 5,
+                  fontFamily: 'FontNormal'
+                }}>
+                  {queryData.title}
+                </Typography>
+                  :عنوان
               </Box>
               <Box className={classes.line}>
                 <Box style={{ marginRight: 5, display: 'flex', flexDirection: 'row' }}>
@@ -264,17 +316,32 @@ const Letter = (props: any) => {
                   :شماره
                 </Box>
               <Box className={classes.detailBox}>
-                {queryData.date} :تاریخ
+                {handleDate(queryData.date)} :تاریخ
                 </Box>
-              <Box className={classes.detailBox}>
-                صادرکننده: {queryData.from}
+              <Box className={classes.detailBox}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                }}
+              >
+                <Box style={{
+                  marginRight: 5,
+                }}>
+                  {queryData.from}
+                </Box>
+              :صادرکننده
               </Box>
               <Box className={classes.detailBox}>
                 مرتبط با مقطع: {queryData.toCategory}
               </Box>
               <Box className={classes.line}>
-                <Box style={{ marginRight: 5 }}>
-                  {queryData.importNumber || queryData.exportNumber}
+                <Box style={{ marginRight: 5, display: 'flex', flexDirection: 'row' }}>
+                  {handleNumber(queryData.importNumber) || handleNumber(queryData.exportNumber)}
+                </Box>
+                <Box
+                  style={{ marginRight: 5 }}
+                >
+                  {(!queryData.importNumber && !queryData.exportNumber) && 'ندارد'}
                 </Box>
                 {queryData.importNumber ? ':شماره ثبت وارده' : ':شماره ثبت صادره'}
               </Box>
@@ -285,14 +352,18 @@ const Letter = (props: any) => {
               <Box className={classes.detailBox}>
                 {queryData.files.length} :تعداد فایل‌ها
               </Box>
-              <Box className={classes.detailBox}>
-                کلمات کلیدی:{' '}{handleTags(queryData.tags)}
-              </Box>
-              <Box>
-                <Button style={{ marginRight: 10 }} onClick={handleOpen}>
-                  <DeleteForeverOutlined style={{ height: 30, width: 30 }} />
-                </Button>
-                  پاک کردن بخشنامه به طور کامل
+              <Box className={classes.detailBox}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                }}
+              >
+                <Box style={{
+                  marginRight: 5,
+                }}>
+                  {handleTags(queryData.tags)}
+                </Box>
+              :کلمات کلیدی
               </Box>
               <Modal
                 aria-labelledby="modal-title"
@@ -332,29 +403,48 @@ const Letter = (props: any) => {
                 </Fade>
               </Modal>
             </Box>
-            <Box style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}>
-              <Button
-                target="_blank" rel="noopener noreferrer"
-                href={queryData.files[fileToShow]}
-              >
-                <img
-                  className={classes.letterSize}
-                  src={queryData.files[fileToShow]}
-                  alt='letterImage'
+            <Box
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start'
+              }}>
+              {props.user.isAdmin && <Box style={{
+                fontFamily: 'FontNormal',
+                fontSize: 14,
+              }}>
+                <Button
+                  href={`/edit-circular-letter?id=${queryData._id}`}
+                  style={{ marginRight: 10 }}
+                >
+                  <EditIcon style={{ height: 30, width: 30 }} />
+                </Button>
+                 ویرایش مشخصات بخشنامه
+              </Box>}
+              <Box style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}>
+                <Button
+                  target="_blank" rel="noopener noreferrer"
+                  href={queryData.files[fileToShow]}
+                >
+                  <img
+                    className={classes.letterSize}
+                    src={queryData.files[fileToShow]}
+                    alt='letterImage'
+                  />
+                </Button>
+                <MyPaginator
+                  count={numberOfFiles}
+                  style={{ direction: 'rtl', marginTop: 20 }}
+                  color="primary"
+                  onChange={(_a, b) => {
+                    setFileToShow(b - 1);
+                  }}
                 />
-              </Button>
-              <MyPaginator
-                count={numberOfFiles}
-                style={{ direction: 'rtl', marginTop: 20 }}
-                color="primary"
-                onChange={(_a, b) => {
-                  setFileToShow(b - 1);
-                }}
-              />
+              </Box>
             </Box>
           </Box>
         );
@@ -362,5 +452,7 @@ const Letter = (props: any) => {
     </Mutation>
   );
 }
-
-export default Letter;
+const mapState = ({ session }: any) => ({
+  user: session.user,
+});
+export default connect(mapState)(withRouter(Letter as any));

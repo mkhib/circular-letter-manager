@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import moment from 'moment';
 import jMoment from 'moment-jalaali';
 import { makeStyles, withStyles, Theme, createStyles } from '@material-ui/core/styles';
 import JalaliUtils from '@date-io/jalaali';
@@ -13,10 +12,7 @@ import { ThemeProvider } from "@material-ui/styles"
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      // maxWidth: '13.9vmax',
       marginBottom: 10,
-      // direction: 'ltr',
-
     },
   }),
 );;
@@ -31,6 +27,8 @@ const defaultMaterialTheme = createMuiTheme({
 const MyDatePicker = withStyles((theme: Theme) => ({
   root: {
     fontFamily: 'FontNormalFD',
+    backgroundColor: '#fcfcfc',
+    borderRadius: 7,
   },
 }))(DatePicker);
 

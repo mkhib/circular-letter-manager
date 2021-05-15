@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
+    _id: {
+        type: String,
+        required: true
+    },
     firstName: {
         type: String,
         required: true
@@ -14,12 +19,17 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     personelNumber: {
-        type: Number,
+        type: String,
         required: true,
         unique: true
     },
     identificationNumber: {
-        type: Number,
+        type: String,
+        required: true,
+        unique: true
+    },
+    phoneNumber: {
+        type: String,
         required: true
     },
     authorized: {
@@ -29,11 +39,15 @@ const userSchema = new mongoose.Schema({
     changedPassword: {
         type: Boolean,
         required: true
+    },
+    isAdmin: {
+        type: Boolean,
+        required: true
+    },
+    timeLimit: {
+        type: String,
+        required: true
     }
 });
 
-userSchema.set('toObjenct', { viruals: true });
-
-var Users = mongoose.model('User', userSchema);
-
-module.exports = Users;
+export default mongoose.model('User', userSchema);

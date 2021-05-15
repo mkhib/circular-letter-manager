@@ -9,12 +9,17 @@ import Backdrop from '@material-ui/core/Backdrop';
 import LetterThumbnailInfo from '../components/LetterThumbnailInfo';
 import { makeStyles } from '@material-ui/core/styles';
 import TextInput from '../components/TextInput';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import SearchOutlinedIcon from '@material-ui/icons/SearchOutlined';
 import { useQuery } from '@apollo/react-hooks';
 import DatePickerFarsi from '../components/DatePickerFarsi';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Select from '@material-ui/core/Select';
+import Tooltip from '@material-ui/core/Tooltip';
 import { MenuItem, InputLabel } from '@material-ui/core';
+import {
+  Redirect,
+} from 'react-router-dom';
 import {
   setAnyThing,
   changeSearchInDate,
@@ -24,6 +29,7 @@ import {
 import {
   useLocation
 } from "react-router-dom";
+import searchBack from '../assets/images/searchBack.jpg';
 
 const useStyles = makeStyles((theme) => ({
   searchOptions: {
@@ -90,6 +96,7 @@ const useStyles = makeStyles((theme) => ({
   },
   select: {
     width: '100%',
+    backgroundColor:'white',
     fontFamily: 'FontNormal',
     // fontSize: '2.1vmin',
     marginBottom: 10,
@@ -98,6 +105,17 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: 'FontNormal',
     fontSize: 15,
     marginBottom: 10,
+  },
+  tipTool: {
+    // marginBottom: 15,
+    marginLeft: 15,
+    fontFamily: 'FontNormalFD'
+  },
+  tipToolText: {
+    fontFamily: 'FontNormalFD',
+    textAlign: 'left',
+    fontSize: 13,
+    padding: 5,
   },
 }));
 
@@ -136,7 +154,6 @@ query SearchQuery($information: String,$sortBy: String,$order: String, $startDat
 function useQueryParam() {
   return new URLSearchParams(useLocation().search);
 }
-
 const SearchLetters = (props: any) => {
   const classes = useStyles();
   const [searchValue, setSearchValue] = useState('');
@@ -146,14 +163,20 @@ const SearchLetters = (props: any) => {
   const [sort, setSort] = useState('dateOfCreation');
   const [order, setOrder] = useState('desc');
   const [width, setWidth] = useState(window.innerWidth);
+  const didMountRef = React.useRef(false);
   let queryParam = useQueryParam();
   const updateWidth = () => {
     setWidth(window.innerWidth);
   };
+  const { history } = props;
   useEffect(() => {
     window.addEventListener("resize", updateWidth);
+    if (didMountRef.current) {
+      history.push(`${window.location.pathname}?page=1&search=${search}&sort=${sort}&order=${order}`)
+    } else didMountRef.current = true
     return () => window.removeEventListener("resize", updateWidth);
-  });
+  }, [search, sort, order, history]);
+  const RESPONSIVE_WIDTH2 = 618;
   const RESPONSIVE_WIDTH = 800;
   const handleSearch = () => {
     const search = queryParam.get('search')
@@ -183,8 +206,11 @@ const SearchLetters = (props: any) => {
       return 'desc';
     }
   }
+  const toolTipText = `
+  پس از انتخاب تاریخ بر روی علامت جست و جو کلیک کنید
+`;
   const { loading, error, data } = useQuery(SEARCH_QUERY, {
-    variables: { information: handleSearch(), startDate: start, endDate: end, page: handlePageNumber(), limit: 15, sortBy: handleSort(), order: handleOrder() },
+    variables: { information: handleSearch(), startDate: start, endDate: end, page: handlePageNumber(), limit: 12, sortBy: sort, order: order },
   });
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     props.changeSearchInDate(event.target.checked);
@@ -194,7 +220,8 @@ const SearchLetters = (props: any) => {
     setEnd(props.toDate);
     props.changeFromDateFull(props.fromDate);
     props.changeToDateFull(props.toDate);
-    props.history.push(`${window.location.pathname}?page=1&search=${searchValue}&sort=${sort}&order=${order}`)
+    setSearch(searchValue);
+    // props.history.push(`${window.location.pathname}?page=1&search=${searchValue}&sort=${sort}&order=${order}`)
   }
   if (loading) return (
     <Box style={{
@@ -208,16 +235,30 @@ const SearchLetters = (props: any) => {
       </Backdrop>
     </Box>
   );
-  if (error) return `Error! ${error}`;
-  console.log('activam', props.searchInDate);
+  if (error) {
+    if (error.message === 'GraphQL error: Authentication required') {
+      return (<Redirect to={{
+        pathname: '/login',
+      }} />)
+    }
+    return `Error! ${error}`;
+  }
   return (
-    <Box>
+    <Box
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        paddingTop: 30,
+        backgroundImage: `url(${searchBack})`,
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <Box className={classes.searchOptions}>
         <Box className={classes.searchBox} style={{
           flexDirection: width >= RESPONSIVE_WIDTH ? 'row' : 'column-reverse',
-          justifyContent: width <= RESPONSIVE_WIDTH ? 'center' : '',
+          justifyContent: 'center',
           alignItems: width >= RESPONSIVE_WIDTH ? 'center' : '',
-          // backgroundColor: width <= RESPONSIVE_WIDTH ? 'red' : '',
         }}>
           <Box style={{
             display: 'flex',
@@ -251,7 +292,7 @@ const SearchLetters = (props: any) => {
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            width: 400
+            // width: 400
           }}>
             <Box className={classes.selectBox} style={{ minWidth: 110, width: 110 }}>
               <InputLabel className={classes.selectTopInputLabel} id="sortBy">
@@ -265,6 +306,7 @@ const SearchLetters = (props: any) => {
                 labelId="label"
                 onChange={(event: any) => {
                   setOrder(event.target.value);
+                  doSearch();
                 }}
               >
                 {orderList.map((order: { name: string, value: string }, index: number) => (
@@ -293,6 +335,7 @@ const SearchLetters = (props: any) => {
                 labelId="label"
                 onChange={(event: any) => {
                   setSort(event.target.value);
+                  doSearch();
                 }}
               >
                 {sortList.map((sort: { name: string, value: string }, index: number) => (
@@ -343,6 +386,18 @@ const SearchLetters = (props: any) => {
           </Box>
           {props.searchInDate && (
             <Box className={classes.selectDateBox}>
+              <Tooltip
+                arrow
+                className={classes.tipTool}
+                leaveDelay={400}
+                title={
+                  <div className={classes.tipToolText}>
+                    {toolTipText}
+                  </div>
+                }
+              >
+                <InfoOutlinedIcon />
+              </Tooltip>
               <Box style={{ marginRight: 10, width: 120 }}>
                 <DatePickerFarsi
                   getSelectedDate={(date: string) => {
@@ -366,6 +421,7 @@ const SearchLetters = (props: any) => {
               </Box>
             :از تاریخ
             </Box>
+
           )}
           {(!!props.fromDateFull && !!props.toDateFull) && (
             <Box className={classes.searchResultBox}>
@@ -374,7 +430,13 @@ const SearchLetters = (props: any) => {
           )}
         </Box>
       </Box>
-      <Box className={classes.letterContainer}>
+      <Box
+        className={classes.letterContainer}
+        style={{
+          justifyContent: width < RESPONSIVE_WIDTH2 ? 'center' : 'flex-start',
+          alignItems: width < RESPONSIVE_WIDTH2 ? 'flex-start' : 'flex-start',
+        }}
+      >
         {renderLetters(data.search.circularLetters)}
         {data.search.circularLetters.length === 0 && (
           <Box style={{
@@ -401,7 +463,7 @@ const SearchLetters = (props: any) => {
           color="primary"
           onChange={(_a, b) => {
             if (handlePageNumber() !== b) {
-              props.history.push(`${window.location.pathname}?page=${b}&search=${handleSearch()}`)
+              props.history.push(`${window.location.pathname}?page=${b}&search=${handleSearch()}&sort=${handleSort()}&order=${handleOrder()}`)
             }
           }}
         />}
